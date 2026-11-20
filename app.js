@@ -304,7 +304,7 @@ function lastWeight(before){const ks=Object.keys(S.nut.days).filter(k=>S.nut.day
 function bmr(w){const P=S.prof,a=P.year?new Date().getFullYear()-P.year:null;if(!P.height||!a)return null;return 10*w+6.25*P.height-5*a+(P.sex==='w'?-161:5)}
 function goals(d){const N=S.nut,w=lastWeight(d)||S.prof.weight||80,b=bmr(w),maint=N.maint||(b?Math.round(b*S.prof.act/50)*50:Math.round(w*32/50)*50),add={aufbau:300,halten:0,defi:-450}[N.goal]||0;
  const trained=S.sessions.some(s=>iso(s.date)===d&&s.ex.length)||(d===today()&&Object.values(drafts).some(dr=>dr&&dr.ex&&Object.values(dr.ex).some(r=>r.some(x=>x.done))));
- const kcal=maint+add,p=Math.round(w*N.gkg*(trained?1.05:1)),f=Math.round(kcal*0.27/9),c=Math.max(0,Math.round((kcal-p*4-f*9)/4));return{kcal,p,c,f,w,trained,maint,bmr:b}}
+ const hh=(S.nut.days[d]||{}).h||{},bonus=Math.max(0,Math.round((hh.ak||0)-400)),kcal=maint+add+bonus,p=Math.round(w*N.gkg*(trained?1.05:1)),f=Math.round(kcal*0.27/9),c=Math.max(0,Math.round((kcal-p*4-f*9)/4));return{kcal,p,c,f,w,trained,maint,bmr:b,bonus,h:hh}}
 function totals(d){const t={kcal:0,p:0,c:0,f:0};for(const it of (S.nut.days[d]||{items:[]}).items){t.kcal+=it.kcal;t.p+=it.p;t.c+=it.c;t.f+=it.f}return t}
 function itemFrom(food,g,meal){const k=g/100;return{id:'i'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),name:food.name,g,meal,kcal:Math.round(food.kcal*k),p:r1(food.p*k),c:r1(food.c*k),f:r1(food.f*k),fid:food.id}}
 function touch(d){ND(d).t=Date.now();persist()}
@@ -315,7 +315,7 @@ const bar=(l,v,goal,u)=>{const pc=goal?Math.min(v/goal,1.25)*100:0;return `<div 
 function renderNut(){if(!nDate)nDate=today();const d=nDate,g=goals(d),t=totals(d),day=S.nut.days[d]||{items:[]},isT=d===today();
  const left=g.kcal-t.kcal,dl=new Date(d+'T12:00').toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'});
  let h=`<div class="ndate"><button data-n="prev" aria-label="Vortag">‹</button><b>${isT?'Heute':dl}</b><button data-n="next" aria-label="Nächster Tag"${isT?' disabled':''}>›</button></div>
- <section class="nsum"><div class="nbig"><b class="cond">${fmt(Math.abs(left))}</b><span>${left>=0?'kcal übrig':'kcal drüber'}</span><small>${{aufbau:'Aufbau',halten:'Halten',defi:'Definieren'}[S.nut.goal]}${g.trained?' · Trainingstag, Protein +5 %':''}</small></div>
+ <section class="nsum"><div class="nbig"><b class="cond">${fmt(Math.abs(left))}</b><span>${left>=0?'kcal übrig':'kcal drüber'}</span><small>${{aufbau:'Aufbau',halten:'Halten',defi:'Definieren'}[S.nut.goal]}${g.trained?' · Trainingstag, Protein +5 %':''}</small>${g.h&&(g.h.st||g.h.ak)?`<p class="hl">Apple Health: ${g.h.st?fmt(g.h.st)+' Schritte':''}${g.h.ak?' · '+fmt(g.h.ak)+' aktive kcal':''}${g.h.tm?' · '+fmt(g.h.tm)+' min Training':''}${g.bonus?` · <b>+${fmt(g.bonus)} kcal</b> extra fürs Ziel`:''}</p>`:''}</div>
  <div class="nbars">${bar('Kalorien',t.kcal,g.kcal,'kcal')}${bar('Protein',t.p,g.p,'g')}${bar('Kohlenhydrate',t.c,g.c,'g')}${bar('Fett',t.f,g.f,'g')}</div></section>`;
  h+=MEALS.map(([m,l])=>{const its=day.items.filter(i=>i.meal===m),mk=its.reduce((a,i)=>a+i.kcal,0);
   return `<section class="meal"><header><h3>${l}</h3><span>${mk?fmt(mk)+' kcal':''}</span></header>${its.map(i=>`<div class="it"><div><b>${esc(i.name)}</b><small>${fmt(i.g)} g · ${fmt(i.p)} g Protein</small></div><span>${fmt(i.kcal)}</span><button data-n="rm" data-id="${i.id}" aria-label="Entfernen">✕</button></div>`).join('')}
@@ -412,6 +412,10 @@ function haCall(cmds){return new Promise((res,rej)=>{let ws;try{ws=new WebSocket
   else if(m.type==='auth_ok'){if(!cmds.length){clearTimeout(to);ws.close();res([]);return}cmds.forEach(c=>ws.send(JSON.stringify({id:++id,...c})))}
   else if(m.type==='result'){out[m.id]=m;if(Object.keys(out).length===cmds.length){clearTimeout(to);ws.close();res(cmds.map((_,i)=>out[i+1]))}}};
  ws.onerror=()=>{clearTimeout(to);rej(new Error('Home Assistant nicht erreichbar'))}})}
+function health(m){if(!m||!m.success||!S.prof.name)return;const pre='input_number.sport_cockpit_'+slugN(S.prof.name)+'_',d=today(),h={};
+ for(const e of m.result||[]){if(!e.entity_id.startsWith(pre)||iso(e.last_updated||e.last_changed)!==d)continue;const v=parseFloat(e.state);if(!isFinite(v))continue;h[e.entity_id.slice(pre.length)]=v}
+ if(!Object.keys(h).length)return;const day=ND(d),old=JSON.stringify(day.h||{});day.h={st:h.schritte,ak:h.aktiv_kcal,tm:h.trainingsminuten};
+ if(h.gewicht>30&&(!day.w||day.wsrc==='health')){day.w=h.gewicht;day.wsrc='health'}if(JSON.stringify(day.h)!==old)day.t=Date.now()}
 function syncLater(){clearTimeout(syncT);if(HA.url&&HA.token)syncT=setTimeout(syncNow,1500)}
 function metaOf(){return{t:S.metaT,prof:S.prof,plan:S.plan,goal:S.goal,rest:S.rest,cgoal:S.cgoal,nut:{goal:S.nut.goal,maint:S.nut.maint,gkg:S.nut.gkg,foods:S.nut.foods,meals:S.nut.meals,recent:S.nut.recent},drafts,draftT}}
 function merge(R){let changed=false;const m=R.sc_meta;
@@ -422,7 +426,7 @@ function merge(R){let changed=false;const m=R.sc_meta;
  const rn=R.sc_nut;if(rn&&rn.days){for(const k in rn.days){const o=S.nut.days[k];if(!o||(rn.days[k].t||0)>(o.t||0)){S.nut.days[k]=rn.days[k];changed=true}}}
  if(changed)migrate();return changed}
 async function syncNow(){if(!HA.url||!HA.token)return;if(syncing){syncAgain=true;return}syncing=true;note('Synchronisiere …');
- try{const keys=['sc_meta','sc_sessions','sc_nut'],r=await haCall(keys.map(k=>({type:'frontend/get_user_data',key:k}))),R={};
+ try{const keys=['sc_meta','sc_sessions','sc_nut'],r=await haCall([...keys.map(k=>({type:'frontend/get_user_data',key:k})),{type:'get_states'}]),R={};health(r[keys.length]);
   r.forEach((m,i)=>{if(m&&m.success&&m.result)R[keys[i]]=m.result.value});
   const changed=merge(R);lsSave();
   await haCall([{type:'frontend/set_user_data',key:'sc_meta',value:metaOf()},{type:'frontend/set_user_data',key:'sc_sessions',value:{list:S.sessions,del:S.del}},{type:'frontend/set_user_data',key:'sc_nut',value:{days:S.nut.days}}]);
@@ -467,7 +471,8 @@ document.addEventListener('click',async ev=>{const b=ev.target.closest('[data-s]
 const slugN=n=>String(n||'').toLowerCase().replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
 function dayScore(d){const g=goals(d),t=totals(d),day=S.nut.days[d]||{},ss=S.sessions.filter(s=>iso(s.date)===d);let pt=0;const why=[];
  const tr=ss.find(s=>s.ex.length);if(tr){pt+=30;why.push('Training +30')}
- const c=ss.reduce((a,s)=>a+(s.cardio||[]).reduce((b,x)=>b+x.min,0),0);if(c>=20){pt+=15;why.push('Cardio +15')}
+ const c=ss.reduce((a,s)=>a+(s.cardio||[]).reduce((b,x)=>b+x.min,0),0),hh=day.h||{};if(c>=20){pt+=15;why.push('Cardio +15')}else if((hh.tm||0)>=30){pt+=15;why.push('Bewegung (Watch) +15')}
+ if((hh.st||0)>=10000){pt+=10;why.push('10.000 Schritte +10')}
  if(t.kcal>0){if(t.p>=g.p){pt+=20;why.push('Protein +20')}else if(t.p>=g.p*.9){pt+=10;why.push('Protein fast +10')}
   const dev=Math.abs(t.kcal-g.kcal)/g.kcal;if(dev<=.1){pt+=20;why.push('Kalorien im Ziel +20')}else if(dev<=.2){pt+=10;why.push('Kalorien nah dran +10')}}
  if(day.w){pt+=5;why.push('Gewogen +5')}if((day.water||0)>=2000){pt+=5;why.push('2 l Wasser +5')}

@@ -145,3 +145,6 @@ textarea{width:100%;font:inherit;font-size:16px;color:inherit;background:var(--b
 .v-nut .seg,.v-nut .dayrow,.v-hist .seg,.v-rec .seg{display:none}.v-nut .stats{margin-top:12px}
 
 .ob{align-items:center;background:var(--bg)}.ob .sheetin{border-radius:10px;border:1px solid var(--line);max-height:96vh}
+
+.hl{margin:8px 0 0;font-size:13px;color:var(--mute);line-height:1.4}.hl b{color:var(--acc)}
+.nbig .hl b{display:inline;font-size:inherit;line-height:inherit;font-weight:700}
