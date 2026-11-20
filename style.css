@@ -444,3 +444,13 @@ html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 .shrow small{display:block;font-size:12px;color:var(--mute)}
 .shrow input{text-align:center}
 .shin li.sum{border-bottom:0;font-weight:700}
+/* Sprach-Eingabe */
+.saybtn{min-width:48px;padding:0 10px}
+.saybtn svg,.sayb svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;vertical-align:-4px}
+#sayIn{width:100%;min-height:96px;padding:12px;font:inherit;font-size:17px;border-radius:12px;border:1px solid transparent;background:var(--s2);resize:vertical}
+.sayb{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.sayb button:only-child{grid-column:1/-1}
+.sayb button svg{margin-right:6px}
+.sayb button.rec{background:var(--acc);border-color:var(--acc);color:#fff;animation:sayp 1.2s ease-in-out infinite}
+@keyframes sayp{50%{opacity:.75}}
+.shin.say p{margin:6px 0 10px;font-size:15px}

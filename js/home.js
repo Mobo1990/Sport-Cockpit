@@ -11,7 +11,7 @@ function renderHome(){const d=today(),sc=dayScore(d),g=sc.g,t=sc.t,hr=new Date()
  return `${healthLink()}<section class="hero2"><div><p class="hk">${new Date().toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'})}</p><h2>${gr}, ${esc(S.prof.name)}</h2></div>
  <div class="pts"><b class="cond">${sc.pt}</b><span>Punkte heute</span><small>Woche ${weekScore()}</small></div></section>
  ${sc.why.length?`<div class="chips">${sc.why.map(w=>`<span>${esc(w)}</span>`).join('')}</div>`:'<p class="tip" style="padding:0 0 12px">Noch keine Punkte heute: Trainieren, im Kalorienziel bleiben und Protein schaffen bringt am meisten.</p>'}
- ${shareInboxHtml()}
+ ${shareInboxHtml()}${sayInboxHtml()}
  <section class="tiles">
   <button class="tile big" data-gym="1" data-d="${run?run[0]:nx}"><small>${run?'Training läuft':'Als Nächstes'}</small><b>${DAYS[run?run[0]:nx].n}</b><span>${run?runSets+' Sätze erledigt – weiter':DAYS[nx].sub}</span><em>${run?'Fortsetzen':'Training starten'} ›</em></button>
   </section>

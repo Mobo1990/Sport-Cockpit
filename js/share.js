@@ -15,7 +15,7 @@ async function shareSend(items,meal,d){const to=sharePartner();if(!to||!items.le
 async function shareFetch(){if(!HA.url||!HA.token||!S.prof.name)return;
  try{const r=await haCall([{type:'call_service',domain:'todo',service:'get_items',target:{entity_id:SHARE_E},service_data:{status:'needs_action'},return_response:true}]);const m=r[0];if(!m||!m.success)return;
   const its=(((m.result||{}).response||{})[SHARE_E]||{}).items||[],me=slugN(S.prof.name),old=JSON.stringify(shareInbox.map(x=>x.uid));
-  shareInbox=its.map(it=>{try{return{uid:it.uid,...JSON.parse(it.description||'')}}catch(e){return null}}).filter(x=>x&&x.to===me&&Array.isArray(x.items));
+  shareInbox=its.map(it=>{try{return{uid:it.uid,...JSON.parse(it.description||'')}}catch(e){return null}}).filter(x=>x&&x.to===me&&(Array.isArray(x.items)||(x.kind==='say'&&x.text)));
   if(JSON.stringify(shareInbox.map(x=>x.uid))!==old&&(view==='nut'||view==='home')&&!sheet)render()}catch(e){}}
 async function shareDone(uid){try{await haCall([{type:'call_service',domain:'todo',service:'remove_item',target:{entity_id:SHARE_E},service_data:{item:uid}}])}catch(e){}
  shareInbox=shareInbox.filter(x=>x.uid!==uid);render()}
@@ -23,7 +23,7 @@ function shareAccept(uid){const s=shareInbox.find(x=>x.uid===uid);if(!s)return;c
  for(const x of s.items){const g=Math.round(x.g*f);dd.items.push(itemFrom({name:x.n,id:x.fid||('sh_'+slugN(x.n)),kcal:x.k,p:x.p,c:x.c,f:x.f,z:x.z},g,s.meal))}
  touch(d);note(`${s.items.length} Lebensmittel von ${s.from} übernommen`);shareDone(uid)}
 /* Ansichten */
-function shareInboxHtml(){if(!shareInbox.length)return '';return shareInbox.map(s=>{const p=sharePct[s.uid]||100,kc=s.items.reduce((a,x)=>a+x.k*x.g/100,0)*p/100,day=s.d===today()?'heute':new Date(s.d+'T12:00').toLocaleDateString('de-DE',{weekday:'short',day:'numeric',month:'numeric'});
+function shareInboxHtml(){const l=shareInbox.filter(x=>x.kind!=='say');if(!l.length)return '';return l.map(s=>{const p=sharePct[s.uid]||100,kc=s.items.reduce((a,x)=>a+x.k*x.g/100,0)*p/100,day=s.d===today()?'heute':new Date(s.d+'T12:00').toLocaleDateString('de-DE',{weekday:'short',day:'numeric',month:'numeric'});
  return `<section class="shin"><b>${esc(s.from)} hat ${esc(mealName(s.meal))} (${day}) für dich eingetragen</b>
  <ul>${s.items.map(x=>`<li><span>${esc(x.n)}</span><span>${fmt(Math.round(x.g*p/100))} g</span></li>`).join('')}<li class="sum"><span>Zusammen</span><span>${fmt(Math.round(kc))} kcal</span></li></ul>
  <div class="shpct"><span>Deine Portion</span>${[75,100,125].map(v=>`<button data-sh="pct" data-uid="${s.uid}" data-v="${v}" aria-pressed="${p===v}">${v} %</button>`).join('')}</div>

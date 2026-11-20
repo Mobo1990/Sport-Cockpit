@@ -9,7 +9,7 @@ Antworte NUR mit JSON, ohne Text davor oder danach:
 Werte pro 100 g (z100 = davon Zucker). Wenn du unsicher bist, schätze realistisch. Keine Erklärungen.`;
 function shrink(file){return new Promise((res,rej)=>{const img=new Image(),u=URL.createObjectURL(file);img.onload=()=>{const m=1280,s=Math.min(1,m/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL('image/jpeg',.82).split(',')[1])};img.onerror=()=>rej(new Error('Bild nicht lesbar'));img.src=u})}
 async function aiAnalyze(file){if(!AI.key){sheet.step='photo';sheet.msg='Erst unter „Mehr → Foto-Erkennung“ einen API-Schlüssel eintragen.';render();return}
- sheet.step='photo';sheet.busy=true;sheet.msg='Foto wird analysiert …';sheet.ai=null;render();
+ sheet.step='photo';sheet.src='';sheet.busy=true;sheet.msg='Foto wird analysiert …';sheet.ai=null;render();
  try{const data=await shrink(file);
   const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':AI.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
    body:JSON.stringify({model:AI.model,max_tokens:1024,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data}},{type:'text',text:AI_PROMPT}]}]})});
@@ -20,11 +20,11 @@ async function aiAnalyze(file){if(!AI.key){sheet.step='photo';sheet.msg='Erst un
  catch(e){sheet.msg='Erkennung fehlgeschlagen: '+e.message}
  sheet.busy=false;render()}
 function renderPhotoStep(){const sh=sheet,ml=MEALS.find(m=>m[0]===sh.meal)[1];
- return `<button class="back" data-n="back">‹ Zurück</button><h2>Foto-Erkennung</h2><p class="tip" style="padding:0 0 10px">${esc(sh.msg||'')}</p>
+ return `<button class="back" data-n="back">‹ Zurück</button><h2>${sh.src==='say'?'Per Sprache eingetragen':'Foto-Erkennung'}</h2><p class="tip" style="padding:0 0 10px">${esc(sh.msg||'')}</p>
  ${sh.busy?'<div class="aispin"></div>':''}
  ${(sh.ai||[]).map((x,i)=>{const it=itemFrom(x.f,num(x.g)||0,sh.meal);return `<div class="airow"><label class="aichk"><input type="checkbox" data-ai="on" data-i="${i}"${x.on?' checked':''}><span><b>${esc(x.f.name)}</b><small>${fmt(x.f.kcal)} kcal · ${fmt(x.f.p)} g P / 100 g</small></span></label><div class="aig"><input inputmode="decimal" data-ai="g" data-i="${i}" value="${esc(x.g)}" aria-label="Gramm"><span>g</span></div><em>${fmt(it.kcal)} kcal</em></div>`}).join('')}
  ${(sh.ai||[]).length?`<button class="primary" data-ai="add" style="width:100%;margin-top:10px">Zu ${ml} hinzufügen</button>`:''}
- <div class="actions"><label class="filebtn">Neues Foto<input type="file" accept="image/*" capture="environment" data-ai="file" hidden></label></div>`}
+ ${sh.src==='say'?`<div class="actions"><button class="ghost" data-say="open">Nochmal sprechen</button></div>`:'<div class="actions"><label class="filebtn">Neues Foto<input type="file" accept="image/*" capture="environment" data-ai="file" hidden></label></div>'}`}
 document.addEventListener('change',ev=>{const t=ev.target;if(t.dataset.ai==='file'&&t.files&&t.files[0])aiAnalyze(t.files[0]);if(t.dataset.ai==='on'){sheet.ai[+t.dataset.i].on=t.checked}});
 document.addEventListener('input',ev=>{const t=ev.target;if(t.dataset.ai==='g'){const x=sheet.ai[+t.dataset.i];x.g=t.value;const em=t.closest('.airow').querySelector('em');em.textContent=fmt(itemFrom(x.f,num(x.g)||0,sheet.meal).kcal)+' kcal'}});
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-ai="add"]');if(!b)return;const d=nDate||today();let n=0;

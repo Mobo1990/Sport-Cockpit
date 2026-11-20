@@ -25,7 +25,12 @@ try:
     with sync_playwright() as p:
         b = p.chromium.launch(); pg = b.new_page(viewport={"width": 400, "height": 860})
         errs = []; pg.on("pageerror", lambda e: errs.append(str(e)))
-        pg.route("https://api.anthropic.com/**", lambda r: r.fulfill(status=200, content_type="application/json", body=json.dumps(AI_REPLY)))
+        api_reqs = []
+        def ai_route(r):
+            try: api_reqs.append(json.loads(r.request.post_data or "{}"))
+            except Exception: pass
+            r.fulfill(status=200, content_type="application/json", body=json.dumps(AI_REPLY))
+        pg.route("https://api.anthropic.com/**", ai_route)
         off_calls = []
         OFF_REPLY = {"products": [{"code": "4001", "product_name": "Testriegel Kakao", "brands": "Marke", "nutriments": {"energy-kcal_100g": 380, "proteins_100g": 30, "carbohydrates_100g": 40, "sugars_100g": 5, "fat_100g": 9}}]}
         def off_route(r):
@@ -173,6 +178,14 @@ try:
         check(pg.evaluate("document.documentElement.classList.contains('sheet-open')"), "Hintergrund gesperrt, solange das Fenster offen ist")
         pg.click("[data-n=close]"); pg.wait_for_timeout(100)
 
+        print("Sprache")
+        pg.click(".nav >> text=Start"); pg.click("[data-h=meal][data-m=m]"); pg.click("[data-say=open]"); pg.wait_for_timeout(150)
+        check(pg.is_visible("#sayIn"), "Sprach-Eingabe öffnet sich")
+        pg.fill("#sayIn", "200 g Reis und 2 Eier zum Frühstück"); pg.click("[data-say=go]"); pg.wait_for_timeout(300)
+        names = pg.evaluate("sheet.ai.map(x=>x.f.name+':'+x.g).join('|')")
+        check("Reis" in names and ":200" in names and "Ei" in names and ":116" in names and pg.evaluate("sheet.meal") == "f", "Ohne Schlüssel: '200 g Reis und 2 Eier zum Frühstück' erkannt (Ei 2 x 58 g, Frühstück)")
+        pg.click("[data-ai=add]"); pg.wait_for_timeout(200)
+        check(pg.evaluate("S.nut.days[today()].items.filter(i=>i.meal==='f').length") >= 2, "Per Sprache eingetragen")
         print("Foto-Erkennung")
         pg.click(".nav >> text=Mehr"); pg.fill("#aiKey", "sk-ant-test"); pg.click("[data-ais=save]")
         pg.click(".nav >> text=Essen"); pg.click("[data-n=add][data-m=m]")
@@ -182,6 +195,12 @@ try:
         pg.click("[data-ai=add]"); pg.wait_for_timeout(300)
         check("Hähnchenbrust" in pg.text_content("#view"), "Foto-Ergebnis eingetragen")
 
+        print("Sprache mit Claude")
+        pg.click(".nav >> text=Start"); pg.click("[data-h=meal][data-m=a]"); pg.click("[data-say=open]"); pg.fill("#sayIn", "Hähnchen mit Reis"); pg.click("[data-say=go]"); pg.wait_for_timeout(800)
+        check(pg.locator(".airow").count() == 2 and "Per Sprache" in pg.text_content(".sheetin"), "Mit Schlüssel: Claude versteht den Satz (2 Lebensmittel zum Bestätigen)")
+        req = [x for x in api_reqs if "Gesagt" in json.dumps(x)]
+        check(bool(req) and req[-1].get("output_config", {}).get("format", {}).get("type") == "json_schema", "Anfrage nutzt strukturierte Ausgabe (JSON-Schema)")
+        pg.click("[data-n=back]"); pg.wait_for_timeout(100); pg.click("[data-n=close]"); pg.wait_for_timeout(100)
         print("Rückblick & Coach")
         pg.click(".nav >> text=Mehr"); pg.click("text=Rückblick"); pg.wait_for_timeout(200)
         check(pg.is_visible(".rvgrid"), "Rückblick zeigt Kennzahlen")
@@ -221,6 +240,11 @@ try:
         check("113 g" in c4.text_content(".shin"), "Portion anpassbar (75 % = 113 g)")
         c4.click(".shin [data-sh=ok]"); c4.wait_for_timeout(1000)
         check(c4.evaluate("S.nut.days[today()].items.some(i=>i.g===113&&i.meal==='a')") and not c4.is_visible(".shin") and json.load(open("/tmp/todo.json")) == [], "Übernommen: steht in Paulines Abendessen, Liste ist wieder leer")
+        c4.evaluate("haCall([{type:'call_service',domain:'todo',service:'add_item',target:{entity_id:SHARE_E},service_data:{item:'Siri',description:JSON.stringify({v:1,kind:'say',to:'pauline',text:'200 g Reis',from:'Siri'})}}]).then(()=>shareFetch())"); c4.wait_for_timeout(1500)
+        check(c4.is_visible(".shin.say") and "200 g Reis" in c4.text_content(".shin.say"), "Siri-Notiz erscheint als Karte")
+        c4.click("[data-say=siri]"); c4.wait_for_timeout(800)
+        check(c4.locator(".airow").count() == 1 and json.load(open("/tmp/todo.json")) == [], "Siri-Notiz wird erkannt und aus der Liste entfernt")
+        c4.click("[data-ai=add]"); c4.wait_for_timeout(200)
 
         print("Ganze Mahlzeit teilen")
         pg.bring_to_front(); pg.click(".nav >> text=Essen"); pg.wait_for_timeout(300)
