@@ -115,7 +115,7 @@ const DEF={push:[mk('bank',4,6,10,2.5),mk('schraeg',3,8,12,2),mk('schulter',3,8,
  legs:[mk('squat',4,6,10,2.5),mk('rdl',3,8,10,2.5),mk('presse',3,10,12,5),mk('beuger',3,10,15,2.5),mk('ausfall',3,10,12,2),mk('waden',4,12,15,5)]};
 const clone=o=>JSON.parse(JSON.stringify(o));
 const LS='sportcockpit.v1';
-let S={plan:clone(DEF),goal:4,rest:90,cgoal:150,sessions:[],del:[],metaT:0,nut:{goal:'aufbau',maint:0,gkg:2,days:{},foods:[],meals:[],recent:[]}},drafts={},draftT=0,summary=null,view='train',day='push',recEx=null,confirmKey=null,picker=false;
+let S={plan:clone(DEF),goal:4,rest:90,cgoal:150,sessions:[],del:[],metaT:0,prof:{name:'',sex:'m',year:'',height:'',weight:'',act:1.55},nut:{goal:'aufbau',maint:0,gkg:2,days:{},foods:[],meals:[],recent:[]}},drafts={},draftT=0,summary=null,view='train',day='push',recEx=null,confirmKey=null,picker=false;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>(+n||0).toLocaleString('de-DE',{maximumFractionDigits:1});
@@ -127,7 +127,7 @@ const vkey=e=>(!e.vars.length||!e.v||e.v===e.vars[0])?e.id:e.id+'@'+e.v.toLowerC
 const vname=e=>e.vars.length>1?`${e.n} · ${e.v}`:e.n;
 function migrate(){S.cgoal=S.cgoal||150;for(const d in DAYS){S.plan[d]=(S.plan[d]||DEF[d]||[]).map(e=>{const c=CAT[e.id];if(c&&!c.v.includes(e.v))e.v=c.v[0];return e})}
  for(const d in drafts){const dr=drafts[d];if(!dr)continue;dr.extra=(dr.extra||[]).map(e=>{if(e.id==='t-kabelzug-brust'){if(dr.ex&&dr.ex[e.id]){dr.ex.fly=dr.ex[e.id];delete dr.ex[e.id]}return mk('fly',3,12,15,2.5)}return e})}}
-function lsLoad(){try{const j=JSON.parse(localStorage.getItem(LS));if(j){S=Object.assign(S,j);S.nut=Object.assign({goal:'aufbau',maint:0,gkg:2,days:{},foods:[],meals:[],recent:[]},j.nut||{});S.del=S.del||[]}const dj=JSON.parse(localStorage.getItem(LS+'.d'));if(dj&&dj.d){drafts=dj.d;draftT=dj.t||0}}catch(e){}migrate()}
+function lsLoad(){try{const j=JSON.parse(localStorage.getItem(LS));if(j){S=Object.assign(S,j);S.prof=Object.assign({name:'',sex:'m',year:'',height:'',weight:'',act:1.55},j.prof||{});S.nut=Object.assign({goal:'aufbau',maint:0,gkg:2,days:{},foods:[],meals:[],recent:[]},j.nut||{});S.del=S.del||[]}const dj=JSON.parse(localStorage.getItem(LS+'.d'));if(dj&&dj.d){drafts=dj.d;draftT=dj.t||0}}catch(e){}migrate()}
 function lsSave(){try{localStorage.setItem(LS,JSON.stringify(S));localStorage.setItem(LS+'.d',JSON.stringify({d:drafts,t:draftT}))}catch(e){note('Speicher voll!')}}
 function persist(){lsSave();syncLater()}
 function saveDrafts(){draftT=Date.now();persist()}
@@ -155,7 +155,7 @@ function prevWk(k){const d=new Date(k);d.setDate(d.getDate()-7);return wk(d)}
 function draftFor(d){if(!drafts[d])drafts[d]={start:Date.now(),ex:{},extra:[]};const dr=drafts[d];dr.extra=dr.extra||[];dr.ex=dr.ex||{};dr.cardio=dr.cardio||(d==='cardio'?[{type:CT[0],min:'',km:'',lvl:'m'}]:[]);for(const e of dayEx(d)){if(!dr.ex[e.id])dr.ex[e.id]=Array.from({length:e.sets},()=>({kg:'',reps:'',done:false}))}return dr}
 function lastDay(){const s=[...S.sessions].filter(s=>s.day!=='cardio'&&DAYS[s.day]).sort((a,b)=>b.date-a.date)[0];return s?s.day:null}
 
-function renderHead(){document.body.className='v-'+view;
+function renderHead(){document.body.className='v-'+view;const br=document.querySelector('.brand');if(br)br.textContent='SPORT COCKPIT'+(S.prof&&S.prof.name?' · '+S.prof.name.toUpperCase():' · 3ER-SPLIT');
  $('dayName').textContent=DAYS[day].n;$('daySub').textContent=DAYS[day].sub;
  const ld=lastDay();$('nextDay').textContent=ld?`Als Nächstes dran: ${DAYS[DAYS[ld].nx].n}`:'Los geht’s mit Push';
  document.querySelectorAll('[data-a=day]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.d===day));
@@ -301,9 +301,10 @@ const today=()=>iso(Date.now());
 const ND=d=>{const N=S.nut;if(!N.days[d])N.days[d]={items:[],t:0};return N.days[d]};
 const r1=x=>Math.round(x*10)/10;
 function lastWeight(before){const ks=Object.keys(S.nut.days).filter(k=>S.nut.days[k].w&&(!before||k<=before)).sort();return ks.length?S.nut.days[ks[ks.length-1]].w:null}
-function goals(d){const N=S.nut,w=lastWeight(d)||80,maint=N.maint||Math.round(w*32/50)*50,add={aufbau:300,halten:0,defi:-450}[N.goal]||0;
+function bmr(w){const P=S.prof,a=P.year?new Date().getFullYear()-P.year:null;if(!P.height||!a)return null;return 10*w+6.25*P.height-5*a+(P.sex==='w'?-161:5)}
+function goals(d){const N=S.nut,w=lastWeight(d)||S.prof.weight||80,b=bmr(w),maint=N.maint||(b?Math.round(b*S.prof.act/50)*50:Math.round(w*32/50)*50),add={aufbau:300,halten:0,defi:-450}[N.goal]||0;
  const trained=S.sessions.some(s=>iso(s.date)===d&&s.ex.length)||(d===today()&&Object.values(drafts).some(dr=>dr&&dr.ex&&Object.values(dr.ex).some(r=>r.some(x=>x.done))));
- const kcal=maint+add,p=Math.round(w*N.gkg*(trained?1.05:1)),f=Math.round(kcal*0.27/9),c=Math.max(0,Math.round((kcal-p*4-f*9)/4));return{kcal,p,c,f,w,trained,maint}}
+ const kcal=maint+add,p=Math.round(w*N.gkg*(trained?1.05:1)),f=Math.round(kcal*0.27/9),c=Math.max(0,Math.round((kcal-p*4-f*9)/4));return{kcal,p,c,f,w,trained,maint,bmr:b}}
 function totals(d){const t={kcal:0,p:0,c:0,f:0};for(const it of (S.nut.days[d]||{items:[]}).items){t.kcal+=it.kcal;t.p+=it.p;t.c+=it.c;t.f+=it.f}return t}
 function itemFrom(food,g,meal){const k=g/100;return{id:'i'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),name:food.name,g,meal,kcal:Math.round(food.kcal*k),p:r1(food.p*k),c:r1(food.c*k),f:r1(food.f*k),fid:food.id}}
 function touch(d){ND(d).t=Date.now();persist()}
@@ -327,7 +328,7 @@ function renderNut(){if(!nDate)nDate=today();const d=nDate,g=goals(d),t=totals(d
  <details class="meal nset"><summary><h3>Ziele einstellen</h3><span>${fmt(g.kcal)} kcal · ${g.p} g Protein</span></summary>
  <div class="vars" style="margin:8px 0">${[['aufbau','Aufbau (+300)'],['halten','Halten'],['defi','Definieren (−450)']].map(([k,l])=>`<button data-n="goal" data-v="${k}" aria-pressed="${S.nut.goal===k}">${l}</button>`).join('')}</div>
  <div class="settings" style="margin:8px 0"><div><label for="maint">Erhaltungsbedarf (kcal)</label><input id="maint" inputmode="numeric" data-n="maint" placeholder="${g.maint} (geschätzt)" value="${S.nut.maint||''}"></div><div><label for="gkg">Protein pro kg Körpergewicht</label><input id="gkg" inputmode="decimal" data-n="gkg" value="${fmt(S.nut.gkg)}"></div></div>
- <p class="tip" style="padding:0">Ohne eigene Angabe wird der Erhaltungsbedarf grob mit 32 kcal pro kg geschätzt. Fett 27 % der Kalorien, Rest Kohlenhydrate.</p></details>`;
+ <p class="tip" style="padding:0">${g.bmr?`Aus deinem Profil berechnet (Grundumsatz ${fmt(Math.round(g.bmr))} kcal × Aktivität ${fmt(S.prof.act)}). Eigene Angabe überschreibt das.`:'Profil unter „Mehr“ ausfüllen für eine genaue Berechnung – sonst grob 32 kcal pro kg.'} Fett 27 % der Kalorien, Rest Kohlenhydrate.</p></details>`;
  if(sheet)h+=renderSheet();
  return h}
 function afterNut(){const s=$('wchart');if(s){if(ro)ro.disconnect();ro=new ResizeObserver(drawW);ro.observe(s)}const q=$('fq');if(q&&sheet&&sheet.focus){q.focus();q.setSelectionRange(q.value.length,q.value.length);sheet.focus=false}}
@@ -412,9 +413,9 @@ function haCall(cmds){return new Promise((res,rej)=>{let ws;try{ws=new WebSocket
   else if(m.type==='result'){out[m.id]=m;if(Object.keys(out).length===cmds.length){clearTimeout(to);ws.close();res(cmds.map((_,i)=>out[i+1]))}}};
  ws.onerror=()=>{clearTimeout(to);rej(new Error('Home Assistant nicht erreichbar'))}})}
 function syncLater(){clearTimeout(syncT);if(HA.url&&HA.token)syncT=setTimeout(syncNow,1500)}
-function metaOf(){return{t:S.metaT,plan:S.plan,goal:S.goal,rest:S.rest,cgoal:S.cgoal,nut:{goal:S.nut.goal,maint:S.nut.maint,gkg:S.nut.gkg,foods:S.nut.foods,meals:S.nut.meals,recent:S.nut.recent},drafts,draftT}}
+function metaOf(){return{t:S.metaT,prof:S.prof,plan:S.plan,goal:S.goal,rest:S.rest,cgoal:S.cgoal,nut:{goal:S.nut.goal,maint:S.nut.maint,gkg:S.nut.gkg,foods:S.nut.foods,meals:S.nut.meals,recent:S.nut.recent},drafts,draftT}}
 function merge(R){let changed=false;const m=R.sc_meta;
- if(m&&(m.t||0)>(S.metaT||0)){Object.assign(S,{plan:m.plan||S.plan,goal:m.goal||S.goal,rest:m.rest||S.rest,cgoal:m.cgoal||S.cgoal,metaT:m.t});if(m.nut)Object.assign(S.nut,m.nut);changed=true}
+ if(m&&(m.t||0)>(S.metaT||0)){if(m.prof)S.prof=m.prof;Object.assign(S,{plan:m.plan||S.plan,goal:m.goal||S.goal,rest:m.rest||S.rest,cgoal:m.cgoal||S.cgoal,metaT:m.t});if(m.nut)Object.assign(S.nut,m.nut);changed=true}
  if(m&&(m.draftT||0)>draftT){drafts=m.drafts||{};draftT=m.draftT;changed=true}
  const rs=R.sc_sessions;if(rs){const del=new Set([...(S.del||[]),...(rs.del||[])]),map=new Map();for(const s of [...(rs.list||[]),...S.sessions]){const o=map.get(s.id);if(!o||(s.t||0)>(o.t||0))map.set(s.id,s)}
   const list=[...map.values()].filter(s=>!del.has(s.id));if(list.length!==S.sessions.length||del.size!==(S.del||[]).length)changed=true;S.sessions=list;S.del=[...del]}
@@ -433,7 +434,15 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 addEventListener('online',()=>syncNow());
 
 /* ===================== EINSTELLUNGEN ===================== */
-function renderSettings(){return `<section class="meal" style="margin-top:24px"><header><h3>Home Assistant</h3><span>${HA.url&&HA.token?'verbunden':'nicht eingerichtet'}</span></header>
+function pcalc(){const g=goals(today());return `<div><b>${g.bmr?fmt(Math.round(g.bmr)):'–'}</b><small>Grundumsatz</small></div><div><b>${fmt(g.maint)}</b><small>Erhalt kcal</small></div><div><b>${fmt(g.kcal)}</b><small>Ziel kcal</small></div><div><b>${g.p}</b><small>Protein g</small></div>`}
+function renderProfile(){const P=S.prof,g=goals(today());const f=(k,l,ph,mode='decimal')=>`<div><label for="p_${k}">${l}</label><input id="p_${k}" inputmode="${mode}" data-p="${k}" placeholder="${ph}" value="${esc(P[k]??'')}"></div>`;
+ return `<section class="meal"><header><h3>Mein Profil</h3><span>${P.name?esc(P.name):''}</span></header>
+ <div class="cform">${f('name','Name','z. B. Michell','text')}<div><label>Geschlecht</label><div class="vars">${[['m','Mann'],['w','Frau']].map(([k,l])=>`<button data-ps="sex" data-v="${k}" aria-pressed="${P.sex===k}">${l}</button>`).join('')}</div></div>
+ ${f('year','Geburtsjahr','z. B. 1990','numeric')}${f('height','Größe (cm)','z. B. 182','numeric')}${f('weight','Startgewicht (kg)','z. B. 85')}
+ <div class="full"><label>Alltag (ohne Training eingerechnet)</label><div class="vars">${[[1.4,'Büro, wenig Bewegung'],[1.55,'Büro + Training 3–4×'],[1.7,'Aktiv / Training 5–6×'],[1.85,'Körperlich harte Arbeit']].map(([v,l])=>`<button data-ps="act" data-v="${v}" aria-pressed="${S.prof.act==v}">${l}</button>`).join('')}</div></div></div>
+ <div class="calc" id="pcalc">${pcalc()}</div>
+ <p class="tip" style="padding:0">Gewicht: wird automatisch durch dein zuletzt eingetragenes Gewicht (Essen-Tab) ersetzt. Ziel (Aufbau/Halten/Definieren) stellst du im Essen-Tab ein.</p></section>`}
+function renderSettings(){return renderProfile()+`<section class="meal" style="margin-top:24px"><header><h3>Home Assistant</h3><span>${HA.url&&HA.token?'verbunden':'nicht eingerichtet'}</span></header>
  <p class="tip" style="padding:0 0 8px">Deine Daten werden in deinem Home Assistant gespeichert (pro HA-Benutzer). Adresse: deine Nabu-Casa-URL. Token: HA → Profil → Sicherheit → „Langlebiges Zugriffstoken erstellen“.</p>
  <div class="cform"><div class="full"><label for="haUrl">Adresse</label><input id="haUrl" placeholder="https://xxxxxxxx.ui.nabu.casa" value="${esc(HA.url)}" autocapitalize="off" autocorrect="off"></div>
  <div class="full"><label for="haTok">Token</label><input id="haTok" type="password" placeholder="${HA.token?'gespeichert – zum Ändern neu einfügen':'Token einfügen'}" autocapitalize="off" autocorrect="off"></div></div>
@@ -443,6 +452,8 @@ function renderSettings(){return `<section class="meal" style="margin-top:24px">
  <textarea id="imp" rows="4" placeholder="Kopierte Daten hier einfügen"></textarea>
  <div class="actions"><button data-s="imp">Importieren</button><button class="ghost" data-s="exp">Backup kopieren</button></div></section>
  <p class="tip" style="padding:0 0 20px">Sport Cockpit · Lebensmittel-Daten: Open Food Facts (ODbL) und eingebaute Richtwerte.</p>`}
+document.addEventListener('click',ev=>{const b=ev.target.closest('[data-ps]');if(!b)return;const k=b.dataset.ps;S.prof[k]=k==='act'?+b.dataset.v:b.dataset.v;S.metaT=Date.now();persist();render()});
+document.addEventListener('input',ev=>{const t=ev.target,k=t.dataset.p;if(!k)return;S.prof[k]=k==='name'?t.value:(num(t.value)??'');S.metaT=Date.now();persist();renderHead();const c=$('pcalc');if(c)c.innerHTML=pcalc()});
 document.addEventListener('click',async ev=>{const b=ev.target.closest('[data-s]');if(!b)return;const a=b.dataset.s;
  if(a==='ha'){let u=$('haUrl').value.trim().replace(/\/+$/,'');const t=$('haTok').value.trim();if(!/^https?:\/\//.test(u)){note('Adresse mit https:// angeben');return}
   const old={...HA};HA.url=u;if(t)HA.token=t;note('Verbinde …');try{await haCall([]);localStorage.setItem('sc.ha',JSON.stringify(HA));note('Verbunden');render();syncNow()}catch(e){HA=old;note(e.message)}}
