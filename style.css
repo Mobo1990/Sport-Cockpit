@@ -148,3 +148,5 @@ textarea{width:100%;font:inherit;font-size:16px;color:inherit;background:var(--b
 
 .hl{margin:8px 0 0;font-size:13px;color:var(--mute);line-height:1.4}.hl b{color:var(--acc)}
 .nbig .hl b{display:inline;font-size:inherit;line-height:inherit;font-weight:700}
+
+.hlink{display:block;margin:0 0 10px;padding:10px 12px;border:1px solid var(--line);border-radius:4px;color:var(--mute);text-decoration:none;font-size:14px;font-weight:600}.hlink.stale{border-color:var(--acc);color:var(--ink);background:rgba(255,90,54,.12)}
