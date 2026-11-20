@@ -1,5 +1,5 @@
 // Sport Cockpit – Offline-Cache. Bei jeder neuen Version VERSION erhöhen.
-const VERSION = 'sc-v18';
+const VERSION = 'sc-v19';
 const SHELL = ['./', 'index.html', 'style.css', 'js/data.js','js/training.js','js/nutrition.js','js/smart.js','js/sync.js','js/game.js','js/workout.js','js/home.js','js/onboarding.js','js/gym.js','js/coach.js','js/review.js','js/photo.js','js/main.js', 'manifest.webmanifest', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));

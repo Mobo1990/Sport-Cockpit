@@ -15,7 +15,7 @@ function migrate(){S.cgoal=S.cgoal||150;for(const d in DAYS){S.plan[d]=(S.plan[d
  for(const d in drafts){const dr=drafts[d];if(!dr)continue;dr.extra=(dr.extra||[]).map(e=>{if(e.id==='t-kabelzug-brust'){if(dr.ex&&dr.ex[e.id]){dr.ex.fly=dr.ex[e.id];delete dr.ex[e.id]}return mk('fly',3,12,15,2.5)}return e})}}
 function lsLoad(){try{const j=JSON.parse(localStorage.getItem(LS));if(j){S=Object.assign(S,j);S.prof=Object.assign({name:'',sex:'m',year:'',height:'',weight:'',act:1.55},j.prof||{});S.nut=Object.assign({goal:'aufbau',maint:0,gkg:2,days:{},foods:[],meals:[],recent:[]},j.nut||{});S.del=S.del||[]}const dj=JSON.parse(localStorage.getItem(LS+'.d'));if(dj&&dj.d){drafts=dj.d;draftT=dj.t||0}}catch(e){}migrate()}
 function lsSave(){try{localStorage.setItem(LS,JSON.stringify(S));localStorage.setItem(LS+'.d',JSON.stringify({d:drafts,t:draftT}))}catch(e){note('Speicher voll!')}}
-function persist(){lsSave();syncLater()}
+function persist(){memoReset();lsSave();syncLater()}
 function saveDrafts(){draftT=Date.now();persist()}
 function savePlan(){S.metaT=Date.now();persist()}
 function putSession(s){s.t=Date.now();persist()}
@@ -133,7 +133,7 @@ function renderPlan(){
  <div class="actions"><button data-a="view" data-v="train" data-pick="1">+ Übung hinzufügen</button><button class="ghost" data-a="reset">${confirmKey==='reset'?'Wirklich zurücksetzen?':'Standardplan'}</button></div>
  <div class="settings"><div><label for="goal">Wochenziel (Einheiten)</label><input id="goal" inputmode="numeric" data-a="set" data-f="goal" value="${S.goal}"></div><div><label for="cgoal">Cardio-Ziel (Min./Woche)</label><input id="cgoal" inputmode="numeric" data-a="set" data-f="cgoal" value="${S.cgoal}"></div><div><label for="rest">Satzpause (Sekunden)</label><input id="rest" inputmode="numeric" data-a="set" data-f="rest" value="${S.rest}"></div></div>`}
 let ro=null;
-function render(){renderHead();const v=$('view');if(!profOK()){v.innerHTML=renderOnboarding();return}v.innerHTML=view==='home'?renderHome():view==='train'?renderTrain():view==='hist'?renderHist():view==='rec'?renderRec():view==='nut'?renderNut():view==='review'?renderReview():renderPlan()+`<div class="actions"><button data-a="view" data-v="hist">Verlauf aller Einheiten</button><button data-a="view" data-v="review">Rückblick</button></div>`+renderSettings()+renderAISettings();if(view==='nut')afterNut();
+function render(){memoReset();renderHead();const v=$('view');if(!profOK()){v.innerHTML=renderOnboarding();return}v.innerHTML=view==='home'?renderHome():view==='train'?renderTrain():view==='hist'?renderHist():view==='rec'?renderRec():view==='nut'?renderNut():view==='review'?renderReview():renderPlan()+`<div class="actions"><button data-a="view" data-v="hist">Verlauf aller Einheiten</button><button data-a="view" data-v="review">Rückblick</button></div>`+renderSettings()+renderAISettings();if(view==='nut')afterNut();
  if(view==='rec'){const s=$('chart');if(s){if(ro)ro.disconnect();ro=new ResizeObserver(drawChart);ro.observe(s)}}}
 
 function finish(){const dr=draftFor(day),ex=[];

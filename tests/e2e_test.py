@@ -26,6 +26,11 @@ try:
         b = p.chromium.launch(); pg = b.new_page(viewport={"width": 400, "height": 860})
         errs = []; pg.on("pageerror", lambda e: errs.append(str(e)))
         pg.route("https://api.anthropic.com/**", lambda r: r.fulfill(status=200, content_type="application/json", body=json.dumps(AI_REPLY)))
+        off_calls = []
+        OFF_REPLY = {"products": [{"code": "4001", "product_name": "Testriegel Kakao", "brands": "Marke", "nutriments": {"energy-kcal_100g": 380, "proteins_100g": 30, "carbohydrates_100g": 40, "sugars_100g": 5, "fat_100g": 9}}]}
+        def off_route(r):
+            off_calls.append(r.request.url); r.fulfill(status=200, content_type="application/json", body=json.dumps(OFF_REPLY))
+        pg.route("https://world.openfoodfacts.org/**", off_route)
         pg.goto("http://localhost:8765/"); pg.evaluate("localStorage.clear()"); pg.reload(); pg.wait_for_timeout(500)
 
         print("Onboarding")
@@ -97,6 +102,19 @@ try:
         pg.click(".nav >> text=Start"); pg.click("[data-h=meal][data-m=f]"); pg.fill("#fq", "skyr"); pg.wait_for_timeout(200)
         pg.click(".frow >> nth=0"); pg.click("[data-n=addit]"); pg.wait_for_timeout(200)
         check("Skyr" in pg.text_content("#view"), "Lebensmittel eingetragen")
+        print("Suche")
+        pg.click(".nav >> text=Start"); pg.click("[data-h=meal][data-m=f]"); pg.wait_for_timeout(150)
+        pg.evaluate("window.__fq = document.getElementById('fq')")
+        pg.type("#fq", "hahnchen", delay=20); pg.wait_for_timeout(100)
+        check(pg.evaluate("window.__fq === document.getElementById('fq')"), "Suchfeld bleibt beim Tippen bestehen (Tastatur springt nicht)")
+        check("Hähnchen" in pg.text_content("#fres"), "Suche ohne Umlaut findet Hähnchen")
+        pg.fill("#fq", "brust hahn"); pg.wait_for_timeout(100)
+        check("Hähnchen" in pg.text_content("#fres"), "Mehrere Wörter in beliebiger Reihenfolge")
+        pg.fill("#fq", "testriegel"); pg.wait_for_timeout(1200)
+        check("Testriegel Kakao" in pg.text_content("#fres") and len(off_calls) == 1, "Online-Suche startet automatisch, wenn lokal nichts passt")
+        pg.fill("#fq", "testriege"); pg.fill("#fq", "testriegel"); pg.wait_for_timeout(1000)
+        check("Testriegel Kakao" in pg.text_content("#fres") and len(off_calls) == 1, "Gleiche Online-Suche kommt aus dem Zwischenspeicher")
+        pg.click("[data-n=close]"); pg.wait_for_timeout(100)
 
         print("Foto-Erkennung")
         pg.click(".nav >> text=Mehr"); pg.fill("#aiKey", "sk-ant-test"); pg.click("[data-ais=save]")

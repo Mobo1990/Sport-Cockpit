@@ -15,7 +15,18 @@ function goals(d){const N=S.nut,w=lastWeight(d)||S.prof.weight||80,b=bmr(w),main
 function totals(d){const t={kcal:0,p:0,c:0,f:0,z:0};for(const it of (S.nut.days[d]||{items:[]}).items){t.kcal+=it.kcal;t.p+=it.p;t.c+=it.c;t.f+=it.f;t.z+=it.z||0}return t}
 function itemFrom(food,g,meal){const k=g/100;return{id:'i'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),name:food.name,g,meal,kcal:Math.round(food.kcal*k),p:r1(food.p*k),c:r1(food.c*k),f:r1(food.f*k),z:r1((food.z||0)*k),fid:food.id}}
 function touch(d){ND(d).t=Date.now();persist()}
-function allFoods(){return [...S.nut.foods,...FOODS]}
+/* Lebensmittel-Index: einmal aufbauen, bei Datenänderung (persist/render) verwerfen */
+let _fm=null;
+const memoReset=()=>{_fm=null};
+const normQ=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/ß/g,'ss').replace(/ae/g,'a').replace(/oe/g,'o').replace(/ue/g,'u');
+function fm(){if(!_fm){const all=[...S.nut.foods,...FOODS],byId=new Map(),byName=new Map();for(const f of all){if(!byId.has(f.id))byId.set(f.id,f);if(!byName.has(f.name))byName.set(f.name,f)}
+ _fm={all,byId,byName,norm:all.map(f=>normQ(f.name+' '+(f.brand||''))),log:null,usual:new Map()}}return _fm}
+function allFoods(){return fm().all}
+const foodById=id=>fm().byId.get(id),foodByName=n=>fm().byName.get(n);
+/* Suche: alle Wörter müssen vorkommen; Treffer am Namensanfang zuerst, dann Wortanfang, dann irgendwo */
+function findFoods(q,max=25){const t=normQ(q).split(/\s+/).filter(Boolean);if(!t.length)return[];const m=fm(),out=[];
+ for(let i=0;i<m.all.length;i++){const h=m.norm[i];if(!t.every(w=>h.includes(w)))continue;const sc=h.startsWith(t[0])?0:(' '+h).includes(' '+t[0])?1:2;out.push([sc,i])}
+ return out.sort((a,b)=>a[0]-b[0]||a[1]-b[1]).slice(0,max).map(x=>m.all[x[1]])}
 function remember(food){const N=S.nut;if(food.src==='off'||food.src==='own'){if(!N.foods.some(x=>x.id===food.id))N.foods.unshift(food)}N.recent=[food.id,...N.recent.filter(x=>x!==food.id)].slice(0,30)}
 function nutLine(){const d=today(),g=goals(d),t=totals(d);if(!t.kcal&&!lastWeight())return '';return `<p class="nline" data-a="view" data-v="nut">Ernährung heute: <b>${fmt(t.kcal)}</b> / ${fmt(g.kcal)} kcal · <b>${fmt(Math.round(t.p))}</b> / ${g.p} g Protein${g.trained?' · Trainingstag':''}</p>`}
 /* Farbverlaufs-Balken: kind 'eat' = Grün→Rot (Kalorien, Limit), 'goal' = Rot→Grün (Protein, Ziel erreichen) */
@@ -50,6 +61,12 @@ function drawW(){const s=$('wchart');if(!s)return;const W=s.clientWidth,Hh=s.cli
  +`<text x="${W-p.r}" y="${Hh-6}" text-anchor="end" font-size="12" fill="#111214">Ø 7 Tage: ${fmt(r1(avg[avg.length-1]))} kg</text>`}
 /* --- Hinzufügen-Sheet --- */
 function foodRow(f){return `<button class="frow" data-n="pick" data-id="${esc(f.id)}"><div><b>${esc(f.name)}</b><small>${f.brand?esc(f.brand)+' · ':''}${fmt(f.kcal)} kcal · ${fmt(f.p)} g P / 100 g</small></div><span>›</span></button>`}
+function sheetList(sh){const q=(sh.q||'').trim(),N=S.nut;
+ if(!q){const tpls=N.meals.length?`<h4>Vorlagen</h4>${N.meals.map(t=>`<button class="frow" data-n="usetpl" data-id="${t.id}"><div><b>${esc(t.name)}</b><small>${t.items.length} Lebensmittel · ${fmt(t.items.reduce((a,i)=>a+i.kcal,0))} kcal</small></div><span>+</span></button>`).join('')}`:'';return tpls+smartLists(sh.meal)}
+ const hits=findFoods(q);
+ return `${hits.length?`<h4>Gefunden</h4>${hits.map(f=>foodRow2(f)).join('')}`:''}<h4>Open Food Facts</h4>${sh.busy?'<p class="tip" style="padding:0">Suche …</p>':sh.results?(sh.results.length?sh.results.map(f=>foodRow2(f)).join(''):'<p class="tip" style="padding:0">Nichts gefunden.</p>'):`<button data-n="off" style="width:100%">„${esc(q)}“ in Open Food Facts suchen</button>`}`}
+/* Nur die Ergebnisliste neu zeichnen – das Suchfeld (und die iPhone-Tastatur) bleibt unberührt */
+function updRes(){const box=$('fres');if(box&&sheet&&sheet.step==='search')box.innerHTML=sheetList(sheet);else render()}
 function renderSheet(){const sh=sheet,ml=MEALS.find(m=>m[0]===sh.meal)[1];let b='';
  if(sh.step==='photo'){b=renderPhotoStep()}
  else if(sh.step==='amount'){const f=sh.food,g=num(sh.g)||0,it=itemFrom(f,g,sh.meal);
@@ -62,20 +79,21 @@ function renderSheet(){const sh=sheet,ml=MEALS.find(m=>m[0]===sh.meal)[1];let b=
   <div class="cform"><div class="full"><label>Name</label><input id="cN" value="${esc(sh.q||'')}"></div>${[['cK','kcal'],['cP','Protein g'],['cC','Kohlenhydrate g'],['cZ','davon Zucker g'],['cF','Fett g'],['cG','Portion g (optional)']].map(([i,l])=>`<div><label>${l}</label><input id="${i}" inputmode="decimal"></div>`).join('')}</div>
   <button class="primary" data-n="savecustom" style="width:100%">Speichern & weiter</button>`}
  else if(sh.step==='scan'){b=`<button class="back" data-n="back">‹ Zurück</button><h2>Barcode scannen</h2><div id="scanbox"></div><p class="tip" style="padding:8px 0">${esc(sh.msg||'Barcode in den Rahmen halten.')}</p><div class="wrow"><input id="codeIn" inputmode="numeric" placeholder="oder Nummer eintippen"><button data-n="code">Suchen</button></div>`}
- else{const q=(sh.q||'').trim().toLowerCase(),N=S.nut;
-  const tpls=N.meals.length&&!q?`<h4>Vorlagen</h4>${N.meals.map(t=>`<button class="frow" data-n="usetpl" data-id="${t.id}"><div><b>${esc(t.name)}</b><small>${t.items.length} Lebensmittel · ${fmt(t.items.reduce((a,i)=>a+i.kcal,0))} kcal</small></div><span>+</span></button>`).join('')}`:'';
-  const rec=!q?N.recent.map(id=>allFoods().find(f=>f.id===id)).filter(Boolean):[];
-  const hits=q?allFoods().filter(f=>(f.name+' '+(f.brand||'')).toLowerCase().includes(q)).slice(0,25):[];
-  b=`<div class="shtop"><h2>Essen eintragen</h2><button class="ghost" data-n="close">Schließen</button></div>${mealChips(sh.meal)}
-  <div class="srch"><input id="fq" data-n="q" placeholder="Lebensmittel suchen …" value="${esc(sh.q||'')}" autocomplete="off"><button data-n="scan" aria-label="Barcode scannen">▦ Scan</button><label class="filebtn">Foto<input type="file" accept="image/*" capture="environment" data-ai="file" hidden></label></div>
-  ${tpls}${!q?smartLists(sh.meal):''}
-  ${q?`${hits.length?`<h4>Gefunden</h4>${hits.map(f=>foodRow2(f)).join('')}`:''}<h4>Open Food Facts</h4>${sh.busy?'<p class="tip" style="padding:0">Suche …</p>':sh.results?(sh.results.length?sh.results.map(f=>foodRow2(f)).join(''):'<p class="tip" style="padding:0">Nichts gefunden.</p>'):`<button data-n="off" style="width:100%">„${esc(sh.q)}“ in Open Food Facts suchen</button>`}`:''}
+ else{b=`<div class="shtop"><h2>Essen eintragen</h2><button class="ghost" data-n="close">Schließen</button></div>${mealChips(sh.meal)}
+  <div class="srch"><input id="fq" data-n="q" placeholder="Lebensmittel suchen …" value="${esc(sh.q||'')}" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="search"><button data-n="scan" aria-label="Barcode scannen">▦ Scan</button><label class="filebtn">Foto<input type="file" accept="image/*" capture="environment" data-ai="file" hidden></label></div>
+  <div id="fres">${sheetList(sh)}</div>
   <div class="actions"><button class="ghost" data-n="custom">+ Eigenes Produkt anlegen</button></div>`}
  return `<div class="sheet" role="dialog" aria-modal="true"><div class="sheetin">${b}</div></div>`}
 function mapOFF(p){const n=p.nutriments||{};const kcal=n['energy-kcal_100g']??(n['energy_100g']?n['energy_100g']/4.184:null);if(kcal==null)return null;
  const sq=parseFloat(p.serving_quantity);return{id:'off'+(p.code||p._id),name:(p.product_name_de||p.product_name||'Unbekannt').trim(),brand:(p.brands||'').split(',')[0].trim(),kcal:Math.round(kcal),p:r1(+n.proteins_100g||0),c:r1(+n.carbohydrates_100g||0),z:r1(+n.sugars_100g||0),f:r1(+n.fat_100g||0),por:sq>0?{l:'Portion '+fmt(sq)+' g',g:sq}:null,src:'off',code:p.code}}
 const OFF_FIELDS='code,product_name,product_name_de,brands,nutriments,serving_quantity';
-async function offSearch(q){sheet.busy=true;render();try{const r=await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}&search_simple=1&action=process&json=1&page_size=25&lc=de&cc=de&fields=${OFF_FIELDS}`);const j=await r.json();sheet.results=(j.products||[]).map(mapOFF).filter(Boolean)}catch(e){sheet.results=[];note('Open Food Facts nicht erreichbar')}if(sheet){sheet.busy=false;render()}}
+const offCache=new Map();let offAbort=null;
+async function offSearch(q){const key=normQ(q);if(offCache.has(key)){sheet.results=offCache.get(key);sheet.busy=false;updRes();return}
+ if(offAbort)offAbort.abort();const ac=new AbortController();offAbort=ac;const to=setTimeout(()=>ac.abort(),10000);sheet.busy=true;updRes();
+ try{const r=await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}&search_simple=1&action=process&json=1&page_size=25&lc=de&cc=de&fields=${OFF_FIELDS}`,{signal:ac.signal});const j=await r.json();
+  const res=(j.products||[]).map(mapOFF).filter(Boolean);offCache.set(key,res);if(sheet&&normQ(sheet.q.trim())===key)sheet.results=res}
+ catch(e){if(offAbort!==ac)return;if(sheet)sheet.results=[];note(e.name==='AbortError'?'Open Food Facts antwortet nicht':'Open Food Facts nicht erreichbar')}
+ finally{clearTimeout(to)}if(offAbort===ac)offAbort=null;if(sheet){sheet.busy=false;updRes()}}
 async function offCode(code){if(!sheet)return;sheet.msg='Suche '+code+' …';render();try{const r=await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code)}.json?fields=${OFF_FIELDS}`);const j=await r.json();const f=j.status===1&&mapOFF({...j.product,code});
  if(f){stopScan();sheet.food=f;sheet.g=f.por?String(f.por.g):'100';sheet.step='amount'}else{sheet.msg=`Produkt ${code} nicht gefunden oder ohne Nährwerte – leg es als eigenes Produkt an.`}}catch(e){sheet.msg='Open Food Facts nicht erreichbar.'}render()}
 let scanner=null,scanLib=null;
@@ -91,11 +109,11 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-n]');if(
  else if(a==='close'){stopScan();sheet=null}
  else if(a==='back'){stopScan();sheet.step='search';sheet.msg=''}
  else if(a==='rm'){const dd=ND(d);dd.items=dd.items.filter(i=>i.id!==b.dataset.id);touch(d)}
- else if(a==='pick'){const f=allFoods().find(x=>x.id===b.dataset.id)||(sheet.results||[]).find(x=>x.id===b.dataset.id);if(!f)return;sheet.food=f;const u=usual(f);sheet.g=u?String(u):f.por?String(f.por.g):'100';sheet.step='amount'}
+ else if(a==='pick'){const f=foodById(b.dataset.id)||(sheet.results||[]).find(x=>x.id===b.dataset.id);if(!f)return;sheet.food=f;const u=usual(f);sheet.g=u?String(u):f.por?String(f.por.g):'100';sheet.step='amount'}
  else if(a==='setmeal'){sheet.meal=b.dataset.m}
  else if(a==='gq'){sheet.g=b.dataset.v}
  else if(a==='addit'){const g=num(sheet.g);if(!g||g<=0){note('Menge eingeben');return}ND(d).items.push(itemFrom(sheet.food,g,sheet.meal));remember(sheet.food);touch(d);sheet=null}
- else if(a==='off'){offSearch(sheet.q.trim());return}
+ else if(a==='off'){clearTimeout(offT);offSearch(sheet.q.trim());return}
  else if(a==='scan'){sheet.step='scan';sheet.msg='';render();startScan();return}
  else if(a==='code'){const c=($('codeIn').value||'').replace(/\D/g,'');if(c)offCode(c);return}
  else if(a==='custom'){sheet.step='custom'}
@@ -109,7 +127,8 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-n]');if(
  else return;
  const op=document.querySelector('details.nset');const wasOpen=op&&op.open;render();if(wasOpen){const n=document.querySelector('details.nset');if(n)n.open=true}});
 document.addEventListener('input',ev=>{const t=ev.target,a=t.dataset.n;if(!a)return;
- if(a==='q'){sheet.q=t.value;sheet.results=null;sheet.focus=true;clearTimeout(offT);render();if(t.value.trim().length>2){offT=setTimeout(()=>{if(sheet&&sheet.step==='search'&&sheet.q.trim().length>2&&!allFoods().some(f=>f.name.toLowerCase().includes(sheet.q.trim().toLowerCase())))offSearch(sheet.q.trim())},900)}}
+ if(a==='q'){sheet.q=t.value;const q=t.value.trim(),key=normQ(q);clearTimeout(offT);if(offAbort){offAbort.abort();offAbort=null}sheet.busy=false;sheet.results=offCache.get(key)||null;updRes();
+  if(q.length>2&&!sheet.results&&!findFoods(q,1).length){offT=setTimeout(()=>{if(sheet&&sheet.step==='search'&&sheet.q.trim()===q)offSearch(q)},600)}}
  else if(a==='g'){sheet.g=t.value;const it=itemFrom(sheet.food,num(t.value)||0,sheet.meal),c=document.querySelectorAll('.calc b');if(c.length===4){c[0].textContent=fmt(it.kcal);c[1].textContent=fmt(it.p);c[2].textContent=fmt(it.c);c[3].textContent=fmt(it.f)}}
  else if(a==='maint'){S.nut.maint=Math.round(num(t.value)||0);S.metaT=Date.now();persist()}
  else if(a==='gkg'){const v=num(t.value);if(v&&v>0.5&&v<4){S.nut.gkg=v;S.metaT=Date.now();persist()}}});
