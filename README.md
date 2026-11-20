@@ -12,6 +12,7 @@ Persönliche Web-App (PWA) für Push/Pull/Legs-Training, Cardio und Ernährung.
 - **Coach:** Stillstand je Übung, Protein/Kalorien, Gewichtstrend, Muskelbalance, Entlastungswoche
 - **Challenges:** jeden Tag 3 kleine Aufgaben (z. B. 10 Liegestütze) zum Abhaken, je +5/+10 Punkte, alle 3 = +10 Bonus, für beide gleich
 - **Tagesziele:** Wasser und Schritte mit eigenem Ziel pro Person (Profil unter „Mehr“), je +10 Punkte; Schritte aus Apple Health oder von Hand
+- **Alkoholfrei:** Tage am Stück abhaken (heute oder gestern nachtragen), Punkte steigen mit der Serie (+5 bis +15), Bonus bei 7/14/30/60/100 Tagen
 - **Rückblick:** Woche/Monat mit Steigerungen, als Bild teilbar
 - **Foto-Erkennung:** Teller oder Nährwert-Etikett per Claude-API (eigener Schlüssel)
 

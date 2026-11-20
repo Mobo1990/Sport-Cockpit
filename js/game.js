@@ -46,12 +46,26 @@ function goalsHtml(){const d=today(),w=(S.nut.days[d]||{}).water||0,wg=waterGoal
   <div class="dgb"><button data-h="water" data-v="250">+ Glas</button><button data-h="water" data-v="500">+ Flasche</button></div><div class="dgf">${w>=wg?'<small class="ok">Ziel geschafft · +10</small>':`<small>noch ${fmt((wg-w)/1000)} l · +10</small>`}${w?'<button class="undo" data-h="water" data-v="-250" aria-label="Ein Glas weniger">− Glas</button>':''}</div></div>
  <div class="dg"><div class="tl"><span>Schritte</span><span><b>${fmt(st)}</b> / ${fmt(sg)}</span></div>${rbar(st,sg,'up')}
   <div class="dgb">${hs?`<span class="src">aus Apple Health</span>`:`<input id="hSt" inputmode="numeric" placeholder="Schritte" aria-label="Schritte heute" value="${(S.nut.days[d]||{}).stm||''}"><button data-h="steps">OK</button>`}</div>${st>=sg?'<small class="ok">Ziel geschafft · +10</small>':`<small>noch ${fmt(sg-st)} · +10</small>`}</div></section>`}
+/* Alkoholfreie Tage: Punkte steigen mit der Serie, Bonus an Meilensteinen */
+const AF_MS={7:20,14:30,30:50,60:75,100:100};
+const afPts=n=>Math.min(4+n,15);
+const dayShift=(d,k)=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+k);return iso(x)};
+function afStreak(d){let n=0;while((S.nut.days[d]||{}).af){n++;d=dayShift(d,-1)}return n}
+function afHtml(){const d=today(),yd=dayShift(d,-1),on=!!(S.nut.days[d]||{}).af,yOn=!!(S.nut.days[yd]||{}).af,
+ cur=on?afStreak(d):afStreak(yd),nT=on?cur:cur+1,pT=afPts(nT)+(AF_MS[nT]||0),ms=Object.keys(AF_MS).map(Number).find(m=>m>cur);
+ return `<section class="afc"><div class="afh"><div class="afn"><b class="cond">${cur}</b><span>${cur===1?'Tag':'Tage'} alkoholfrei<br>am Stück</span></div>
+ <small><b>+${pT}</b> heute${on?'':' möglich'}<br>${ms?`+${AF_MS[ms]} Bonus in ${ms-cur} ${ms-cur===1?'Tag':'Tagen'}`:'Alle Meilensteine geschafft'}</small></div>
+ <div class="afb"><button class="afbtn${on?' ok':''}" data-af="${d}" aria-pressed="${on}">${on?'Heute alkoholfrei ✓':'Heute alkoholfrei'}</button>${yOn?'':`<button class="ghost" data-af="${yd}">Gestern auch</button>`}</div></section>`}
+document.addEventListener('click',ev=>{const b=ev.target.closest('[data-af]');if(!b)return;const d=b.dataset.af,dd=ND(d);
+ if(dd.af)delete dd.af;else dd.af=1;touch(d);const n=afStreak(today())||afStreak(dayShift(today(),-1));
+ if(dd.af&&AF_MS[n])tell(`${S.prof.name||'Jemand'}: ${n} Tage alkoholfrei`,`${n} Tage am Stück ohne Alkohol – Bonus +${AF_MS[n]}. Hältst du mit?`);render()});
 function dayScore(d){const g=goals(d),t=totals(d),day=S.nut.days[d]||{},ss=S.sessions.filter(s=>iso(s.date)===d);let pt=0;const why=[];
  const tr=ss.find(s=>s.ex.length);if(tr){pt+=30;why.push('Training +30')}
  const c=ss.reduce((a,s)=>a+(s.cardio||[]).reduce((b,x)=>b+x.min,0),0),hh=day.h||{};if(c>=20){pt+=15;why.push('Cardio +15')}else if((hh.tm||0)>=30){pt+=15;why.push('Bewegung (Watch) +15')}
  if(daySteps(d)>=stepGoal()){pt+=10;why.push('Schrittziel +10')}
  if(t.kcal>0){if(t.p>=g.p){pt+=20;why.push('Protein +20')}else if(t.p>=g.p*.9){pt+=10;why.push('Protein fast +10')}
   const dev=Math.abs(t.kcal-g.kcal)/g.kcal;if(dev<=.1){pt+=20;why.push('Kalorien im Ziel +20')}else if(dev<=.2){pt+=10;why.push('Kalorien nah dran +10')}}
+ if(day.af){const n=afStreak(d),p=afPts(n)+(AF_MS[n]||0);pt+=p;why.push(`Alkoholfrei Tag ${n} +${p}`)}
  const chp=chPoints(d);if(chp){pt+=chp;why.push((chDone(d).length===3?'Alle Challenges +':'Challenges +')+chp)}
  if(day.w){pt+=5;why.push('Gewogen +5')}if((day.water||0)>=waterGoal()){pt+=10;why.push('Wasserziel +10')}
  const prn=ss.reduce((a,s)=>a+(s.prn||0),0);if(prn){pt+=10*prn;why.push(prn+'× Bestwert +'+10*prn)}

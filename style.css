@@ -386,3 +386,15 @@ h1{letter-spacing:-.5px}
 .dgb button{white-space:nowrap}
 .dgf{display:flex;justify-content:space-between;align-items:center;gap:6px}
 .dgf .undo{background:none;border:0;box-shadow:none;min-height:0;padding:2px 0;font-size:12px;color:var(--mute);text-decoration:underline;cursor:pointer}
+/* Alkoholfreie Tage */
+.afc{background:var(--s1);border-radius:var(--r);box-shadow:var(--sh);padding:14px;margin:8px 0 4px;display:flex;flex-direction:column;gap:12px}
+.afh{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.afn{display:flex;align-items:center;gap:10px}
+.afn b{font-size:44px;line-height:1;font-weight:800;color:var(--acc);font-variant-numeric:tabular-nums}
+.afn span{font-size:13px;line-height:1.25;color:var(--mute)}
+.afh small{font-size:12px;color:var(--mute);text-align:right;line-height:1.35}
+.afb{display:flex;gap:8px}
+.afb button{min-height:44px;white-space:nowrap}
+.afbtn{flex:1}
+.afbtn.ok{background:var(--acc);border-color:var(--acc);color:#fff}
+.afh small b{font:700 18px 'Barlow Condensed';color:var(--ink)}
