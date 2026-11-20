@@ -34,10 +34,13 @@ try:
         for k, v in [("name", "Michell"), ("year", "1990"), ("height", "182"), ("weight", "85")]: pg.fill("#p_" + k, v)
         pg.click("[data-ob=go]"); pg.wait_for_timeout(300)
         check(pg.is_visible(".hero2"), "Startseite erscheint")
+        check(pg.is_visible(".eatday") and "Kalorien" in pg.text_content(".eatday"), "Startseite: kompakte Essen-Zeile")
+        check(pg.get_attribute("#sync", "data-st") == "", "Status-Punkt grau ohne Home Assistant")
 
         print("Home Assistant")
         pg.click(".nav >> text=Mehr"); pg.fill("#haUrl", "http://localhost:8123"); pg.fill("#haTok", "tok"); pg.click("[data-s=ha]"); pg.wait_for_timeout(2500)
         check("Synchronisiert" in pg.text_content("#sync"), "Sync mit HA")
+        check(pg.get_attribute("#sync", "data-st") == "ok", "Status-Punkt grün nach Sync")
 
         print("Gym Mode")
         pg.click(".nav >> text=Start"); pg.click(".tile.big"); pg.wait_for_timeout(300)
@@ -74,6 +77,7 @@ try:
         check(pg.is_visible(".rvgrid"), "Rückblick zeigt Kennzahlen")
         pg.click(".nav >> text=Kraft"); pg.wait_for_timeout(200)
         check(pg.is_visible(".mm"), "Kraft-Tab mit Muskel-Karte")
+        check(pg.is_visible(".mm .mleg") and not pg.is_visible(".dayrow"), "Muskel-Karte mit Legende, ohne Trainingstag-Kopf")
 
         print("Zweites Gerät")
         c2 = b.new_page(viewport={"width": 400, "height": 860}); c2.on("pageerror", lambda e: errs.append(str(e)))

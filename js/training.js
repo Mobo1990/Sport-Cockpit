@@ -20,7 +20,7 @@ function saveDrafts(){draftT=Date.now();persist()}
 function savePlan(){S.metaT=Date.now();persist()}
 function putSession(s){s.t=Date.now();persist()}
 function dropSession(id){S.sessions=S.sessions.filter(s=>s.id!==id);if(!S.del.includes(id))S.del.push(id);persist()}
-function note(t){$('sync').textContent=t}
+function note(t){const e=$('sync');e.title=t;e.innerHTML='<span>'+esc(t)+'</span>';e.dataset.st=/Synchronisiert|Verbunden|kopiert|eingetragen|gespeichert|übernommen|aktiv\b/.test(t)?'ok':/…|Synchronisiere/.test(t)?'busy':/Offline|Getrennt|nicht|voll|eingeben|angeben|Erst |Trag |verworfen|beginnt/.test(t)?'err':''}
 const dayEx=d=>[...S.plan[d],...((drafts[d]&&drafts[d].extra)||[])].map(info);
 function hist(k){return S.sessions.filter(s=>s.ex.some(x=>x.id===k)).sort((a,b)=>a.date-b.date).map(s=>({date:s.date,sets:s.ex.find(x=>x.id===k).sets}))}
 function sugg(e){const h=hist(vkey(e));if(!h.length)return null;const L=h[h.length-1].sets.filter(s=>s.reps>0);if(!L.length)return null;
@@ -90,12 +90,26 @@ function trained(){const m=new Map();for(const s of [...S.sessions].sort((a,b)=>
 function weekSets(){const mon=wk(Date.now()),c={};const add=(id,n)=>{const m=MAP[id];if(m)for(const k in m)c[k]=(c[k]||0)+m[k]*n};
  for(const s of S.sessions)if(wk(s.date)===mon)for(const x of s.ex)add(x.base||String(x.id).split('@')[0],x.sets.length);
  for(const d in drafts){const dr=drafts[d];if(dr&&dr.ex)for(const id in dr.ex)add(id,dr.ex[id].filter(r=>r.done).length)}return c}
-function muscleMap(){const c=weekSets(),f=k=>{const n=c[k]||0;return n?`fill="#ff4b26" fill-opacity="${(0.25+Math.min(n/12,1)*0.75).toFixed(2)}"`:'fill="#d6d3cc"'},N='fill="#e8e6e0"',r=(x,y,w,h,a)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" ${a}/>`;
- const base=`<circle cx="60" cy="16" r="12" ${N}/>`+r(53,27,14,8,N)+r(19,90,10,30,N)+r(91,90,10,30,N);
- const front=base+`<ellipse cx="34" cy="48" rx="12" ry="10" ${f('shoulders')}/><ellipse cx="86" cy="48" rx="12" ry="10" ${f('shoulders')}/>`+r(41,40,18,24,f('chest'))+r(61,40,18,24,f('chest'))+r(21,60,11,28,f('biceps'))+r(88,60,11,28,f('biceps'))+r(44,67,32,40,N)+r(39,110,19,54,f('quads'))+r(62,110,19,54,f('quads'))+r(41,168,15,40,N)+r(64,168,15,40,N);
- const back=base+`<ellipse cx="34" cy="48" rx="12" ry="10" ${f('reardelt')}/><ellipse cx="86" cy="48" rx="12" ry="10" ${f('reardelt')}/>`+r(41,38,38,52,f('back'))+r(21,60,11,28,f('triceps'))+r(88,60,11,28,f('triceps'))+r(44,92,32,16,N)+r(40,108,40,24,f('glutes'))+r(40,134,18,32,f('ham'))+r(62,134,18,32,f('ham'))+r(41,168,15,40,f('calves'))+r(64,168,15,40,f('calves'));
- const list=Object.keys(MU).map(k=>[k,c[k]||0]).sort((a,b)=>b[1]-a[1]).map(([k,n])=>`<div><span>${MU[k]}</span><span style="text-align:right">${fmt(n)}</span><i><s style="width:${Math.min(n/12,1)*100}%"></s></i></div>`).join('');
- return `<section class="mm"><h2>Sätze pro Muskel – diese Woche</h2><div><svg viewBox="0 0 120 212" role="img" aria-label="Vorderseite">${front}</svg><div class="cap">Vorne</div></div><div><svg viewBox="0 0 120 212" role="img" aria-label="Rückseite">${back}</svg><div class="cap">Hinten</div></div><div class="mlist">${list}<span class="cap" style="text-align:left">Ziel: 10–20 Sätze pro Muskel und Woche. Nebenmuskeln zählen halb.</span></div></section>`}
+function muscleMap(){const c=weekSets(),
+ lvl=n=>n<=0?0:n<6?1:n<10?2:n<=20?3:4,COL=['#e2dfd8','#ffc9b8','#ff8f6b','#ff4b26','#b9301a'],
+ f=k=>`fill="${COL[lvl(c[k]||0)]}"`,B='fill="#efede8"',N2='fill="#e7e4dd"',
+ r=(x,y,w,h,a,rx)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx||Math.min(w,h)/2}" ${a}/>`,
+ el=(x,y,rx,ry,a)=>`<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" ${a}/>`,
+ pa=(d,a)=>`<path d="${d}" ${a}/>`;
+ const base=`<circle cx="60" cy="15" r="11" ${B}/>`+r(54,24,12,10,B,4)+pa('M38 38Q60 30 82 38L83 70Q80 92 79 108L41 108Q40 92 37 70Z',B)
+  +r(20,54,13,36,B)+r(87,54,13,36,B)+r(17,90,11,34,B)+r(92,90,11,34,B)+el(22,128,5,5,B)+el(98,128,5,5,B)
+  +r(41,108,18,58,B,8)+r(61,108,18,58,B,8)+r(43,168,14,38,B,6)+r(63,168,14,38,B,6)+el(50,208,8,3.5,B)+el(70,208,8,3.5,B);
+ const front=base+el(31,45,10,9,f('shoulders'))+el(89,45,10,9,f('shoulders'))
+  +pa('M42 42Q51 37 59 40L59 60Q50 65 41 58Z',f('chest'))+pa('M78 42Q69 37 61 40L61 60Q70 65 79 58Z',f('chest'))
+  +r(21,56,11,30,f('biceps'))+r(88,56,11,30,f('biceps'))+r(48,64,24,40,N2,6)
+  +r(42,110,16,52,f('quads'),8)+r(62,110,16,52,f('quads'),8);
+ const back=base+el(31,45,10,9,f('reardelt'))+el(89,45,10,9,f('reardelt'))
+  +pa('M42 40Q60 33 78 40L77 72Q60 90 43 72Z',f('back'))+r(21,56,11,30,f('triceps'))+r(88,56,11,30,f('triceps'))+r(47,84,26,20,N2,6)
+  +el(50,118,10,11,f('glutes'))+el(70,118,10,11,f('glutes'))+r(42,132,16,32,f('ham'),8)+r(62,132,16,32,f('ham'),8)
+  +el(50,184,7,16,f('calves'))+el(70,184,7,16,f('calves'));
+ const list=Object.keys(MU).map(k=>[k,c[k]||0]).sort((a,b)=>b[1]-a[1]).map(([k,n])=>`<div><span>${MU[k]}</span><span class="mn">${fmt(n)}</span><i><s style="width:${Math.min(n/20,1)*100}%;background:${COL[Math.max(lvl(n),1)]}"></s></i></div>`).join('');
+ const leg=[['0',0],['1–5',1],['6–9',2],['10–20',3],['20+',4]].map(([l,i])=>`<span><i style="background:${COL[i]}"></i>${l}</span>`).join('');
+ return `<section class="mm"><h2>Sätze pro Muskel – diese Woche</h2><div><svg viewBox="0 0 120 214" role="img" aria-label="Vorderseite">${front}</svg><div class="cap">Vorne</div></div><div><svg viewBox="0 0 120 214" role="img" aria-label="Rückseite">${back}</svg><div class="cap">Hinten</div></div><div class="mleg">${leg}</div><div class="mlist">${list}<span class="cap" style="text-align:left">Ziel: 10–20 Sätze pro Muskel und Woche (Strich = 10). Nebenmuskeln zählen halb.</span></div></section>`}
 function renderRec(){const ex=trained();
  if(!ex.length)return coachHtml()+muscleMap()+'<p class="empty">Deine Kraftkurven erscheinen nach dem ersten Training.</p>';
  if(!recEx||!ex.some(e=>e.id===recEx))recEx=ex[0].id;
