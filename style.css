@@ -404,3 +404,7 @@ h1{letter-spacing:-.5px}
 .sheetin .srch{position:sticky;top:calc(-14px - env(safe-area-inset-top));z-index:2;background:var(--bg);padding:8px 0;margin-top:-8px}
 html.sheet-open,html.sheet-open body{overflow:hidden;overscroll-behavior:none}
 .offerr{display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-top:8px}
+/* Walking Pad: Kalorien-Hinweis */
+.wpk{margin:8px 0 0;padding:10px 12px;border-radius:10px;background:var(--acc2);font-size:13px;color:var(--ink)}
+.wpk b{font:700 17px 'Barlow Condensed';color:var(--acc)}
+.clab{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px;font-size:11px;color:var(--mute);padding:0 4px}

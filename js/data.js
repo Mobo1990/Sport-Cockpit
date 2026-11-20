@@ -21,7 +21,7 @@ const FOODS=[
 
 
 const DAYS={push:{n:'Push',sub:'Brust · Schultern · Trizeps',nx:'pull'},pull:{n:'Pull',sub:'Rücken · Bizeps · hintere Schulter',nx:'legs'},legs:{n:'Legs',sub:'Beine · Po · Waden',nx:'push'},cardio:{n:'Cardio',sub:'Ausdauer · Herz · Fettstoffwechsel',nx:null}};
-const CT=['Laufband','Laufen draußen','Fahrrad / Ergometer','Crosstrainer','Rudergerät','Stepper / Treppe','Schwimmen','Seilspringen'];
+const CT=['Walking Pad · 7 % Steigung','Laufband','Laufen draußen','Fahrrad / Ergometer','Crosstrainer','Rudergerät','Stepper / Treppe','Schwimmen','Seilspringen'];
 /* Piktogramme: Seitenansicht, 100×80 */
 const H=(x,y)=>`<circle class="hd" cx="${x}" cy="${y}" r="6"/>`,F=p=>`<polyline class="f" points="${p}"/>`,E=p=>`<polyline class="e" points="${p}"/>`,W=(x,y,r=7)=>`<circle class="w" cx="${x}" cy="${y}" r="${r}"/>`,R=(x,y,w,h,c='w')=>`<rect class="${c}" x="${x}" y="${y}" width="${w}" height="${h}" rx="1"/>`,C=p=>`<polyline class="c" points="${p}"/>`,DB=(x,y)=>R(x-6,y-3,12,6);
 const PIC={
