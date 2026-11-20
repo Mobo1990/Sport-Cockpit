@@ -31,13 +31,12 @@ try:
         def off_route(r):
             off_calls.append(r.request.url); r.fulfill(status=200, content_type="application/json", body=json.dumps(OFF_REPLY))
         pg.route("https://world.openfoodfacts.org/**", off_route)
-        fast_calls = []; FAST = {"fail": False}
-        FAST_REPLY = {"hits": [{"code": "4002", "product_name": "Schnellriegel Vanille", "brands": ["Marke"], "nutriments": {"energy-kcal_100g": 360, "proteins_100g": 33, "carbohydrates_100g": 35, "sugars_100g": 3, "fat_100g": 8}}]}
-        def fast_route(r):
-            fast_calls.append(r.request.url)
-            if FAST["fail"]: r.fulfill(status=503, body="down")
-            else: r.fulfill(status=200, content_type="application/json", body=json.dumps(FAST_REPLY if "schnellriegel" in r.request.url else {"hits": []}))
-        pg.route("https://search.openfoodfacts.org/**", fast_route)
+        OFF = {"busy": False}
+        def off_route2(r):
+            off_calls.append(r.request.url)
+            if OFF["busy"]: r.fulfill(status=200, content_type="text/html", body="<!DOCTYPE html><title>Page temporarily unavailable</title>")
+            else: r.fulfill(status=200, content_type="application/json", body=json.dumps(OFF_REPLY))
+        pg.unroute("https://world.openfoodfacts.org/**"); pg.route("https://world.openfoodfacts.org/**", off_route2)
         pg.goto("http://localhost:8765/"); pg.evaluate("localStorage.clear()"); pg.reload(); pg.wait_for_timeout(500)
 
         print("Onboarding")
@@ -117,14 +116,15 @@ try:
         check("Hähnchen" in pg.text_content("#fres"), "Suche ohne Umlaut findet Hähnchen")
         pg.fill("#fq", "brust hahn"); pg.wait_for_timeout(100)
         check("Hähnchen" in pg.text_content("#fres"), "Mehrere Wörter in beliebiger Reihenfolge")
-        pg.fill("#fq", "schnellriegel"); pg.wait_for_timeout(1200)
-        check("Schnellriegel Vanille" in pg.text_content("#fres") and len(off_calls) == 0 and "schnelle Suche" in pg.text_content("#fres"), "Schnelle Online-Suche liefert Treffer")
-        pg.fill("#fq", "testriegel"); pg.wait_for_timeout(1200)
-        check("Testriegel Kakao" in pg.text_content("#fres") and len(off_calls) == 1, "Ohne Treffer in der schnellen Suche: Rückfall auf klassische Suche")
+        pg.fill("#fq", "testriegel"); pg.wait_for_timeout(1500)
+        check("Testriegel Kakao" in pg.text_content("#fres") and len(off_calls) == 1, "Online-Suche startet automatisch, wenn lokal nichts passt")
         pg.fill("#fq", "testriege"); pg.fill("#fq", "testriegel"); pg.wait_for_timeout(1000)
         check("Testriegel Kakao" in pg.text_content("#fres") and len(off_calls) == 1, "Gleiche Online-Suche kommt aus dem Zwischenspeicher")
-        FAST["fail"] = True; pg.fill("#fq", "kakaoriegel"); pg.wait_for_timeout(1200)
-        check("Testriegel Kakao" in pg.text_content("#fres") and len(off_calls) == 2, "Schnelle Suche gestört: klassische Suche springt ein")
+        check(pg.evaluate("'testriegel' in JSON.parse(localStorage.getItem('sc.offcache')||'{}')"), "Online-Treffer werden auf dem Gerät gemerkt")
+        OFF["busy"] = True; pg.fill("#fq", "kakaoriegel"); pg.wait_for_timeout(4500)
+        check("überlastet" in pg.text_content("#fres") and pg.is_visible("#fres [data-n=off]"), "Überlastung von Open Food Facts wird erkannt, mit Nochmal-Knopf")
+        OFF["busy"] = False; pg.click("#fres [data-n=off]"); pg.wait_for_timeout(500)
+        check("Testriegel Kakao" in pg.text_content("#fres"), "Nochmal versuchen klappt")
         print("Kein Springen")
         pg.fill("#fq", ""); pg.wait_for_timeout(100)
         box = lambda: pg.evaluate("(()=>{const r=document.querySelector('.sheetin').getBoundingClientRect(),f=document.getElementById('fq').getBoundingClientRect();return [Math.round(r.top),Math.round(r.height),Math.round(f.top)]})()")

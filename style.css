@@ -398,7 +398,6 @@ h1{letter-spacing:-.5px}
 .afbtn{flex:1}
 .afbtn.ok{background:var(--acc);border-color:var(--acc);color:#fff}
 .afh small b{font:700 18px 'Barlow Condensed';color:var(--ink)}
-.offsrc{font:500 11px 'Barlow';color:var(--mute);margin-left:6px;letter-spacing:0;text-transform:none}
 /* Eingabefenster ohne Springen: feste Höhe, Suchfeld klebt oben, Hintergrund scrollt nicht mit */
 .sheet:not(.ob) .sheetin{height:calc(var(--vvh,100dvh) - 20px - env(safe-area-inset-top));max-height:none}
 .sheet.noanim .sheetin{animation:none}
