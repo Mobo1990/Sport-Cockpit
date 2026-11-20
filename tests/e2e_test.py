@@ -186,6 +186,19 @@ try:
         check(c2.is_visible(".hero2"), "Profil kommt per Sync mit (kein Onboarding)")
         check(c2.text_content(".tile.big").count("Pull") or "PULL" in c2.text_content(".tile.big").upper(), "Nächster Tag ist Pull")
 
+        print("Fremdes Konto")
+        c3 = b.new_page(viewport={"width": 400, "height": 860}); c3.on("pageerror", lambda e: errs.append(str(e)))
+        c3.goto("http://localhost:8765/"); c3.evaluate("localStorage.clear()"); c3.reload(); c3.wait_for_timeout(300)
+        for k, v in [("name", "Pauline"), ("year", "1992"), ("height", "168"), ("weight", "62")]: c3.fill("#p_" + k, v)
+        c3.click("[data-ob=go]"); c3.wait_for_timeout(300)
+        c3.click(".nav >> text=Mehr"); c3.fill("#haUrl", "http://localhost:8123"); c3.fill("#haTok", "tok"); c3.click("[data-s=ha]"); c3.wait_for_timeout(2500)
+        meta = json.load(open("/tmp/store.json")).get("sc_meta", {})
+        check("Konto gehört zu „Michell“" in c3.text_content("#sync") and meta.get("prof", {}).get("name") == "Michell" and c3.evaluate("S.prof.name") == "Pauline", "Konto einer anderen Person: nichts gemischt, nichts hochgeladen")
+        check(c3.is_visible(".haconf"), "Hinweis mit Überschreiben-Option erscheint")
+        c3.click("[data-s=haforce]"); c3.click("[data-s=haforce]"); c3.wait_for_timeout(2500)
+        meta = json.load(open("/tmp/store.json")).get("sc_meta", {})
+        check(meta.get("prof", {}).get("name") == "Pauline" and "Synchronisiert" in c3.text_content("#sync"), "Nach Bestätigung: Konto mit diesem Gerät überschrieben")
+
         check(not errs, "Keine JavaScript-Fehler" + ("" if not errs else ": " + "; ".join(errs)))
         b.close()
 finally:

@@ -419,3 +419,9 @@ button,a,label,input,select,textarea{touch-action:manipulation}
 html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 .gstep button,.gok,.gf button{-webkit-user-select:none;user-select:none}
 .gstart{text-align:center;font-size:13px;color:var(--mute);margin:-4px 0 6px}
+/* Home Assistant: Konto einer anderen Person */
+.haconf{margin:12px 0 4px;padding:12px 14px;border-radius:12px;background:var(--acc2);font-size:14px}
+.haconf b{display:block;font-weight:700;margin-bottom:4px}
+.haconf p{margin:6px 0;color:var(--ink)}
+.haconf button{width:100%;margin-top:6px}
+.haconf button.danger{background:var(--acc);border-color:var(--acc);color:#fff}
