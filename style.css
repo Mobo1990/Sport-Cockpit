@@ -408,3 +408,6 @@ html.sheet-open,html.sheet-open body{overflow:hidden;overscroll-behavior:none}
 .wpk{margin:8px 0 0;padding:10px 12px;border-radius:10px;background:var(--acc2);font-size:13px;color:var(--ink)}
 .wpk b{font:700 17px 'Barlow Condensed';color:var(--acc)}
 .clab{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px;font-size:11px;color:var(--mute);padding:0 4px}
+.wpeat{display:flex;align-items:flex-start;gap:8px;margin-top:8px;font-size:14px;cursor:pointer}
+.wpeat input{width:20px;height:20px;min-height:0;margin:1px 0 0;accent-color:var(--acc);flex:none}
+.wpeat small{display:block;font-size:12px;color:var(--mute)}
