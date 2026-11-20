@@ -331,3 +331,16 @@ h1{letter-spacing:-.5px}
 .eatday .tl b{font:700 20px 'Barlow Condensed';color:var(--ink)}
 .eatday .tf{display:flex;justify-content:space-between;margin-top:10px;font-size:12px;color:var(--mute)}
 .eatday .tf em{font-style:normal;color:var(--acc);font-weight:600}
+/* Coach-Challenges */
+.sh .chn{font:500 13px 'Barlow';color:var(--mute);margin-left:6px;letter-spacing:0}
+.chl{display:flex;flex-direction:column;gap:8px}
+.chi{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;text-align:left;font:inherit;color:inherit;background:var(--s1);border:0;border-radius:var(--r);box-shadow:var(--sh);padding:12px 14px;cursor:pointer;transition:transform .15s}
+.chi:active{transform:scale(.98)}
+.chi i{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;box-sizing:border-box}
+.chi.ok i{background:var(--acc);border-color:var(--acc)}
+.chi.ok i::after{content:'';width:10px;height:5px;border:solid #fff;border-width:0 0 2.5px 2.5px;transform:translateY(-1px) rotate(-45deg)}
+.chi b{display:block;font-weight:700}
+.chi span{display:block;font-size:13px;color:var(--mute);margin-top:2px}
+.chi em{font:700 20px 'Barlow Condensed';font-style:normal;color:var(--acc)}
+.chi.ok b{color:var(--mute);text-decoration:line-through}
+.chi.ok em{color:var(--mute)}

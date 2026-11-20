@@ -19,6 +19,7 @@ function renderHome(){const d=today(),sc=dayScore(d),g=sc.g,t=sc.t,hr=new Date()
   <div><div class="tl"><span>Protein</span><span><b>${fmt(Math.round(t.p))}</b> / ${g.p} g</span></div>${rbar(t.p,g.p,'up')}</div></div>
   <div class="tf"><span>${g.kcal-t.kcal>=0?fmt(Math.round(g.kcal-t.kcal))+' kcal frei':fmt(Math.round(t.kcal-g.kcal))+' kcal drüber'} · KH ${fmt(Math.round(t.c))}/${fmt(g.c)} · Fett ${fmt(Math.round(t.f))}/${fmt(g.f)}</span><em>Details ›</em></div></button>
  ${coachHtml(3)}
+ ${chHtml()}
  <h3 class="sh">Essen eintragen</h3><button class="primary eatnow" data-eatnow="1">+ Jetzt eintragen <small>· ${mealName(mealNow())}</small></button><div class="quick">${MEALS.map(([m,l])=>{const k=(S.nut.days[d]||{items:[]}).items.filter(i=>i.meal===m).reduce((a,i)=>a+i.kcal,0);return `<button data-h="meal" data-m="${m}"><b>${l}</b><span>${k?fmt(k)+' kcal':'+ eintragen'}</span></button>`}).join('')}</div>
  ${snackHtml()}
  <h3 class="sh">Schnell erledigt</h3><div class="quick q2">

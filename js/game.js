@@ -2,12 +2,46 @@
 'use strict';
 /* ===================== PUNKTE & PARTNER ===================== */
 const slugN=n=>String(n||'').toLowerCase().replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+/* Coach-Challenges: 3 kleine Aufgaben pro Tag (für alle gleich, aus dem Datum gewählt) */
+const CH=[
+ {id:'push10',k:'k',t:'10 Liegestütze',s:'Sauber, Brust bis knapp über den Boden. Knie am Boden ist okay.',pt:5},
+ {id:'squat20',k:'k',t:'20 Kniebeugen',s:'Ohne Gewicht, Fersen bleiben am Boden.',pt:5},
+ {id:'plank30',k:'k',t:'30 s Unterarmstütz',s:'Bauch und Po fest, Körper eine Linie.',pt:5},
+ {id:'plank60',k:'k',t:'60 s Unterarmstütz',s:'Am Stück. Pausen zählen nicht.',pt:10},
+ {id:'lunge15',k:'k',t:'15 Ausfallschritte je Bein',s:'Hinteres Knie kurz über den Boden.',pt:5},
+ {id:'jack30',k:'k',t:'30 Hampelmänner',s:'Zügig am Stück.',pt:5},
+ {id:'burpee10',k:'k',t:'10 Burpees',s:'Runter, Liegestütz-Position, hoch, Sprung.',pt:10},
+ {id:'wall45',k:'k',t:'45 s Wandsitzen',s:'Oberschenkel waagerecht, Rücken an der Wand.',pt:5},
+ {id:'bridge15',k:'k',t:'15 Glute Bridges',s:'Oben 1 Sekunde halten, Po fest.',pt:5},
+ {id:'dips10',k:'k',t:'10 Dips am Stuhl',s:'Hände an der Kante, Ellbogen nach hinten.',pt:5},
+ {id:'calf25',k:'k',t:'25 Wadenheben',s:'Auf einer Stufe, ganz hoch und tief.',pt:5},
+ {id:'push3x',k:'k',t:'3 × 10 Liegestütze über den Tag',s:'Morgens, mittags, abends je 10.',pt:10},
+ {id:'stairs',k:'a',t:'Treppe statt Aufzug',s:'Heute jede Treppe zu Fuß.',pt:5},
+ {id:'walk10',k:'a',t:'10 Minuten spazieren',s:'Am besten nach dem Essen.',pt:5},
+ {id:'stretch5',k:'a',t:'5 Minuten dehnen',s:'Brust, Hüfte, Beinrückseite.',pt:5},
+ {id:'water0',k:'a',t:'Glas Wasser nach dem Aufstehen',s:'Noch vor dem Kaffee.',pt:5},
+ {id:'nosoda',k:'a',t:'Heute kein Süßgetränk',s:'Wasser, Tee oder Kaffee ohne Zucker.',pt:5},
+ {id:'veg',k:'a',t:'Eine Portion Gemüse extra',s:'Zu einer Mahlzeit dazu.',pt:5},
+ {id:'mob10',k:'a',t:'10 Minuten Mobility',s:'Hüfte und Schultern locker machen.',pt:5}];
+const CH_BONUS=10;
+function dayCh(d){let h=2166136261;for(const c of 'ch'+d)h=Math.imul(h^c.charCodeAt(0),16777619)>>>0;
+ const pick=(arr,n)=>{const a=[...arr],o=[];while(o.length<n&&a.length){h=Math.imul(h^(h>>>15),2246822507)>>>0;o.push(a.splice(h%a.length,1)[0])}return o};
+ return [...pick(CH.filter(c=>c.k==='k'),2),...pick(CH.filter(c=>c.k==='a'),1)]}
+function chDone(d){const list=dayCh(d),done=(S.nut.days[d]||{}).ch||[];return list.filter(c=>done.includes(c.id))}
+function chPoints(d){const dn=chDone(d);return dn.reduce((a,c)=>a+c.pt,0)+(dn.length===3?CH_BONUS:0)}
+function chHtml(){const d=today(),list=dayCh(d),done=chDone(d).map(c=>c.id),n=done.length;
+ return `<h3 class="sh">Challenges heute <small class="chn">${n} / 3${n===3?' · Bonus +'+CH_BONUS+' geholt':' · alle 3 = +'+CH_BONUS+' Bonus'}</small></h3><div class="chl">${list.map(c=>{const ok=done.includes(c.id);return `<button class="chi${ok?' ok':''}" data-ch="${c.id}" aria-pressed="${ok}"><i aria-hidden="true"></i><div><b>${esc(c.t)}</b><span>${esc(c.s)}</span></div><em>+${c.pt}</em></button>`}).join('')}</div>`}
+document.addEventListener('click',ev=>{const b=ev.target.closest('[data-ch]');if(!b)return;const d=today(),dd=ND(d),id=b.dataset.ch;
+ const before=chDone(d).length;dd.ch=(dd.ch||[]).includes(id)?dd.ch.filter(x=>x!==id):[...(dd.ch||[]),id];touch(d);
+ const after=chDone(d).length;if(after===3&&before<3)tell(`${S.prof.name||'Jemand'} hat alle Challenges geschafft`,`Heute alle 3 Coach-Challenges erledigt (+${chPoints(d)} Punkte). Und du?`);
+ render()});
 function dayScore(d){const g=goals(d),t=totals(d),day=S.nut.days[d]||{},ss=S.sessions.filter(s=>iso(s.date)===d);let pt=0;const why=[];
  const tr=ss.find(s=>s.ex.length);if(tr){pt+=30;why.push('Training +30')}
  const c=ss.reduce((a,s)=>a+(s.cardio||[]).reduce((b,x)=>b+x.min,0),0),hh=day.h||{};if(c>=20){pt+=15;why.push('Cardio +15')}else if((hh.tm||0)>=30){pt+=15;why.push('Bewegung (Watch) +15')}
  if((hh.st||0)>=10000){pt+=10;why.push('10.000 Schritte +10')}
  if(t.kcal>0){if(t.p>=g.p){pt+=20;why.push('Protein +20')}else if(t.p>=g.p*.9){pt+=10;why.push('Protein fast +10')}
   const dev=Math.abs(t.kcal-g.kcal)/g.kcal;if(dev<=.1){pt+=20;why.push('Kalorien im Ziel +20')}else if(dev<=.2){pt+=10;why.push('Kalorien nah dran +10')}}
+ const chp=chPoints(d);if(chp){pt+=chp;why.push((chDone(d).length===3?'Alle Challenges +':'Challenges +')+chp)}
  if(day.w){pt+=5;why.push('Gewogen +5')}if((day.water||0)>=2000){pt+=5;why.push('2 l Wasser +5')}
  const prn=ss.reduce((a,s)=>a+(s.prn||0),0);if(prn){pt+=10*prn;why.push(prn+'× Bestwert +'+10*prn)}
  return{pt,why,g,t,c,tr:tr?DAYS[tr.day].n:''}}
