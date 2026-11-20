@@ -133,7 +133,14 @@ function renderPlan(){
  <div class="actions"><button data-a="view" data-v="train" data-pick="1">+ Übung hinzufügen</button><button class="ghost" data-a="reset">${confirmKey==='reset'?'Wirklich zurücksetzen?':'Standardplan'}</button></div>
  <div class="settings"><div><label for="goal">Wochenziel (Einheiten)</label><input id="goal" inputmode="numeric" data-a="set" data-f="goal" value="${S.goal}"></div><div><label for="cgoal">Cardio-Ziel (Min./Woche)</label><input id="cgoal" inputmode="numeric" data-a="set" data-f="cgoal" value="${S.cgoal}"></div><div><label for="rest">Satzpause (Sekunden)</label><input id="rest" inputmode="numeric" data-a="set" data-f="rest" value="${S.rest}"></div></div>`}
 let ro=null;
-function render(){memoReset();renderHead();const v=$('view');if(!profOK()){v.innerHTML=renderOnboarding();return}v.innerHTML=view==='home'?renderHome():view==='train'?renderTrain():view==='hist'?renderHist():view==='rec'?renderRec():view==='nut'?renderNut():view==='review'?renderReview():renderPlan()+`<div class="actions"><button data-a="view" data-v="hist">Verlauf aller Einheiten</button><button data-a="view" data-v="review">Rückblick</button></div>`+renderSettings()+renderAISettings();if(view==='nut')afterNut();
+/* Neu zeichnen ohne Springen: offenes Eingabefenster behält Scrollposition und Fokus, keine Einblend-Animation */
+function sheetSnap(){const el=document.querySelector('.sheet:not(.ob) .sheetin');if(!el)return null;const a=document.activeElement,mine=a&&el.contains(a)&&a.id;
+ return{step:el.dataset.step,top:el.scrollTop,id:mine?a.id:null,s:mine?a.selectionStart:null,e:mine?a.selectionEnd:null}}
+function sheetRestore(p){const el=document.querySelector('.sheet:not(.ob) .sheetin');document.documentElement.classList.toggle('sheet-open',!!el);if(!el||!p)return;
+ el.parentNode.classList.add('noanim');if(p.step===el.dataset.step)el.scrollTop=p.top;
+ if(p.id){const i=document.getElementById(p.id);if(i&&document.activeElement!==i){i.focus({preventScroll:true});try{if(p.s!=null)i.setSelectionRange(p.s,p.e)}catch(x){}}}}
+function render(){const p=sheetSnap();renderCore();sheetRestore(p)}
+function renderCore(){memoReset();renderHead();const v=$('view');if(!profOK()){v.innerHTML=renderOnboarding();return}v.innerHTML=view==='home'?renderHome():view==='train'?renderTrain():view==='hist'?renderHist():view==='rec'?renderRec():view==='nut'?renderNut():view==='review'?renderReview():renderPlan()+`<div class="actions"><button data-a="view" data-v="hist">Verlauf aller Einheiten</button><button data-a="view" data-v="review">Rückblick</button></div>`+renderSettings()+renderAISettings();if(view==='nut')afterNut();
  if(view==='rec'){const s=$('chart');if(s){if(ro)ro.disconnect();ro=new ResizeObserver(drawChart);ro.observe(s)}}}
 
 function finish(){const dr=draftFor(day),ex=[];

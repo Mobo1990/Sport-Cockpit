@@ -7,5 +7,4 @@ render();note(HA.token?'Lokal · verbinde …':'Nur auf diesem Gerät');
 syncNow();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 /* iOS: Fenster an die sichtbare Fläche (ohne Tastatur) anpassen */
-if(window.visualViewport){const vv=window.visualViewport,fit=()=>{const r=document.documentElement.style;r.setProperty('--vvh',vv.height+'px');r.setProperty('--vvt',vv.offsetTop+'px')};vv.addEventListener('resize',fit);vv.addEventListener('scroll',fit);fit()}
-document.addEventListener('focusin',ev=>{if(ev.target.closest&&ev.target.closest('.sheet:not(.ob)'))setTimeout(()=>{const s=document.querySelector('.sheet:not(.ob) .sheetin');if(s&&ev.target.id==='fq')s.scrollTop=0},300)});
+if(window.visualViewport){const vv=window.visualViewport;let raf=0;const fit=()=>{raf=0;const r=document.documentElement.style;r.setProperty('--vvh',Math.round(vv.height)+'px');r.setProperty('--vvt',Math.round(vv.offsetTop)+'px')},q=()=>{if(!raf)raf=requestAnimationFrame(fit)};vv.addEventListener('resize',q);vv.addEventListener('scroll',q);fit()}

@@ -399,3 +399,8 @@ h1{letter-spacing:-.5px}
 .afbtn.ok{background:var(--acc);border-color:var(--acc);color:#fff}
 .afh small b{font:700 18px 'Barlow Condensed';color:var(--ink)}
 .offsrc{font:500 11px 'Barlow';color:var(--mute);margin-left:6px;letter-spacing:0;text-transform:none}
+/* Eingabefenster ohne Springen: feste Höhe, Suchfeld klebt oben, Hintergrund scrollt nicht mit */
+.sheet:not(.ob) .sheetin{height:calc(var(--vvh,100dvh) - 20px - env(safe-area-inset-top));max-height:none}
+.sheet.noanim .sheetin{animation:none}
+.sheetin .srch{position:sticky;top:calc(-14px - env(safe-area-inset-top));z-index:2;background:var(--bg);padding:8px 0;margin-top:-8px}
+html.sheet-open,html.sheet-open body{overflow:hidden;overscroll-behavior:none}
