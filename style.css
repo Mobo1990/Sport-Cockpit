@@ -344,3 +344,29 @@ h1{letter-spacing:-.5px}
 .chi em{font:700 20px 'Barlow Condensed';font-style:normal;color:var(--acc)}
 .chi.ok b{color:var(--mute);text-decoration:line-through}
 .chi.ok em{color:var(--mute)}
+/* Kurz-Workouts (Timer) */
+.wogo{margin-top:8px;padding:7px 12px;min-height:0;border:0;border-radius:999px;background:var(--acc);color:#fff;font:700 14px 'Barlow';cursor:pointer}
+.wo{z-index:36}
+.wo .gh small{color:var(--mute);font-size:13px}
+.wo .gprog{display:flex;gap:3px;padding:10px 16px 0}
+.wo .gprog i{flex:2;height:4px;border-radius:2px;background:var(--line)}
+.wo .gprog i.p{flex:1}
+.wo .gprog i.d{background:var(--mute)}
+.wo .gprog i.c{background:var(--acc)}
+.wobody{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px 24px;gap:6px}
+.wok{font-size:13px;color:var(--mute);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.won{margin:0;font:800 44px/1 'Barlow Condensed';text-transform:uppercase}
+.wosub{margin:0;color:var(--mute);max-width:320px}
+.woring{position:relative;width:220px;height:220px;margin:18px 0 10px}
+.woring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.woring circle{fill:none;stroke-width:8}
+.woring .bg{stroke:var(--line)}
+.woring .fg{stroke:var(--acc);stroke-linecap:round;transition:stroke-dashoffset .2s linear}
+.wobody.rest .fg{stroke:var(--mute)}
+.woring b{position:absolute;inset:0;display:grid;place-items:center;font-size:84px;font-weight:800;font-variant-numeric:tabular-nums}
+.wonx{margin:0;color:var(--mute)}
+.wonx b{color:var(--ink)}
+.wodone{margin:0;font-size:56px;font-weight:800;color:var(--acc);text-transform:uppercase}
+.wobody .primary{margin-top:20px;width:100%;max-width:320px}
+.wo .gfoot{display:grid;grid-template-columns:1fr 2fr;gap:8px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:var(--s1);box-shadow:0 -1px 0 var(--line)}
+.wo .gfoot button{min-height:56px}

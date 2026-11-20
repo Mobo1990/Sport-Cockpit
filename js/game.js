@@ -15,6 +15,8 @@ const CH=[
  {id:'bridge15',k:'k',t:'15 Glute Bridges',s:'Oben 1 Sekunde halten, Po fest.',pt:5},
  {id:'dips10',k:'k',t:'10 Dips am Stuhl',s:'Hände an der Kante, Ellbogen nach hinten.',pt:5},
  {id:'calf25',k:'k',t:'25 Wadenheben',s:'Auf einer Stufe, ganz hoch und tief.',pt:5},
+ {id:'wo_core',k:'k',t:'Core-Workout · 6 min',s:'Geführt mit Timer: Stütz, Crunches, Beinheben.',pt:15,w:'core'},
+ {id:'wo_zirkel',k:'k',t:'Kurz-Zirkel · 7 min',s:'Geführt mit Timer: Ganzkörper ohne Geräte.',pt:15,w:'zirkel'},
  {id:'push3x',k:'k',t:'3 × 10 Liegestütze über den Tag',s:'Morgens, mittags, abends je 10.',pt:10},
  {id:'stairs',k:'a',t:'Treppe statt Aufzug',s:'Heute jede Treppe zu Fuß.',pt:5},
  {id:'walk10',k:'a',t:'10 Minuten spazieren',s:'Am besten nach dem Essen.',pt:5},
@@ -22,6 +24,7 @@ const CH=[
  {id:'water0',k:'a',t:'Glas Wasser nach dem Aufstehen',s:'Noch vor dem Kaffee.',pt:5},
  {id:'nosoda',k:'a',t:'Heute kein Süßgetränk',s:'Wasser, Tee oder Kaffee ohne Zucker.',pt:5},
  {id:'veg',k:'a',t:'Eine Portion Gemüse extra',s:'Zu einer Mahlzeit dazu.',pt:5},
+ {id:'wo_mobil',k:'a',t:'Mobility · 5 min',s:'Geführt mit Timer: Schultern, Rücken, Hüfte.',pt:10,w:'mobil'},
  {id:'mob10',k:'a',t:'10 Minuten Mobility',s:'Hüfte und Schultern locker machen.',pt:5}];
 const CH_BONUS=10;
 function dayCh(d){let h=2166136261;for(const c of 'ch'+d)h=Math.imul(h^c.charCodeAt(0),16777619)>>>0;
@@ -30,7 +33,8 @@ function dayCh(d){let h=2166136261;for(const c of 'ch'+d)h=Math.imul(h^c.charCod
 function chDone(d){const list=dayCh(d),done=(S.nut.days[d]||{}).ch||[];return list.filter(c=>done.includes(c.id))}
 function chPoints(d){const dn=chDone(d);return dn.reduce((a,c)=>a+c.pt,0)+(dn.length===3?CH_BONUS:0)}
 function chHtml(){const d=today(),list=dayCh(d),done=chDone(d).map(c=>c.id),n=done.length;
- return `<h3 class="sh">Challenges heute <small class="chn">${n} / 3${n===3?' · Bonus +'+CH_BONUS+' geholt':' · alle 3 = +'+CH_BONUS+' Bonus'}</small></h3><div class="chl">${list.map(c=>{const ok=done.includes(c.id);return `<button class="chi${ok?' ok':''}" data-ch="${c.id}" aria-pressed="${ok}"><i aria-hidden="true"></i><div><b>${esc(c.t)}</b><span>${esc(c.s)}</span></div><em>+${c.pt}</em></button>`}).join('')}</div>`}
+ return `<h3 class="sh">Challenges heute <small class="chn">${n} / 3${n===3?' · Bonus +'+CH_BONUS+' geholt':' · alle 3 = +'+CH_BONUS+' Bonus'}</small></h3><div class="chl">${list.map(c=>{const ok=done.includes(c.id);return `<div class="chi${ok?' ok':''}" data-ch="${c.id}" role="button" tabindex="0" aria-pressed="${ok}"><i aria-hidden="true"></i><div><b>${esc(c.t)}</b><span>${esc(c.s)}</span>${c.w&&!ok?`<button class="wogo" data-wo="${c.w}" data-woc="${c.id}">Jetzt starten ›</button>`:''}</div><em>+${c.pt}</em></div>`}).join('')}</div>`}
+document.addEventListener('keydown',ev=>{if((ev.key==='Enter'||ev.key===' ')&&ev.target.matches&&ev.target.matches('.chi[data-ch]')){ev.preventDefault();ev.target.click()}});
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-ch]');if(!b)return;const d=today(),dd=ND(d),id=b.dataset.ch;
  const before=chDone(d).length;dd.ch=(dd.ch||[]).includes(id)?dd.ch.filter(x=>x!==id):[...(dd.ch||[]),id];touch(d);
  const after=chDone(d).length;if(after===3&&before<3)tell(`${S.prof.name||'Jemand'} hat alle Challenges geschafft`,`Heute alle 3 Coach-Challenges erledigt (+${chPoints(d)} Punkte). Und du?`);
