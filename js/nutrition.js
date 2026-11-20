@@ -42,9 +42,9 @@ function afterNut(){const s=$('wchart');if(s){if(ro)ro.disconnect();ro=new Resiz
 function drawW(){const s=$('wchart');if(!s)return;const W=s.clientWidth,Hh=s.clientHeight;if(!W)return;
  const ks=Object.keys(S.nut.days).filter(k=>S.nut.days[k].w).sort().slice(-60),pts=ks.map(k=>({k,v:S.nut.days[k].w})),avg=pts.map((q,i)=>{const a=pts.slice(Math.max(0,i-6),i+1);return a.reduce((x,y)=>x+y.v,0)/a.length});
  const p={l:40,r:14,t:16,b:26},lo=Math.min(...pts.map(q=>q.v))-0.5,hi=Math.max(...pts.map(q=>q.v))+0.5,x=i=>p.l+(pts.length<2?0:i*(W-p.l-p.r)/(pts.length-1)),y=v=>p.t+(hi-v)/(hi-lo)*(Hh-p.t-p.b);
- s.innerHTML=[lo+0.5,hi-0.5].map(v=>`<line x1="${p.l}" x2="${W-p.r}" y1="${y(v)}" y2="${y(v)}" stroke="#2a2e35"/><text x="${p.l-6}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="#8f949d">${fmt(r1(v))}</text>`).join('')
- +pts.map((q,i)=>`<circle cx="${x(i)}" cy="${y(q.v)}" r="2.5" fill="#8f949d"/>`).join('')+`<path d="${avg.map((v,i)=>`${i?'L':'M'}${x(i)},${y(v)}`).join('')}" fill="none" stroke="#ff5a36" stroke-width="3"/>`
- +`<text x="${W-p.r}" y="${Hh-6}" text-anchor="end" font-size="12" fill="#eeece8">Ø 7 Tage: ${fmt(r1(avg[avg.length-1]))} kg</text>`}
+ s.innerHTML=[lo+0.5,hi-0.5].map(v=>`<line x1="${p.l}" x2="${W-p.r}" y1="${y(v)}" y2="${y(v)}" stroke="#e4e2dc"/><text x="${p.l-6}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="#6b6e75">${fmt(r1(v))}</text>`).join('')
+ +pts.map((q,i)=>`<circle cx="${x(i)}" cy="${y(q.v)}" r="2.5" fill="#6b6e75"/>`).join('')+`<path d="${avg.map((v,i)=>`${i?'L':'M'}${x(i)},${y(v)}`).join('')}" fill="none" stroke="#ff4b26" stroke-width="3"/>`
+ +`<text x="${W-p.r}" y="${Hh-6}" text-anchor="end" font-size="12" fill="#111214">Ø 7 Tage: ${fmt(r1(avg[avg.length-1]))} kg</text>`}
 /* --- Hinzufügen-Sheet --- */
 function foodRow(f){return `<button class="frow" data-n="pick" data-id="${esc(f.id)}"><div><b>${esc(f.name)}</b><small>${f.brand?esc(f.brand)+' · ':''}${fmt(f.kcal)} kcal · ${fmt(f.p)} g P / 100 g</small></div><span>›</span></button>`}
 function renderSheet(){const sh=sheet,ml=MEALS.find(m=>m[0]===sh.meal)[1];let b='';
