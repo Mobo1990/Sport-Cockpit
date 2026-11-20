@@ -4,7 +4,7 @@ let gym={open:false,i:0,last:null};
 const gymEl=(()=>{const d=document.createElement('div');d.id='gym';d.className='gym';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');document.body.appendChild(d);return d})();
 function gymRow(e,dr){const rows=dr.ex[e.id];let k=rows.findIndex(r=>!r.done);return{rows,k}}
 function gymDefaults(e,rows,k){const sg=sugg(e),r=rows[k]||{},prev=rows.slice(0,k).filter(x=>x.done).pop();
- const kg=r.kg!==''&&r.kg!=null?num(r.kg):(prev?num(prev.kg):(sg?sg.kg:null)),reps=r.reps!==''&&r.reps!=null?num(r.reps):(sg?(sg.reps[k]??sg.reps[sg.reps.length-1]):e.max);return{kg,reps,sg}}
+ const kg=r.kg!==''&&r.kg!=null?num(r.kg):(prev?num(prev.kg):(sg?sg.kg:startKg(e))),reps=r.reps!==''&&r.reps!=null?num(r.reps):(sg?(sg.reps[k]??sg.reps[sg.reps.length-1]):e.max);return{kg,reps,sg}}
 function renderGym(){const gb0=$('gbody'),keep=gb0&&gym.shown===gym.i?gb0.scrollTop:0;renderGym0();document.documentElement.classList.toggle('gym-open',gym.open);const gb=$('gbody');if(gb&&keep)gb.scrollTop=keep;gym.shown=gym.open?gym.i:null}
 function renderGym0(){if(!gym.open){gymEl.innerHTML='';gymEl.classList.remove('on');return}
  const dr=draftFor(day),list=dayEx(day);if(!list.length){gym.open=false;return renderGym0()}
@@ -15,7 +15,7 @@ function renderGym0(){if(!gym.open){gymEl.innerHTML='';gymEl.classList.remove('o
  gymEl.innerHTML=`<header class="gh"><button class="gx" data-g="close" aria-label="Gym Mode schließen">✕</button><div><b>${DAYS[day].n}</b><span>Übung ${gym.i+1} von ${list.length}</span></div><div class="gdots">${list.map((x,j)=>`<i class="${j===gym.i?'cur':''}${dr.ex[x.id].every(r=>r.done)?' ok':''}"></i>`).join('')}</div></header>
  <section class="gbody" id="gbody"><div class="gpic">${svg(picOf(e))}</div><h2>${esc(e.n)}</h2>
  ${e.vars.length>1?`<div class="vars gv">${e.vars.map(v=>`<button data-a="var" data-e="${e.id}" data-v="${esc(v)}" aria-pressed="${v===e.v}">${esc(v)}</button>`).join('')}</div>`:''}
- <p class="gsg">${sg?esc(sg.txt):`Ziel: ${e.sets} × ${e.min}–${e.max} Wdh.`}</p>
+ <p class="gsg">${sg?esc(sg.txt):`Ziel: ${e.sets} × ${e.min}–${e.max} Wdh.`}</p>${!sg&&!rows.some(x=>x.done)&&startKg(e)?`<p class="gstart">Erstes Mal: Startvorschlag ${fmt(startKg(e))} kg${/Kurzhantel/.test(e.v)?' pro Hand':''}${isA(e.v)?' Hilfe':''} – lieber leicht anfangen und steigern.</p>`:''}
  ${resting?`<div class="grest"><span>Pause</span><b id="grest">${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}</b><button data-g="skip">Weiter</button></div>`:''}
  ${done?`<div class="gdone"><b>Alle ${rows.length} Sätze geschafft</b>${lastI!=null?rpeBtns(e,lastI,rows[lastI]):''}<div class="gnav">${gym.i<list.length-1?`<button class="primary" data-g="next">Nächste Übung ›</button>`:''}<button data-g="more">+ Noch ein Satz</button></div></div>`
  :`<p class="gset">Satz <b>${k+1}</b> von ${rows.length}</p>

@@ -418,3 +418,4 @@ button,a,label,input,select,textarea{touch-action:manipulation}
 .gbody{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 .gstep button,.gok,.gf button{-webkit-user-select:none;user-select:none}
+.gstart{text-align:center;font-size:13px;color:var(--mute);margin:-4px 0 6px}

@@ -116,3 +116,17 @@ const DEF={push:[mk('bank',4,6,10,2.5),mk('schraeg',3,8,12,2),mk('schulter',3,8,
  pull:[mk('klimm',4,6,10,2.5),mk('rudern',3,8,12,2.5),mk('latzug',3,10,12,2.5),mk('face',3,12,15,2.5),mk('curl',3,8,12,2.5),mk('hammer',3,10,12,1)],
  legs:[mk('squat',4,6,10,2.5),mk('rdl',3,8,10,2.5),mk('presse',3,10,12,5),mk('beuger',3,10,15,2.5),mk('ausfall',3,10,12,2),mk('waden',4,12,15,5)]};
 const clone=o=>JSON.parse(JSON.stringify(o));
+
+/* Startgewichte fürs erste Mal (Männer, leichter Einstieg). Frauen: 60 %, Hilfe bei assistierten Übungen höher.
+   Kurzhantel = pro Hand. Danach übernimmt die doppelte Progression aus dem eigenen Verlauf. */
+const START_KG={bank:{'Langhantel':40,'Kurzhantel':16,'Multipresse':30,'Maschine':30},schraeg:{'Kurzhantel':14,'Langhantel':30,'Multipresse':25,'Maschine':25},
+ fly:{'Kabelzug':10,'Butterfly-Maschine':30,'Kurzhantel':8},schulter:{'Kurzhantel':12,'Langhantel':25,'Maschine':20},seit:{'Kurzhantel':6,'Kabelzug':5,'Maschine':15},
+ dips:{'Barren':0,'Assistiert':30,'Maschine':40},trizeps:{'Kabelzug Seil':15,'Kabelzug Stange':20,'Kurzhantel über Kopf':12},klimm:{'Körpergewicht + Zusatz':0,'Assistiert':30},
+ rudern:{'Langhantel':40,'Kurzhantel einarmig':18,'Kabelzug sitzend':40,'Maschine':40},latzug:{'Enger Griff':40,'Breiter Griff':40},face:{'Kabelzug Seil':12,'Band':0},
+ revfly:{'Maschine':20,'Kabelzug':5,'Kurzhantel':5},curl:{'Langhantel':20,'SZ-Stange':20,'Kurzhantel':10,'Kabelzug':15},hammer:{'Kurzhantel':10,'Kabelzug Seil':15},
+ squat:{'Langhantel':40,'Multipresse':40,'Goblet Kurzhantel':16},rdl:{'Langhantel':40,'Kurzhantel':16},kreuz:{'Langhantel':60,'Trap Bar':60},
+ presse:{'45° Maschine':80,'Horizontal':60},beuger:{'Liegend':25,'Sitzend':25},strecker:{'Maschine':30},ausfall:{'Kurzhantel':10,'Langhantel':30,'Multipresse':30},
+ waden:{'Stehend Maschine':40,'Sitzend':30,'An der Beinpresse':80}};
+function startKg(e){const t=START_KG[e.id];if(!t)return null;const v=t[e.v]??Object.values(t)[0];if(!v)return v===0?0:null;
+ const w=(typeof S!=='undefined'&&S.prof&&S.prof.sex==='w'),st=e.step||2.5;let kg=isA(e.v)?(w?v*1.5:v):(w?v*0.6:v);
+ kg=Math.round(kg/st)*st;if(!isA(e.v)){if(/^Langhantel|SZ-Stange/.test(e.v))kg=Math.max(kg,/SZ/.test(e.v)?10:20);if(/Kurzhantel/.test(e.v))kg=Math.max(kg,2)}return kg}

@@ -93,6 +93,8 @@ try:
         check(pg.is_visible("#gym.on"), "Gym Mode öffnet")
         check(pg.evaluate("getComputedStyle(document.querySelector('[data-g=kg]')).touchAction") == "manipulation" and "maximum-scale=1" in pg.get_attribute("meta[name=viewport]", "content"), "Kein Doppeltipp-/Eingabe-Zoom (touch-action, Viewport)")
         check(pg.evaluate("document.documentElement.classList.contains('gym-open')"), "Hintergrund gesperrt, solange Gym Mode offen ist")
+        check(pg.input_value("#gkg") == "40" and "Startvorschlag 40 kg" in pg.text_content(".gstart"), "Erstes Mal: Startgewicht 40 kg vorausgefüllt (Bankdrücken Langhantel)")
+        check(pg.evaluate("(()=>{const s=S.prof.sex;S.prof.sex='w';const r=[startKg({id:'bank',v:'Langhantel'}),startKg({id:'seit',v:'Kurzhantel',step:1}),startKg({id:'klimm',v:'Assistiert'})];S.prof.sex=s;return r.join('/')})()") == "25/4/45", "Frauen: 60 % (mind. leere Stange), Hilfe bei Assistiert höher")
         pg.fill("#gkg", "80"); pg.fill("#grp", "8")
         pg.evaluate("document.getElementById('gbody').scrollTop=150"); sc0 = pg.evaluate("document.getElementById('gbody').scrollTop")
         pg.evaluate("document.querySelector('[data-g=set]').click()"); pg.wait_for_timeout(200)
