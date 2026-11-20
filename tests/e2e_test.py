@@ -122,7 +122,7 @@ try:
         check("Testriegel Kakao" in pg.text_content("#fres") and len(off_calls) == 1, "Gleiche Online-Suche kommt aus dem Zwischenspeicher")
         check(pg.evaluate("'testriegel' in JSON.parse(localStorage.getItem('sc.offcache')||'{}')"), "Online-Treffer werden auf dem Gerät gemerkt")
         OFF["busy"] = True; pg.fill("#fq", "kakaoriegel"); pg.wait_for_timeout(4500)
-        check("überlastet" in pg.text_content("#fres") and pg.is_visible("#fres [data-n=off]"), "Überlastung von Open Food Facts wird erkannt, mit Nochmal-Knopf")
+        check("gestört" in pg.text_content("#fres") and pg.is_visible("#fres [data-n=off]") and pg.is_visible("#fres [data-n=scan]"), "Störung von Open Food Facts wird erkannt, mit Scan- und Nochmal-Knopf")
         OFF["busy"] = False; pg.click("#fres [data-n=off]"); pg.wait_for_timeout(500)
         check("Testriegel Kakao" in pg.text_content("#fres"), "Nochmal versuchen klappt")
         print("Kein Springen")

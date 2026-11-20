@@ -403,3 +403,4 @@ h1{letter-spacing:-.5px}
 .sheet.noanim .sheetin{animation:none}
 .sheetin .srch{position:sticky;top:calc(-14px - env(safe-area-inset-top));z-index:2;background:var(--bg);padding:8px 0;margin-top:-8px}
 html.sheet-open,html.sheet-open body{overflow:hidden;overscroll-behavior:none}
+.offerr{display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-top:8px}

@@ -64,7 +64,7 @@ function foodRow(f){return `<button class="frow" data-n="pick" data-id="${esc(f.
 function sheetList(sh){const q=(sh.q||'').trim(),N=S.nut;
  if(!q){const tpls=N.meals.length?`<h4>Vorlagen</h4>${N.meals.map(t=>`<button class="frow" data-n="usetpl" data-id="${t.id}"><div><b>${esc(t.name)}</b><small>${t.items.length} Lebensmittel · ${fmt(t.items.reduce((a,i)=>a+i.kcal,0))} kcal</small></div><span>+</span></button>`).join('')}`:'';return tpls+smartLists(sh.meal)}
  const hits=findFoods(q);
- return `${hits.length?`<h4>Gefunden</h4>${hits.map(f=>foodRow2(f)).join('')}`:''}<h4>Open Food Facts</h4>${sh.busy?'<p class="tip" style="padding:0">Suche …</p>':sh.results?(sh.results.length?sh.results.map(f=>foodRow2(f)).join(''):`<p class="tip" style="padding:0">${esc(sh.offErr||'Nichts gefunden.')}</p>${sh.offErr?`<button data-n="off" style="width:100%;margin-top:6px">Nochmal versuchen</button>`:''}`):`<button data-n="off" style="width:100%">„${esc(q)}“ in Open Food Facts suchen</button>`}`}
+ return `${hits.length?`<h4>Gefunden</h4>${hits.map(f=>foodRow2(f)).join('')}`:''}<h4>Open Food Facts</h4>${sh.busy?'<p class="tip" style="padding:0">Suche …</p>':sh.results?(sh.results.length?sh.results.map(f=>foodRow2(f)).join(''):`<p class="tip" style="padding:0">${esc(sh.offErr||'Nichts gefunden.')}${sh.offErr?' Packungen findest du per <b>Barcode-Scan</b>, sonst leg das Produkt selbst an.':''}</p>${sh.offErr?`<div class="offerr"><button data-n="scan">▦ Barcode scannen</button><button class="ghost" data-n="off">Nochmal</button></div>`:''}`):`<button data-n="off" style="width:100%">„${esc(q)}“ in Open Food Facts suchen</button>`}`}
 /* Nur die Ergebnisliste neu zeichnen – das Suchfeld (und die iPhone-Tastatur) bleibt unberührt */
 function updRes(){const box=$('fres');if(box&&sheet&&sheet.step==='search')box.innerHTML=sheetList(sheet);else render()}
 function renderSheet(){const sh=sheet,ml=MEALS.find(m=>m[0]===sh.meal)[1];let b='';
@@ -92,7 +92,7 @@ const offCache=new Map();let offAbort=null;
    Browser-Anfragen (keine CORS-Freigabe), daher die klassische. Sie ist auf wenige Anfragen pro Minute begrenzt:
    Ergebnisse werden 7 Tage auf dem Gerät gemerkt, automatische Suchen höchstens alle 4 s. */
 const OFF_OLD=q=>`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}&search_simple=1&action=process&json=1&page_size=20&lc=de&cc=de&fields=${OFF_FIELDS}`;
-const OFF_LS='sc.offcache',OFF_TTL=7*864e5;let offLast=0;
+const OFF_LS='sc.offcache',OFF_TTL=7*864e5;let offLast=0,offDown=0;
 (()=>{try{const j=JSON.parse(localStorage.getItem(OFF_LS)||'{}');for(const k in j)if(Date.now()-j[k].t<OFF_TTL)offCache.set(k,j[k].r)}catch(e){}})();
 function offStore(){try{const o={},ks=[...offCache.keys()].slice(-40),now=Date.now();for(const k of ks)o[k]={t:now,r:offCache.get(k)};localStorage.setItem(OFF_LS,JSON.stringify(o))}catch(e){}}
 async function offGet(url,signal,ms){const ac=new AbortController(),to=setTimeout(()=>ac.abort(),ms),stop=()=>ac.abort();signal.addEventListener('abort',stop);
@@ -101,7 +101,7 @@ async function offSearch(q){const key=normQ(q);if(offCache.has(key)){sheet.resul
  if(offAbort)offAbort.abort();const ac=new AbortController();offAbort=ac;sheet.busy=true;updRes();offLast=Date.now();
  try{const j=await offGet(OFF_OLD(q),ac.signal,12000);const res=(j.products||[]).map(mapOFF).filter(Boolean);if(offAbort!==ac)return;
   offCache.delete(key);offCache.set(key,res);offStore();if(sheet&&normQ(sheet.q.trim())===key)sheet.results=res}
- catch(e){if(offAbort!==ac)return;if(sheet){sheet.results=[];sheet.offErr=e.message==='busy'?'Open Food Facts ist gerade überlastet – in einer Minute nochmal versuchen.':ac.signal.aborted?'Open Food Facts antwortet nicht.':'Open Food Facts nicht erreichbar.'}}
+ catch(e){if(offAbort!==ac)return;if(sheet){sheet.results=[];sheet.offErr=!navigator.onLine?'Kein Internet – Online-Suche nicht möglich.':ac.signal.aborted?'Open Food Facts antwortet gerade nicht.':'Die Online-Suche von Open Food Facts ist gerade gestört.';offDown=Date.now()}}
  offAbort=null;if(sheet){sheet.busy=false;updRes()}}
 async function offCode(code){if(!sheet)return;sheet.msg='Suche '+code+' …';render();try{const r=await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code)}.json?fields=${OFF_FIELDS}`);const j=await r.json();const f=j.status===1&&mapOFF({...j.product,code});
  if(f){stopScan();sheet.food=f;sheet.g=f.por?String(f.por.g):'100';sheet.step='amount'}else{sheet.msg=`Produkt ${code} nicht gefunden oder ohne Nährwerte – leg es als eigenes Produkt an.`}}catch(e){sheet.msg='Open Food Facts nicht erreichbar.'}render()}
@@ -137,7 +137,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-n]');if(
  const op=document.querySelector('details.nset');const wasOpen=op&&op.open;render();if(wasOpen){const n=document.querySelector('details.nset');if(n)n.open=true}});
 document.addEventListener('input',ev=>{const t=ev.target,a=t.dataset.n;if(!a)return;
  if(a==='q'){sheet.q=t.value;const q=t.value.trim(),key=normQ(q);clearTimeout(offT);if(offAbort){offAbort.abort();offAbort=null}sheet.busy=false;sheet.results=offCache.get(key)||null;sheet.offErr='';updRes();
-  if(q.length>2&&!sheet.results&&!findFoods(q,1).length){offT=setTimeout(()=>{if(sheet&&sheet.step==='search'&&sheet.q.trim()===q)offSearch(q)},Math.max(800,offLast+4000-Date.now()))}}
+  if(q.length>2&&!sheet.results&&!findFoods(q,1).length&&Date.now()-offDown>60000){offT=setTimeout(()=>{if(sheet&&sheet.step==='search'&&sheet.q.trim()===q)offSearch(q)},Math.max(800,offLast+4000-Date.now()))}}
  else if(a==='g'){sheet.g=t.value;const it=itemFrom(sheet.food,num(t.value)||0,sheet.meal),c=document.querySelectorAll('.calc b');if(c.length===4){c[0].textContent=fmt(it.kcal);c[1].textContent=fmt(it.p);c[2].textContent=fmt(it.c);c[3].textContent=fmt(it.f)}}
  else if(a==='maint'){S.nut.maint=Math.round(num(t.value)||0);S.metaT=Date.now();persist()}
  else if(a==='gkg'){const v=num(t.value);if(v&&v>0.5&&v<4){S.nut.gkg=v;S.metaT=Date.now();persist()}}});
