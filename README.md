@@ -24,7 +24,7 @@ Im Code stehen keine Zugangsdaten; Adresse und Token werden nur auf dem Gerät g
 
 ## Einrichten
 
-1. Öffnen: `https://mobo1990.github.io/sport-cockpit/`
+1. Öffnen: `https://mobo1990.github.io/Sport-Cockpit/`
 2. iPhone: Safari → Teilen → **Zum Home-Bildschirm**
 3. In der App: **Mehr → Home Assistant** – Nabu-Casa-Adresse und ein langlebiges Zugriffstoken eintragen
 

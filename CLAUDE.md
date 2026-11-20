@@ -1,7 +1,7 @@
 # Sport Cockpit – Projektwissen für Claude Code
 
 Persönliche PWA (Push/Pull/Legs-Training, Cardio, Ernährung, Gamification) für Michell und Pauline.
-Live: https://mobo1990.github.io/sport-cockpit/ (GitHub Pages, Branch `main`, Ordner `/`).
+Live: https://mobo1990.github.io/Sport-Cockpit/ (GitHub Pages, Branch `main`, Ordner `/`; Groß-/Kleinschreibung zählt, `/sport-cockpit/` ergibt 404).
 
 ## Sprache & Stil
 - UI-Texte und Kommunikation auf **Deutsch**, kurz und direkt.
