@@ -143,3 +143,5 @@ textarea{width:100%;font:inherit;font-size:16px;color:inherit;background:var(--b
 @media(max-width:600px){.nsum{grid-template-columns:1fr}}
 
 .v-nut .seg,.v-nut .dayrow,.v-hist .seg,.v-rec .seg{display:none}.v-nut .stats{margin-top:12px}
+
+.ob{align-items:center;background:var(--bg)}.ob .sheetin{border-radius:10px;border:1px solid var(--line);max-height:96vh}

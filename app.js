@@ -233,7 +233,7 @@ function renderPlan(){
  <div class="actions"><button data-a="view" data-v="train" data-pick="1">+ Übung hinzufügen</button><button class="ghost" data-a="reset">${confirmKey==='reset'?'Wirklich zurücksetzen?':'Standardplan'}</button></div>
  <div class="settings"><div><label for="goal">Wochenziel (Einheiten)</label><input id="goal" inputmode="numeric" data-a="set" data-f="goal" value="${S.goal}"></div><div><label for="cgoal">Cardio-Ziel (Min./Woche)</label><input id="cgoal" inputmode="numeric" data-a="set" data-f="cgoal" value="${S.cgoal}"></div><div><label for="rest">Satzpause (Sekunden)</label><input id="rest" inputmode="numeric" data-a="set" data-f="rest" value="${S.rest}"></div></div>`}
 let ro=null;
-function render(){renderHead();const v=$('view');v.innerHTML=view==='train'?nutLine()+renderTrain():view==='hist'?renderHist():view==='rec'?renderRec():view==='nut'?renderNut():renderPlan()+renderSettings();if(view==='nut')afterNut();
+function render(){renderHead();const v=$('view');if(!profOK()){v.innerHTML=renderOnboarding();return}v.innerHTML=view==='train'?scoreLine()+nutLine()+renderTrain():view==='hist'?renderHist():view==='rec'?renderRec():view==='nut'?renderNut():renderPlan()+renderSettings();if(view==='nut')afterNut();
  if(view==='rec'){const s=$('chart');if(s){if(ro)ro.disconnect();ro=new ResizeObserver(drawChart);ro.observe(s)}}}
 
 function finish(){const dr=draftFor(day),ex=[];
@@ -243,7 +243,7 @@ function finish(){const dr=draftFor(day),ex=[];
  const date=Date.now(),s={id:'s_'+date,date,day,start:dr.start,ex,...(cardio.length?{cardio}:{})},prs=[];
  for(const x of ex){if(isA(x.id))continue;const b=best(x.id),m=Math.max(...x.sets.map(t=>e1(t.kg,t.reps)));if(b>0&&m>b+0.01)prs.push(`${x.name}: Kraftwert ${fmt(m)} kg (vorher ${fmt(b)})`)}
  const prev=[...S.sessions].filter(q=>q.day===day).sort((a,b)=>b.date-a.date)[0];
- S.sessions.push(s);delete drafts[day];saveDrafts();
+ s.prn=prs.length;S.sessions.push(s);delete drafts[day];saveDrafts();announce(s,prs);
  summary={day,vol:vol(s),prevVol:prev?vol(prev):0,sets:ex.reduce((a,x)=>a+x.sets.length,0),prs,cmin:cardio.reduce((a,c)=>a+c.min,0)};
  putSession(s);stopT();render();scrollTo({top:0,behavior:'smooth'})}
 
@@ -426,7 +426,7 @@ async function syncNow(){if(!HA.url||!HA.token)return;if(syncing){syncAgain=true
   r.forEach((m,i)=>{if(m&&m.success&&m.result)R[keys[i]]=m.result.value});
   const changed=merge(R);lsSave();
   await haCall([{type:'frontend/set_user_data',key:'sc_meta',value:metaOf()},{type:'frontend/set_user_data',key:'sc_sessions',value:{list:S.sessions,del:S.del}},{type:'frontend/set_user_data',key:'sc_nut',value:{days:S.nut.days}}]);
-  note('Synchronisiert · '+new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}));
+  note('Synchronisiert · '+new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}));publish();
   const busy=document.activeElement&&document.activeElement.tagName==='INPUT';if(changed&&!busy&&!sheet)render()}
  catch(e){note((navigator.onLine?e.message:'Offline')+' – lokal gespeichert')}
  syncing=false;if(syncAgain){syncAgain=false;syncNow()}}
@@ -462,6 +462,43 @@ document.addEventListener('click',async ev=>{const b=ev.target.closest('[data-s]
  else if(a==='imp'){try{const j=JSON.parse($('imp').value);const src=j.S||j;let n=0;const ids=new Set(S.sessions.map(s=>s.id));for(const s of (src.sessions||[]))if(!ids.has(s.id)){s.t=s.t||Date.now();S.sessions.push(s);n++}
   if(src.plan&&!S.metaT){S.plan=src.plan;S.goal=src.goal||S.goal;S.rest=src.rest||S.rest;S.cgoal=src.cgoal||S.cgoal;S.metaT=Date.now()}
   if(src.nut&&src.nut.days)for(const k in src.nut.days)if(!S.nut.days[k])S.nut.days[k]=src.nut.days[k];migrate();persist();render();note(n+' Einheiten übernommen')}catch(e){note('Daten nicht lesbar')}}});
+
+/* ===================== PUNKTE & PARTNER ===================== */
+const slugN=n=>String(n||'').toLowerCase().replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+function dayScore(d){const g=goals(d),t=totals(d),day=S.nut.days[d]||{},ss=S.sessions.filter(s=>iso(s.date)===d);let pt=0;const why=[];
+ const tr=ss.find(s=>s.ex.length);if(tr){pt+=30;why.push('Training +30')}
+ const c=ss.reduce((a,s)=>a+(s.cardio||[]).reduce((b,x)=>b+x.min,0),0);if(c>=20){pt+=15;why.push('Cardio +15')}
+ if(t.kcal>0){if(t.p>=g.p){pt+=20;why.push('Protein +20')}else if(t.p>=g.p*.9){pt+=10;why.push('Protein fast +10')}
+  const dev=Math.abs(t.kcal-g.kcal)/g.kcal;if(dev<=.1){pt+=20;why.push('Kalorien im Ziel +20')}else if(dev<=.2){pt+=10;why.push('Kalorien nah dran +10')}}
+ if(day.w){pt+=5;why.push('Gewogen +5')}if((day.water||0)>=2000){pt+=5;why.push('2 l Wasser +5')}
+ const prn=ss.reduce((a,s)=>a+(s.prn||0),0);if(prn){pt+=10*prn;why.push(prn+'× Bestwert +'+10*prn)}
+ return{pt,why,g,t,c,tr:tr?DAYS[tr.day].n:''}}
+function weekScore(){const m=new Date(wk(Date.now()));let sum=0;for(let i=0;i<7;i++){const d=new Date(m);d.setDate(d.getDate()+i);if(d>new Date())break;sum+=dayScore(iso(d)).pt}return sum}
+function scoreLine(){const s=dayScore(today());return `<p class="nline" data-a="view" data-v="nut">Heute <b>${s.pt} Punkte</b> · Woche <b>${weekScore()}</b>${s.why.length?' · '+s.why.join(', '):' · Trainiere, iss im Ziel und trink genug, um Punkte zu sammeln'}</p>`}
+let lastPub='';
+async function publish(){if(!HA.token||!S.prof.name)return;const d=today(),s=dayScore(d);
+ const v=JSON.stringify({d,k:Math.round(s.t.kcal),kz:s.g.kcal,p:Math.round(s.t.p),pz:s.g.p,tr:s.tr,c:Math.round(s.c),pt:s.pt,wp:weekScore()});if(v===lastPub)return;
+ try{const r=await haCall([{type:'call_service',domain:'input_text',service:'set_value',service_data:{entity_id:'input_text.sport_cockpit_'+slugN(S.prof.name),value:v.slice(0,255)}}]);if(r[0]&&r[0].success)lastPub=v}catch(e){}
+ const dd=S.nut.days[d];if(dd&&s.t.p>=s.g.p&&!dd.pg){dd.pg=1;touch(d);tell('Proteinziel geschafft','💪 '+S.prof.name+' hat heute '+Math.round(s.t.p)+' g Protein gegessen.')}}
+async function tell(titel,nachricht){if(!HA.token||!S.prof.name)return;try{await haCall([{type:'call_service',domain:'script',service:'sport_cockpit_meldung',service_data:{von:S.prof.name,titel,nachricht}}])}catch(e){}}
+function announce(s,prs){const n=S.prof.name||'Jemand',sets=s.ex.reduce((a,x)=>a+x.sets.length,0),cm=(s.cardio||[]).reduce((a,c)=>a+c.min,0);
+ if(s.ex.length)tell(`${n} hat ${DAYS[s.day].n} trainiert`,`🏋️ ${sets} Sätze · ${fmt(Math.round(vol(s)))} kg bewegt${cm?` · ${cm} min Cardio`:''}${prs.length?` · ${prs.length} neue${prs.length>1?'':'r'} Bestwert${prs.length>1?'e':''}!`:''}\nDu bist dran 😉`);
+ else if(cm)tell(`${n} war beim Cardio`,`🏃 ${cm} min ${(s.cardio[0]||{}).type||''}\nUnd du?`)}
+
+/* ===================== ONBOARDING ===================== */
+const profOK=()=>{const P=S.prof;return P.name&&P.year&&P.height&&(P.weight||lastWeight())};
+let ob={step:0};
+function renderOnboarding(){const P=S.prof,f=(k,l,ph,mode='decimal')=>`<div><label for="p_${k}">${l}</label><input id="p_${k}" inputmode="${mode}" data-p="${k}" placeholder="${ph}" value="${esc(P[k]??'')}"></div>`;
+ return `<div class="sheet ob"><div class="sheetin"><h2>Willkommen im Sport Cockpit</h2>
+ <p class="tip" style="padding:0 0 12px">Bevor es losgeht, brauchen wir ein paar Angaben. Daraus berechnet die App deinen Kalorienbedarf und dein Proteinziel. Alles kannst du später unter „Mehr“ ändern.</p>
+ <div class="cform">${f('name','Dein Name','z. B. Michell','text')}<div><label>Geschlecht</label><div class="vars">${[['m','Mann'],['w','Frau']].map(([k,l])=>`<button data-ps="sex" data-v="${k}" aria-pressed="${P.sex===k}">${l}</button>`).join('')}</div></div>
+ ${f('year','Geburtsjahr','z. B. 1990','numeric')}${f('height','Größe (cm)','z. B. 182','numeric')}${f('weight','Gewicht (kg)','z. B. 85')}
+ <div class="full"><label>Dein Alltag</label><div class="vars">${[[1.4,'Büro, wenig Bewegung'],[1.55,'Büro + Training 3–4×'],[1.7,'Aktiv / Training 5–6×'],[1.85,'Körperlich harte Arbeit']].map(([v,l])=>`<button data-ps="act" data-v="${v}" aria-pressed="${P.act==v}">${l}</button>`).join('')}</div></div>
+ <div class="full"><label>Dein Ziel</label><div class="vars">${[['aufbau','Muskeln aufbauen'],['halten','Gewicht halten'],['defi','Abnehmen / Definieren']].map(([k,l])=>`<button data-n="goal" data-v="${k}" aria-pressed="${S.nut.goal===k}">${l}</button>`).join('')}</div></div></div>
+ <div class="calc" id="pcalc">${pcalc()}</div>
+ <button class="primary" data-ob="go" style="width:100%">Los geht’s</button><p class="tip" id="obmsg" style="padding:8px 0 0"></p></div></div>`}
+document.addEventListener('click',ev=>{const b=ev.target.closest('[data-ob]');if(!b)return;if(!profOK()){$('obmsg').textContent='Bitte Name, Geburtsjahr, Größe und Gewicht ausfüllen.';return}
+ if(S.prof.weight&&!lastWeight()){ND(today()).w=S.prof.weight;ND(today()).t=Date.now()}S.metaT=Date.now();persist();render()});
 
 /* ===================== START ===================== */
 lsLoad();{const ld=lastDay();if(ld)day=DAYS[ld].nx}
