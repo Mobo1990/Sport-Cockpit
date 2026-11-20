@@ -24,7 +24,7 @@ function rbar(v,goal,kind,big){const r=goal?v/goal:0,pc=Math.min(r,1)*100,over=k
 const bar=(l,v,goal,u)=>{const kind=l==='Protein'?'up':'eat',left=goal-v;return `<div class="nb"><div class="nbh"><span>${l}</span><span><b>${fmt(Math.round(v))}</b> / ${fmt(goal)} ${u}</span></div>${rbar(v,goal,kind)}<div class="nbf">${kind==='goal'?(left>0?`noch ${fmt(Math.round(left))} ${u}`:'Ziel erreicht'):(left>=0?`noch ${fmt(Math.round(left))} ${u} frei`:`${fmt(Math.round(-left))} ${u} drüber`)}</div></div>`};
 function renderNut(){if(!nDate)nDate=today();const d=nDate,g=goals(d),t=totals(d),day=S.nut.days[d]||{items:[]},isT=d===today();
  const left=g.kcal-t.kcal,dl=new Date(d+'T12:00').toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'});
- let h=healthLink()+`<div class="ndate"><button data-n="prev" aria-label="Vortag">‹</button><b>${isT?'Heute':dl}</b><button data-n="next" aria-label="Nächster Tag"${isT?' disabled':''}>›</button></div>
+ let h=healthLink()+`<button class="primary eatnow" data-eatnow="1">+ Essen eintragen <small>· ${mealName(mealNow())}</small></button><div class="ndate"><button data-n="prev" aria-label="Vortag">‹</button><b>${isT?'Heute':dl}</b><button data-n="next" aria-label="Nächster Tag"${isT?' disabled':''}>›</button></div>
  <section class="nsum"><div class="nbig"><b class="cond">${fmt(Math.abs(left))}</b><span>${left>=0?'kcal übrig':'kcal drüber'}</span><small>${{aufbau:'Aufbau',halten:'Halten',defi:'Definieren'}[S.nut.goal]}${g.trained?' · Trainingstag, Protein +5 %':''}</small>${g.h&&(g.h.st||g.h.ak)?`<p class="hl">Apple Health: ${g.h.st?fmt(g.h.st)+' Schritte':''}${g.h.ak?' · '+fmt(g.h.ak)+' aktive kcal':''}${g.h.tm?' · '+fmt(g.h.tm)+' min Training':''}${g.bonus?` · <b>+${fmt(g.bonus)} kcal</b> extra (mehr bewegt als dein Alltag-Faktor annimmt)`:''}</p>`:''}</div>
  <div class="nbars">${bar('Kalorien',t.kcal,g.kcal,'kcal')}${bar('Protein',t.p,g.p,'g')}${bar('Kohlenhydrate',t.c,g.c,'g')}${bar('Zucker',t.z,g.z,'g')}${bar('Fett',t.f,g.f,'g')}</div></section>`;
  h+=MEALS.map(([m,l])=>{const its=day.items.filter(i=>i.meal===m),mk=its.reduce((a,i)=>a+i.kcal,0);
@@ -66,10 +66,10 @@ function renderSheet(){const sh=sheet,ml=MEALS.find(m=>m[0]===sh.meal)[1];let b=
   const tpls=N.meals.length&&!q?`<h4>Vorlagen</h4>${N.meals.map(t=>`<button class="frow" data-n="usetpl" data-id="${t.id}"><div><b>${esc(t.name)}</b><small>${t.items.length} Lebensmittel · ${fmt(t.items.reduce((a,i)=>a+i.kcal,0))} kcal</small></div><span>+</span></button>`).join('')}`:'';
   const rec=!q?N.recent.map(id=>allFoods().find(f=>f.id===id)).filter(Boolean):[];
   const hits=q?allFoods().filter(f=>(f.name+' '+(f.brand||'')).toLowerCase().includes(q)).slice(0,25):[];
-  b=`<div class="shtop"><h2>${ml}</h2><button class="ghost" data-n="close">Schließen</button></div>
+  b=`<div class="shtop"><h2>Essen eintragen</h2><button class="ghost" data-n="close">Schließen</button></div>${mealChips(sh.meal)}
   <div class="srch"><input id="fq" data-n="q" placeholder="Lebensmittel suchen …" value="${esc(sh.q||'')}" autocomplete="off"><button data-n="scan" aria-label="Barcode scannen">▦ Scan</button><label class="filebtn">Foto<input type="file" accept="image/*" capture="environment" data-ai="file" hidden></label></div>
-  ${tpls}${rec.length?`<h4>Zuletzt</h4>${rec.slice(0,10).map(foodRow).join('')}`:''}
-  ${q?`${hits.length?`<h4>Gefunden</h4>${hits.map(foodRow).join('')}`:''}<h4>Open Food Facts</h4>${sh.busy?'<p class="tip" style="padding:0">Suche …</p>':sh.results?(sh.results.length?sh.results.map(foodRow).join(''):'<p class="tip" style="padding:0">Nichts gefunden.</p>'):`<button data-n="off" style="width:100%">„${esc(sh.q)}“ in Open Food Facts suchen</button>`}`:''}
+  ${tpls}${!q?smartLists(sh.meal):''}
+  ${q?`${hits.length?`<h4>Gefunden</h4>${hits.map(f=>foodRow2(f)).join('')}`:''}<h4>Open Food Facts</h4>${sh.busy?'<p class="tip" style="padding:0">Suche …</p>':sh.results?(sh.results.length?sh.results.map(f=>foodRow2(f)).join(''):'<p class="tip" style="padding:0">Nichts gefunden.</p>'):`<button data-n="off" style="width:100%">„${esc(sh.q)}“ in Open Food Facts suchen</button>`}`:''}
   <div class="actions"><button class="ghost" data-n="custom">+ Eigenes Produkt anlegen</button></div>`}
  return `<div class="sheet" role="dialog" aria-modal="true"><div class="sheetin">${b}</div></div>`}
 function mapOFF(p){const n=p.nutriments||{};const kcal=n['energy-kcal_100g']??(n['energy_100g']?n['energy_100g']/4.184:null);if(kcal==null)return null;
@@ -91,7 +91,8 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-n]');if(
  else if(a==='close'){stopScan();sheet=null}
  else if(a==='back'){stopScan();sheet.step='search';sheet.msg=''}
  else if(a==='rm'){const dd=ND(d);dd.items=dd.items.filter(i=>i.id!==b.dataset.id);touch(d)}
- else if(a==='pick'){const f=allFoods().find(x=>x.id===b.dataset.id)||(sheet.results||[]).find(x=>x.id===b.dataset.id);if(!f)return;sheet.food=f;sheet.g=f.por?String(f.por.g):'100';sheet.step='amount'}
+ else if(a==='pick'){const f=allFoods().find(x=>x.id===b.dataset.id)||(sheet.results||[]).find(x=>x.id===b.dataset.id);if(!f)return;sheet.food=f;const u=usual(f);sheet.g=u?String(u):f.por?String(f.por.g):'100';sheet.step='amount'}
+ else if(a==='setmeal'){sheet.meal=b.dataset.m}
  else if(a==='gq'){sheet.g=b.dataset.v}
  else if(a==='addit'){const g=num(sheet.g);if(!g||g<=0){note('Menge eingeben');return}ND(d).items.push(itemFrom(sheet.food,g,sheet.meal));remember(sheet.food);touch(d);sheet=null}
  else if(a==='off'){offSearch(sheet.q.trim());return}
