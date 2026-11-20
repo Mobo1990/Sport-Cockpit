@@ -398,3 +398,4 @@ h1{letter-spacing:-.5px}
 .afbtn{flex:1}
 .afbtn.ok{background:var(--acc);border-color:var(--acc);color:#fff}
 .afh small b{font:700 18px 'Barlow Condensed';color:var(--ink)}
+.offsrc{font:500 11px 'Barlow';color:var(--mute);margin-left:6px;letter-spacing:0;text-transform:none}
