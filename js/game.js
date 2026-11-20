@@ -18,7 +18,6 @@ const CH=[
  {id:'wo_core',k:'k',t:'Core-Workout · 6 min',s:'Geführt mit Timer: Stütz, Crunches, Beinheben.',pt:15,w:'core'},
  {id:'wo_zirkel',k:'k',t:'Kurz-Zirkel · 7 min',s:'Geführt mit Timer: Ganzkörper ohne Geräte.',pt:15,w:'zirkel'},
  {id:'push3x',k:'k',t:'3 × 10 Liegestütze über den Tag',s:'Morgens, mittags, abends je 10.',pt:10},
- {id:'stairs',k:'a',t:'Treppe statt Aufzug',s:'Heute jede Treppe zu Fuß.',pt:5},
  {id:'walk10',k:'a',t:'10 Minuten spazieren',s:'Am besten nach dem Essen.',pt:5},
  {id:'stretch5',k:'a',t:'5 Minuten dehnen',s:'Brust, Hüfte, Beinrückseite.',pt:5},
  {id:'water0',k:'a',t:'Glas Wasser nach dem Aufstehen',s:'Noch vor dem Kaffee.',pt:5},
