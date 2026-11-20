@@ -18,7 +18,10 @@ function touch(d){ND(d).t=Date.now();persist()}
 function allFoods(){return [...S.nut.foods,...FOODS]}
 function remember(food){const N=S.nut;if(food.src==='off'||food.src==='own'){if(!N.foods.some(x=>x.id===food.id))N.foods.unshift(food)}N.recent=[food.id,...N.recent.filter(x=>x!==food.id)].slice(0,30)}
 function nutLine(){const d=today(),g=goals(d),t=totals(d);if(!t.kcal&&!lastWeight())return '';return `<p class="nline" data-a="view" data-v="nut">Ernährung heute: <b>${fmt(t.kcal)}</b> / ${fmt(g.kcal)} kcal · <b>${fmt(Math.round(t.p))}</b> / ${g.p} g Protein${g.trained?' · Trainingstag':''}</p>`}
-const bar=(l,v,goal,u)=>{const pc=goal?Math.min(v/goal,1.25)*100:0;return `<div class="nb"><div class="nbh"><span>${l}</span><span><b>${fmt(Math.round(v))}</b> / ${fmt(goal)} ${u}</span></div><i><s style="width:${Math.min(pc,100)}%"${v>goal*1.08?' class="over"':''}></s></i></div>`};
+/* Farbverlaufs-Balken: kind 'eat' = Grün→Rot (Kalorien, Limit), 'goal' = Rot→Grün (Protein, Ziel erreichen) */
+function rbar(v,goal,kind,big){const r=goal?v/goal:0,pc=Math.min(r,1)*100,over=kind==='eat'&&r>1.05;
+ return `<div class="rb ${kind}${big?' big':''}${over?' over':''}" role="meter" aria-valuemin="0" aria-valuemax="${goal}" aria-valuenow="${Math.round(v)}"><i style="--p:${pc.toFixed(1)}%"></i><b style="left:${pc.toFixed(1)}%"></b></div>`}
+const bar=(l,v,goal,u)=>{const kind=l==='Protein'?'up':'eat',left=goal-v;return `<div class="nb"><div class="nbh"><span>${l}</span><span><b>${fmt(Math.round(v))}</b> / ${fmt(goal)} ${u}</span></div>${rbar(v,goal,kind)}<div class="nbf">${kind==='goal'?(left>0?`noch ${fmt(Math.round(left))} ${u}`:'Ziel erreicht'):(left>=0?`noch ${fmt(Math.round(left))} ${u} frei`:`${fmt(Math.round(-left))} ${u} drüber`)}</div></div>`};
 function renderNut(){if(!nDate)nDate=today();const d=nDate,g=goals(d),t=totals(d),day=S.nut.days[d]||{items:[]},isT=d===today();
  const left=g.kcal-t.kcal,dl=new Date(d+'T12:00').toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'});
  let h=healthLink()+`<div class="ndate"><button data-n="prev" aria-label="Vortag">‹</button><b>${isT?'Heute':dl}</b><button data-n="next" aria-label="Nächster Tag"${isT?' disabled':''}>›</button></div>

@@ -13,8 +13,8 @@ function renderHome(){const d=today(),sc=dayScore(d),g=sc.g,t=sc.t,hr=new Date()
  ${sc.why.length?`<div class="chips">${sc.why.map(w=>`<span>${esc(w)}</span>`).join('')}</div>`:'<p class="tip" style="padding:0 0 12px">Noch keine Punkte heute: Trainieren, im Kalorienziel bleiben und Protein schaffen bringt am meisten.</p>'}
  <section class="tiles">
   <button class="tile big" data-gym="1" data-d="${run?run[0]:nx}"><small>${run?'Training läuft':'Als Nächstes'}</small><b>${DAYS[run?run[0]:nx].n}</b><span>${run?runSets+' Sätze erledigt – weiter':DAYS[nx].sub}</span><em>${run?'Fortsetzen':'Training starten'} ›</em></button>
-  <div class="tile"><small>Kalorien</small><b>${fmt(Math.round(t.kcal))}</b><span>von ${fmt(g.kcal)} kcal</span><i><s style="width:${Math.min(t.kcal/g.kcal,1)*100}%"></s></i></div>
-  <div class="tile"><small>Protein</small><b>${fmt(Math.round(t.p))} g</b><span>von ${g.p} g</span><i><s style="width:${Math.min(t.p/g.p,1)*100}%"></s></i></div>
+  <div class="tile budget"><div class="bh"><small>Kalorien heute</small><span><b>${fmt(Math.round(t.kcal))}</b> / ${fmt(g.kcal)} kcal</span></div>${rbar(t.kcal,g.kcal,'eat',1)}<div class="bf"><span>${g.kcal-t.kcal>=0?`<b>${fmt(Math.round(g.kcal-t.kcal))}</b> kcal noch frei`:`<b class="hot">${fmt(Math.round(t.kcal-g.kcal))}</b> kcal drüber`}</span><span>${Math.round(t.kcal/g.kcal*100)} %</span></div>
+  <div class="bh" style="margin-top:14px"><small>Protein</small><span><b>${fmt(Math.round(t.p))}</b> / ${g.p} g</span></div>${rbar(t.p,g.p,'up')}<div class="bf"><span>${g.p-t.p>0?`noch <b>${fmt(Math.round(g.p-t.p))} g</b>`:'<b>Ziel erreicht</b>'}</span><span>${Math.round(t.p/g.p*100)} %</span></div></div>
  </section>
  ${coachHtml(3)}
  <h3 class="sh">Essen eintragen</h3><div class="quick">${MEALS.map(([m,l])=>{const k=(S.nut.days[d]||{items:[]}).items.filter(i=>i.meal===m).reduce((a,i)=>a+i.kcal,0);return `<button data-h="meal" data-m="${m}"><b>${l}</b><span>${k?fmt(k)+' kcal':'+ eintragen'}</span></button>`}).join('')}</div>
