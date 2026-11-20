@@ -9,14 +9,15 @@ Live: https://mobo1990.github.io/Sport-Cockpit/ (GitHub Pages, Branch `main`, Or
 
 ## Aufbau
 - Kein Build-Schritt: reines HTML/CSS/JS. `index.html` lädt klassische Skripte aus `js/` in fester Reihenfolge
-  (data → training → nutrition → smart → sync → game → workout → home → onboarding → gym → coach → review → photo → main).
+  (data → training → nutrition → smart → sync → game → workout → share → home → onboarding → gym → coach → review → photo → main).
   Sie teilen sich den globalen Gültigkeitsbereich (top-level `const`/`let`/`function`).
 - `js/training.js` enthält Zustand `S`, Speicher (`persist`, `lsSave`) und `render()`; `js/gym.js` überschreibt `render` als Wrapper.
 - Daten: zuerst `localStorage`, dann Sync mit **Home Assistant** per WebSocket (`frontend/get_user_data` / `set_user_data`,
   Schlüssel `sc_meta`, `sc_sessions`, `sc_nut`). Zusammenführen in `merge()` (`js/sync.js`).
 - HA-Seite (nicht im Repo, in Michells HA angelegt): `input_text.sport_cockpit_<name>` (Tageswerte-JSON),
   `input_number.sport_cockpit_<name>_{schritte,aktiv_kcal,gewicht,trainingsminuten}` (Apple Health per Kurzbefehl),
-  Skript `script.sport_cockpit_meldung` (Push an Partner), Automation „Sport Cockpit – Tagesauswertung 22 Uhr“.
+  Skript `script.sport_cockpit_meldung` (Push an Partner), Liste `todo.sport_cockpit_geteiltes_essen` (geteiltes Essen, Beschreibung = JSON),
+  `rest_command.sport_cockpit_food_search` (Lebensmittelsuche), `script.sport_cockpit_health` (Apple-Health-Werte), Automation „Sport Cockpit – Tagesauswertung 22 Uhr“.
 - Service Worker `sw.js`: bei jeder Änderung an ausgelieferten Dateien `VERSION` hochzählen und neue Dateien in `SHELL` eintragen.
 
 ## Arbeitsweise

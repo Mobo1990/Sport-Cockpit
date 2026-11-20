@@ -8,7 +8,7 @@ from playwright.sync_api import sync_playwright
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 procs = [subprocess.Popen([sys.executable, "-m", "http.server", "8765"], cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL),
          subprocess.Popen([sys.executable, str(ROOT / "tests" / "mock_ha.py")], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)]
-for f in ("/tmp/calls.log", "/tmp/store.json"):
+for f in ("/tmp/calls.log", "/tmp/store.json", "/tmp/todo.json"):
     if os.path.exists(f): os.remove(f)
 time.sleep(1.5)
 ok = 0
@@ -127,6 +127,16 @@ try:
         pg.click(".nav >> text=Start"); pg.click("[data-h=meal][data-m=f]"); pg.fill("#fq", "skyr"); pg.wait_for_timeout(200)
         pg.click(".frow >> nth=0"); pg.click("[data-n=addit]"); pg.wait_for_timeout(200)
         check("Skyr" in pg.text_content("#view"), "Lebensmittel eingetragen")
+        print("Gemeinsam gegessen")
+        pg.click(".nav >> text=Start"); pg.click("[data-h=meal][data-m=a]"); pg.fill("#fq", "reis"); pg.wait_for_timeout(200)
+        pg.click(".frow >> nth=0"); pg.fill("#gIn", "200"); pg.wait_for_timeout(100)
+        check(pg.is_visible("[data-sh-in=on]") and "Pauline" in pg.text_content(".shchk"), "Mengen-Schritt: 'Auch für Pauline eintragen'")
+        pg.check("[data-sh-in=on]"); pg.wait_for_timeout(150)
+        check(pg.input_value("#shG") == "200", "Paulines Menge vorgeschlagen (gleich viel)")
+        pg.fill("#shG", "150"); pg.click("[data-n=addit]"); pg.wait_for_timeout(1500)
+        td = json.load(open("/tmp/todo.json"))
+        check(len(td) == 1 and json.loads(td[0]["description"])["to"] == "pauline" and json.loads(td[0]["description"])["items"][0]["g"] == 150, "Geteiltes Essen liegt für Pauline bereit (150 g)")
+        check(pg.evaluate("S.nut.shr") < 1, "Verhältnis gelernt (Pauline isst weniger)")
         print("Suche")
         pg.click(".nav >> text=Start"); pg.click("[data-h=meal][data-m=f]"); pg.wait_for_timeout(150)
         pg.evaluate("window.__fq = document.getElementById('fq')")
@@ -198,6 +208,27 @@ try:
         c3.click("[data-s=haforce]"); c3.click("[data-s=haforce]"); c3.wait_for_timeout(2500)
         meta = json.load(open("/tmp/store.json")).get("sc_meta", {})
         check(meta.get("prof", {}).get("name") == "Pauline" and "Synchronisiert" in c3.text_content("#sync"), "Nach Bestätigung: Konto mit diesem Gerät überschrieben")
+
+        print("Pauline übernimmt")
+        c4 = b.new_page(viewport={"width": 400, "height": 860}); c4.on("pageerror", lambda e: errs.append(str(e)))
+        c4.goto("http://localhost:8765/"); c4.evaluate("localStorage.clear()"); c4.reload(); c4.wait_for_timeout(300)
+        for k, v in [("name", "Pauline"), ("year", "1992"), ("height", "168"), ("weight", "62")]: c4.fill("#p_" + k, v)
+        c4.click("[data-ob=go]"); c4.wait_for_timeout(300)
+        c4.click(".nav >> text=Mehr"); c4.fill("#haUrl", "http://localhost:8123"); c4.fill("#haTok", "tok2"); c4.click("[data-s=ha]"); c4.wait_for_timeout(2500)
+        c4.click(".nav >> text=Start"); c4.wait_for_timeout(300)
+        check(c4.is_visible(".shin") and "Michell hat Abend" in c4.text_content(".shin") and "150 g" in c4.text_content(".shin"), "Pauline sieht: Michell hat Abend für dich eingetragen")
+        c4.click(".shin [data-sh=pct][data-v='75']"); c4.wait_for_timeout(100)
+        check("113 g" in c4.text_content(".shin"), "Portion anpassbar (75 % = 113 g)")
+        c4.click(".shin [data-sh=ok]"); c4.wait_for_timeout(1000)
+        check(c4.evaluate("S.nut.days[today()].items.some(i=>i.g===113&&i.meal==='a')") and not c4.is_visible(".shin") and json.load(open("/tmp/todo.json")) == [], "Übernommen: steht in Paulines Abendessen, Liste ist wieder leer")
+
+        print("Ganze Mahlzeit teilen")
+        pg.bring_to_front(); pg.click(".nav >> text=Essen"); pg.wait_for_timeout(300)
+        pg.click("[data-sh=meal][data-m=a]"); pg.wait_for_timeout(200)
+        check(pg.is_visible(".shlist") and pg.locator(".shrow").count() >= 1, "Mahlzeit-Teilen zeigt alle Zutaten mit Mengen für Pauline")
+        pg.click("[data-sh=ratio][data-v='50']"); pg.wait_for_timeout(100); pg.click("[data-sh=send]"); pg.wait_for_timeout(1500)
+        td = json.load(open("/tmp/todo.json"))
+        check(len(td) == 1 and json.loads(td[0]["description"])["items"][0]["g"] == 100, "Ganze Mahlzeit mit 50 % an Pauline geschickt")
 
         check(not errs, "Keine JavaScript-Fehler" + ("" if not errs else ": " + "; ".join(errs)))
         b.close()
