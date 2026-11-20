@@ -5,8 +5,8 @@ const AI_PROMPT=`Du hilfst bei einem Ernährungstagebuch. Analysiere das Foto.
 - Ist es ein Teller/Gericht: erkenne die einzelnen Lebensmittel und schätze die Menge in Gramm.
 - Ist es ein Nährwert-Etikett oder eine Verpackung: lies die Werte pro 100 g ab (ein Eintrag; g = angegebene Portion oder 100).
 Antworte NUR mit JSON, ohne Text davor oder danach:
-{"art":"teller"|"etikett","items":[{"name":"deutscher Name","g":Zahl,"kcal100":Zahl,"p100":Zahl,"c100":Zahl,"f100":Zahl}]}
-Werte pro 100 g. Wenn du unsicher bist, schätze realistisch. Keine Erklärungen.`;
+{"art":"teller"|"etikett","items":[{"name":"deutscher Name","g":Zahl,"kcal100":Zahl,"p100":Zahl,"c100":Zahl,"z100":Zahl,"f100":Zahl}]}
+Werte pro 100 g (z100 = davon Zucker). Wenn du unsicher bist, schätze realistisch. Keine Erklärungen.`;
 function shrink(file){return new Promise((res,rej)=>{const img=new Image(),u=URL.createObjectURL(file);img.onload=()=>{const m=1280,s=Math.min(1,m/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL('image/jpeg',.82).split(',')[1])};img.onerror=()=>rej(new Error('Bild nicht lesbar'));img.src=u})}
 async function aiAnalyze(file){if(!AI.key){sheet.step='photo';sheet.msg='Erst unter „Mehr → Foto-Erkennung“ einen API-Schlüssel eintragen.';render();return}
  sheet.step='photo';sheet.busy=true;sheet.msg='Foto wird analysiert …';sheet.ai=null;render();
@@ -15,7 +15,7 @@ async function aiAnalyze(file){if(!AI.key){sheet.step='photo';sheet.msg='Erst un
    body:JSON.stringify({model:AI.model,max_tokens:1024,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data}},{type:'text',text:AI_PROMPT}]}]})});
   const j=await r.json();if(!r.ok)throw new Error((j.error&&j.error.message)||('Fehler '+r.status));
   const txt=(j.content||[]).map(c=>c.text||'').join(''),m=txt.match(/\{[\s\S]*\}/);if(!m)throw new Error('Keine Antwort erkannt');
-  const o=JSON.parse(m[0]);sheet.ai=(o.items||[]).filter(x=>x&&x.name).map((x,i)=>({on:true,g:String(Math.round(+x.g||100)),f:{id:'ai'+Date.now().toString(36)+i,name:String(x.name).slice(0,60),kcal:Math.round(+x.kcal100||0),p:r1(+x.p100||0),c:r1(+x.c100||0),f:r1(+x.f100||0),src:o.art==='etikett'?'own':'ai'}}));
+  const o=JSON.parse(m[0]);sheet.ai=(o.items||[]).filter(x=>x&&x.name).map((x,i)=>({on:true,g:String(Math.round(+x.g||100)),f:{id:'ai'+Date.now().toString(36)+i,name:String(x.name).slice(0,60),kcal:Math.round(+x.kcal100||0),p:r1(+x.p100||0),c:r1(+x.c100||0),z:r1(+x.z100||0),f:r1(+x.f100||0),src:o.art==='etikett'?'own':'ai'}}));
   sheet.art=o.art;sheet.msg=sheet.ai.length?(o.art==='etikett'?'Etikett gelesen – prüfe die Werte.':'Geschätzt – Mengen bitte prüfen und anpassen.'):'Nichts erkannt. Versuch ein schärferes Foto von oben.'}
  catch(e){sheet.msg='Erkennung fehlgeschlagen: '+e.message}
  sheet.busy=false;render()}

@@ -290,3 +290,6 @@ h1{letter-spacing:-.5px}
 .sheet:not(.ob) .sheetin::before{display:none}
 @keyframes shin{from{transform:translateY(-12px);opacity:0}}
 @media(prefers-reduced-motion:reduce){.sheet .sheetin{animation:none}}
+
+.macros{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.macros .mv{display:block;font:800 24px/1.1 'Barlow Condensed';margin-top:2px}.macros .ms{display:block;font-size:12px;color:var(--mute);margin-bottom:6px}
