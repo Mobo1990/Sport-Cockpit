@@ -279,3 +279,14 @@ h1{letter-spacing:-.5px}
 .tile.budget .rb{margin-top:8px}.bf{display:flex;justify-content:space-between;margin-top:6px;font-size:14px;color:var(--mute)}.bf b{color:var(--ink);font-weight:700}
 @media(max-width:600px){.tiles{grid-template-columns:1fr}.tile.budget{grid-column:auto}}
 @media(prefers-reduced-motion:reduce){.rb i,.rb b{transition:none}.rb.over{animation:none}}
+/* Hinzufügen-Fenster: Vollbild von oben, folgt der sichtbaren Fläche über der Tastatur */
+.sheet:not(.ob){align-items:flex-start;background:var(--bg);top:var(--vvt,0px);bottom:auto;height:var(--vvh,100dvh)}
+.sheet:not(.ob) .sheetin{max-width:720px;height:100%;max-height:none;border-radius:0;box-shadow:none;padding-top:calc(14px + env(safe-area-inset-top));-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.sheet:not(.ob) .sheetin::before{display:none}
+.srch{top:calc(-14px - env(safe-area-inset-top));padding:8px 0;z-index:2}
+/* Hinzufügen-Fenster: oben verankert, Höhe = sichtbarer Bereich über der Tastatur */
+.sheet:not(.ob){align-items:flex-start;padding:calc(10px + env(safe-area-inset-top)) 10px 0;height:var(--vvh,100dvh);top:var(--vvt,0px);bottom:auto}
+.sheet:not(.ob) .sheetin{border-radius:20px;max-height:calc(var(--vvh,100dvh) - 20px - env(safe-area-inset-top));box-shadow:0 20px 50px rgba(17,18,20,.25);animation:shin .22s ease-out}
+.sheet:not(.ob) .sheetin::before{display:none}
+@keyframes shin{from{transform:translateY(-12px);opacity:0}}
+@media(prefers-reduced-motion:reduce){.sheet .sheetin{animation:none}}
