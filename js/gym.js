@@ -5,8 +5,9 @@ const gymEl=(()=>{const d=document.createElement('div');d.id='gym';d.className='
 function gymRow(e,dr){const rows=dr.ex[e.id];let k=rows.findIndex(r=>!r.done);return{rows,k}}
 function gymDefaults(e,rows,k){const sg=sugg(e),r=rows[k]||{},prev=rows.slice(0,k).filter(x=>x.done).pop();
  const kg=r.kg!==''&&r.kg!=null?num(r.kg):(prev?num(prev.kg):(sg?sg.kg:null)),reps=r.reps!==''&&r.reps!=null?num(r.reps):(sg?(sg.reps[k]??sg.reps[sg.reps.length-1]):e.max);return{kg,reps,sg}}
-function renderGym(){if(!gym.open){gymEl.innerHTML='';gymEl.classList.remove('on');return}
- const dr=draftFor(day),list=dayEx(day);if(!list.length){gym.open=false;return renderGym()}
+function renderGym(){const gb0=$('gbody'),keep=gb0&&gym.shown===gym.i?gb0.scrollTop:0;renderGym0();document.documentElement.classList.toggle('gym-open',gym.open);const gb=$('gbody');if(gb&&keep)gb.scrollTop=keep;gym.shown=gym.open?gym.i:null}
+function renderGym0(){if(!gym.open){gymEl.innerHTML='';gymEl.classList.remove('on');return}
+ const dr=draftFor(day),list=dayEx(day);if(!list.length){gym.open=false;return renderGym0()}
  gym.i=Math.max(0,Math.min(gym.i,list.length-1));const e=list[gym.i],{rows,k}=gymRow(e,dr),done=k===-1,{kg,reps,sg}=gymDefaults(e,rows,done?rows.length-1:k);
  const A=isA(e.v),allDone=list.every(x=>dr.ex[x.id].every(r=>r.done)),lastI=gym.last;
  const left=Math.max(0,Math.round((tEnd-Date.now())/1000)),resting=$('timer').classList.contains('on')&&left>0;
@@ -33,15 +34,15 @@ gymEl.addEventListener('click',ev=>{const b=ev.target.closest('[data-g]');if(!b)
  else if(a==='skip'){stopT()}
  else if(a==='kg'||a==='rp'){const inp=$(a==='kg'?'gkg':'grp'),st=a==='kg'?(e.step||2.5):1;inp.value=fmt(Math.max(0,(num(inp.value)||0)+(+b.dataset.d)*st));return}
  else if(a==='set'){const {rows,k}=gymRow(e,dr);if(k<0)return;const kg=num($('gkg').value),rp=Math.round(num($('grp').value)||0);if(!rp){note('Wiederholungen eintragen');return}
-  const r=rows[k];r.kg=kg!=null?String(kg).replace('.',','):'0';r.reps=String(rp);r.done=true;gym.last=k;startT(S.rest);
+  if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();const r=rows[k];r.kg=kg!=null?String(kg).replace('.',','):'0';r.reps=String(rp);r.done=true;gym.last=k;startT(S.rest);
   const key=vkey(e),b0=best(key),m=e1(kg||0,rp);if(!isA(e.v)&&b0>0&&m>b0+0.01&&m>Math.max(0,...rows.filter((x,j)=>j!==k&&x.done).map(x=>e1(num(x.kg)||0,num(x.reps)||0))))toast('Neuer Bestwert!',`${vname(e)}: ${fmt(kg)} kg × ${rp}`);saveDrafts()}
  else if(a==='rpe'){const r=dr.ex[b.dataset.e][+b.dataset.i];r.rpe=r.rpe===b.dataset.r?'':b.dataset.r;saveDrafts()}
  else if(a==='more'){const rows=dr.ex[e.id],l=rows[rows.length-1];rows.push({kg:l?l.kg:'',reps:'',done:false});gym.last=null;saveDrafts()}
  else if(a==='finish'){gym.open=false;finish();return}
  renderGym()});
 gymEl.addEventListener('click',ev=>{if(ev.target.closest('[data-a="var"]'))setTimeout(renderGym,0)});
-let gx0=null;gymEl.addEventListener('touchstart',ev=>{if(ev.target.closest('input,button'))return;gx0=ev.touches[0].clientX},{passive:true});
-gymEl.addEventListener('touchend',ev=>{if(gx0==null)return;const dx=ev.changedTouches[0].clientX-gx0;gx0=null;const n=dayEx(day).length;if(Math.abs(dx)<70)return;gym.i=Math.max(0,Math.min(n-1,gym.i+(dx<0?1:-1)));gym.last=null;renderGym()},{passive:true});
+let gx0=null,gy0=0;gymEl.addEventListener('touchstart',ev=>{if(ev.target.closest('input,button'))return;gx0=ev.touches[0].clientX;gy0=ev.touches[0].clientY},{passive:true});
+gymEl.addEventListener('touchend',ev=>{if(gx0==null)return;const dx=ev.changedTouches[0].clientX-gx0,dy=ev.changedTouches[0].clientY-gy0;gx0=null;const n=dayEx(day).length;if(Math.abs(dx)<80||Math.abs(dx)<2*Math.abs(dy))return;gym.i=Math.max(0,Math.min(n-1,gym.i+(dx<0?1:-1)));gym.last=null;renderGym()},{passive:true});
 setInterval(()=>{if(!gym.open)return;const el=$('grest'),l=Math.max(0,Math.round((tEnd-Date.now())/1000));if(el){el.textContent=`${Math.floor(l/60)}:${String(l%60).padStart(2,'0')}`;if(l<=0)renderGym()}},500);
 /* Einstieg: Knopf im Training-Tab und auf der Startseite */
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-gym]');if(!b)return;if(b.dataset.d)day=b.dataset.d;view='train';render();openGym()});
