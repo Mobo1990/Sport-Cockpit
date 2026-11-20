@@ -97,9 +97,17 @@ const OFF_LS='sc.offcache',OFF_TTL=7*864e5;let offLast=0,offDown=0;
 function offStore(){try{const o={},ks=[...offCache.keys()].slice(-40),now=Date.now();for(const k of ks)o[k]={t:now,r:offCache.get(k)};localStorage.setItem(OFF_LS,JSON.stringify(o))}catch(e){}}
 async function offGet(url,signal,ms){const ac=new AbortController(),to=setTimeout(()=>ac.abort(),ms),stop=()=>ac.abort();signal.addEventListener('abort',stop);
  try{const r=await fetch(url,{signal:ac.signal});if(!r.ok)throw new Error('HTTP '+r.status);const t=await r.text();try{return JSON.parse(t)}catch(e){throw new Error('busy')}}finally{clearTimeout(to);signal.removeEventListener('abort',stop)}}
+/* Über Home Assistant (rest_command.sport_cockpit_food_search) die schnelle Suche holen – dort gilt keine CORS-Sperre.
+   Fehlt der Dienst, 10 min lang direkt suchen. */
+let haFoodOff=0;
+async function haFoodSearch(q){if(!HA.url||!HA.token||Date.now()-haFoodOff<600000)return null;
+ try{const r=await haCall([{type:'call_service',domain:'rest_command',service:'sport_cockpit_food_search',service_data:{q},return_response:true}]);const m=r[0]||{};
+  if(!m.success){haFoodOff=Date.now();return null}const resp=(m.result||{}).response||{};if(resp.status!==200||!resp.content)return null;
+  const c=typeof resp.content==='string'?JSON.parse(resp.content):resp.content;return(c.hits||[]).map(mapOFF).filter(Boolean)}catch(e){return null}}
 async function offSearch(q){const key=normQ(q);if(offCache.has(key)){sheet.results=offCache.get(key);sheet.busy=false;updRes();return}
  if(offAbort)offAbort.abort();const ac=new AbortController();offAbort=ac;sheet.busy=true;updRes();offLast=Date.now();
- try{const j=await offGet(OFF_OLD(q),ac.signal,12000);const res=(j.products||[]).map(mapOFF).filter(Boolean);if(offAbort!==ac)return;
+ const viaHA=await haFoodSearch(q);if(offAbort!==ac)return;
+ try{const res=viaHA||(await offGet(OFF_OLD(q),ac.signal,12000).then(j=>(j.products||[]).map(mapOFF).filter(Boolean)));if(offAbort!==ac)return;
   offCache.delete(key);offCache.set(key,res);offStore();if(sheet&&normQ(sheet.q.trim())===key)sheet.results=res}
  catch(e){if(offAbort!==ac)return;if(sheet){sheet.results=[];sheet.offErr=!navigator.onLine?'Kein Internet – Online-Suche nicht möglich.':ac.signal.aborted?'Open Food Facts antwortet gerade nicht.':'Die Online-Suche von Open Food Facts ist gerade gestört.';offDown=Date.now()}}
  offAbort=null;if(sheet){sheet.busy=false;updRes()}}

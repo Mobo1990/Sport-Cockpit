@@ -16,6 +16,14 @@ async def h(ws):
             now=datetime.datetime.now().isoformat()
             st=[{"entity_id":"input_number.sport_cockpit_michell_schritte","state":"11234","last_updated":now},{"entity_id":"input_number.sport_cockpit_michell_aktiv_kcal","state":"650","last_updated":now},{"entity_id":"input_number.sport_cockpit_michell_gewicht","state":"84.2","last_updated":now},{"entity_id":"input_number.sport_cockpit_michell_trainingsminuten","state":"42","last_updated":now},{"entity_id":"input_text.sport_cockpit_pauline","state":json.dumps({"d":datetime.date.today().isoformat(),"pt":70,"tr":"Legs","wp":180}),"attributes":{"friendly_name":"Sport Cockpit Pauline"},"last_updated":now}]
             await ws.send(json.dumps({"id":m["id"],"type":"result","success":True,"result":st}))
+        elif m["type"]=="call_service" and m.get("domain")=="rest_command":
+            open("/tmp/calls.log","a").write(json.dumps(m)+"\n")
+            q=(m.get("service_data") or {}).get("q","")
+            if q.lower().startswith("proxy"):
+                hit={"code":"4003","product_name":"Proxyriegel Erdnuss","brands":["Marke"],"nutriments":{"energy-kcal_100g":390,"proteins_100g":31,"carbohydrates_100g":30,"sugars_100g":2,"fat_100g":14}}
+                await ws.send(json.dumps({"id":m["id"],"type":"result","success":True,"result":{"context":{},"response":{"status":200,"content":{"hits":[hit]}}}}))
+            else:
+                await ws.send(json.dumps({"id":m["id"],"type":"result","success":False,"error":{"code":"not_found","message":"Service not found."}}))
         elif m["type"]=="call_service":
             open("/tmp/calls.log","a").write(json.dumps(m)+"\n")
             await ws.send(json.dumps({"id":m["id"],"type":"result","success":True,"result":{}}))
