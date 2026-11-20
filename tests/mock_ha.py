@@ -21,7 +21,8 @@ async def h(ws):
             q=(m.get("service_data") or {}).get("q","")
             if q.lower().startswith("proxy"):
                 hit={"code":"4003","product_name":"Proxyriegel Erdnuss","brands":["Marke"],"nutriments":{"energy-kcal_100g":390,"proteins_100g":31,"carbohydrates_100g":30,"sugars_100g":2,"fat_100g":14}}
-                await ws.send(json.dumps({"id":m["id"],"type":"result","success":True,"result":{"context":{},"response":{"status":200,"content":{"hits":[hit]}}}}))
+                bare={"code":"4004","product_name":"Proxysnack Gurke","brands":["Aldi"]}
+                await ws.send(json.dumps({"id":m["id"],"type":"result","success":True,"result":{"context":{},"response":{"status":200,"content":{"hits":[hit,bare]}}}}))
             else:
                 await ws.send(json.dumps({"id":m["id"],"type":"result","success":False,"error":{"code":"not_found","message":"Service not found."}}))
         elif m["type"]=="call_service":

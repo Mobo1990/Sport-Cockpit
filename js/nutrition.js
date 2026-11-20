@@ -26,6 +26,7 @@ const foodById=id=>fm().byId.get(id),foodByName=n=>fm().byName.get(n);
 /* Suche: alle Wörter müssen vorkommen; Treffer am Namensanfang zuerst, dann Wortanfang, dann irgendwo */
 function findFoods(q,max=25){const t=normQ(q).split(/\s+/).filter(Boolean);if(!t.length)return[];const m=fm(),out=[];
  for(let i=0;i<m.all.length;i++){const h=m.norm[i];if(!t.every(w=>h.includes(w)))continue;const sc=h.startsWith(t[0])?0:(' '+h).includes(' '+t[0])?1:2;out.push([sc,i])}
+ if(!out.length){const q=t.join('');for(let i=0;i<m.all.length;i++){const ws=m.norm[i].split(/[^a-z0-9]+/).filter(w=>w.length>=4);if(ws.some(w=>q.includes(w)))out.push([3,i])}}
  return out.sort((a,b)=>a[0]-b[0]||a[1]-b[1]).slice(0,max).map(x=>m.all[x[1]])}
 function remember(food){const N=S.nut;if(food.src==='off'||food.src==='own'){if(!N.foods.some(x=>x.id===food.id))N.foods.unshift(food)}N.recent=[food.id,...N.recent.filter(x=>x!==food.id)].slice(0,30)}
 function nutLine(){const d=today(),g=goals(d),t=totals(d);if(!t.kcal&&!lastWeight())return '';return `<p class="nline" data-a="view" data-v="nut">Ernährung heute: <b>${fmt(t.kcal)}</b> / ${fmt(g.kcal)} kcal · <b>${fmt(Math.round(t.p))}</b> / ${g.p} g Protein${g.trained?' · Trainingstag':''}</p>`}
@@ -61,10 +62,11 @@ function drawW(){const s=$('wchart');if(!s)return;const W=s.clientWidth,Hh=s.cli
  +`<text x="${W-p.r}" y="${Hh-6}" text-anchor="end" font-size="12" fill="#111214">Ø 7 Tage: ${fmt(r1(avg[avg.length-1]))} kg</text>`}
 /* --- Hinzufügen-Sheet --- */
 function foodRow(f){return `<button class="frow" data-n="pick" data-id="${esc(f.id)}"><div><b>${esc(f.name)}</b><small>${f.brand?esc(f.brand)+' · ':''}${fmt(f.kcal)} kcal · ${fmt(f.p)} g P / 100 g</small></div><span>›</span></button>`}
+function bareHtml(res){const b=res.bare||[];return b.length?`<h4>Gefunden, aber ohne Nährwerte</h4>${b.map(n=>`<button class="frow" data-n="custom" data-name="${esc(n)}"><div><b>${esc(n)}</b><small>Werte von der Packung eintragen</small></div><span>+</span></button>`).join('')}`:''}
 function sheetList(sh){const q=(sh.q||'').trim(),N=S.nut;
  if(!q){const tpls=N.meals.length?`<h4>Vorlagen</h4>${N.meals.map(t=>`<button class="frow" data-n="usetpl" data-id="${t.id}"><div><b>${esc(t.name)}</b><small>${t.items.length} Lebensmittel · ${fmt(t.items.reduce((a,i)=>a+i.kcal,0))} kcal</small></div><span>+</span></button>`).join('')}`:'';return tpls+smartLists(sh.meal)}
  const hits=findFoods(q);
- return `${hits.length?`<h4>Gefunden</h4>${hits.map(f=>foodRow2(f)).join('')}`:''}<h4>Open Food Facts</h4>${sh.busy?'<p class="tip" style="padding:0">Suche …</p>':sh.results?(sh.results.length?sh.results.map(f=>foodRow2(f)).join(''):`<p class="tip" style="padding:0">${esc(sh.offErr||'Nichts gefunden.')}${sh.offErr?' Packungen findest du per <b>Barcode-Scan</b>, sonst leg das Produkt selbst an.':''}</p>${sh.offErr?`<div class="offerr"><button data-n="scan">▦ Barcode scannen</button><button class="ghost" data-n="off">Nochmal</button></div>`:''}`):`<button data-n="off" style="width:100%">„${esc(q)}“ in Open Food Facts suchen</button>`}`}
+ return `${hits.length?`<h4>Gefunden</h4>${hits.map(f=>foodRow2(f)).join('')}`:''}<h4>Open Food Facts</h4>${sh.busy?'<p class="tip" style="padding:0">Suche …</p>':sh.results?(sh.results.length?sh.results.map(f=>foodRow2(f)).join('')+bareHtml(sh.results):(sh.results.bare||[]).length?bareHtml(sh.results):`<p class="tip" style="padding:0">${esc(sh.offErr||'Nichts gefunden.')}${sh.offErr?' Packungen findest du per <b>Barcode-Scan</b>, sonst leg das Produkt selbst an.':''}</p>${sh.offErr?`<div class="offerr"><button data-n="scan">▦ Barcode scannen</button><button class="ghost" data-n="off">Nochmal</button></div>`:''}`):`<button data-n="off" style="width:100%">„${esc(q)}“ in Open Food Facts suchen</button>`}`}
 /* Nur die Ergebnisliste neu zeichnen – das Suchfeld (und die iPhone-Tastatur) bleibt unberührt */
 function updRes(){const box=$('fres');if(box&&sheet&&sheet.step==='search')box.innerHTML=sheetList(sheet);else render()}
 function renderSheet(){const sh=sheet,ml=MEALS.find(m=>m[0]===sh.meal)[1];let b='';
@@ -76,7 +78,7 @@ function renderSheet(){const sh=sheet,ml=MEALS.find(m=>m[0]===sh.meal)[1];let b=
   <div class="calc"><div><b>${fmt(it.kcal)}</b><small>kcal</small></div><div><b>${fmt(it.p)}</b><small>Protein</small></div><div><b>${fmt(it.c)}</b><small>KH</small></div><div><b>${fmt(it.f)}</b><small>Fett</small></div></div>
   <button class="primary" data-n="addit" style="width:100%">Zu ${ml} hinzufügen</button>`}
  else if(sh.step==='custom'){b=`<button class="back" data-n="back">‹ Zurück</button><h2>Eigenes Produkt</h2><p class="tip" style="padding:0">Werte von der Packung, pro 100 g.</p>
-  <div class="cform"><div class="full"><label>Name</label><input id="cN" value="${esc(sh.q||'')}"></div>${[['cK','kcal'],['cP','Protein g'],['cC','Kohlenhydrate g'],['cZ','davon Zucker g'],['cF','Fett g'],['cG','Portion g (optional)']].map(([i,l])=>`<div><label>${l}</label><input id="${i}" inputmode="decimal"></div>`).join('')}</div>
+  <div class="cform"><div class="full"><label>Name</label><input id="cN" value="${esc(sh.cname||sh.q||'')}"></div>${[['cK','kcal'],['cP','Protein g'],['cC','Kohlenhydrate g'],['cZ','davon Zucker g'],['cF','Fett g'],['cG','Portion g (optional)']].map(([i,l])=>`<div><label>${l}</label><input id="${i}" inputmode="decimal"></div>`).join('')}</div>
   <button class="primary" data-n="savecustom" style="width:100%">Speichern & weiter</button>`}
  else if(sh.step==='scan'){b=`<button class="back" data-n="back">‹ Zurück</button><h2>Barcode scannen</h2><div id="scanbox"></div><p class="tip" style="padding:8px 0">${esc(sh.msg||'Barcode in den Rahmen halten.')}</p><div class="wrow"><input id="codeIn" inputmode="numeric" placeholder="oder Nummer eintippen"><button data-n="code">Suchen</button></div>`}
  else{b=`<div class="shtop"><h2>Essen eintragen</h2><button class="ghost" data-n="close">Schließen</button></div>${mealChips(sh.meal)}
@@ -100,10 +102,11 @@ async function offGet(url,signal,ms){const ac=new AbortController(),to=setTimeou
 /* Über Home Assistant (rest_command.sport_cockpit_food_search) die schnelle Suche holen – dort gilt keine CORS-Sperre.
    Fehlt der Dienst, 10 min lang direkt suchen. */
 let haFoodOff=0;
+const offBare=hits=>[...new Set(hits.filter(p=>!mapOFF(p)).map(p=>String(p.product_name_de||p.product_name||'').trim()+((Array.isArray(p.brands)?p.brands[0]:String(p.brands||'').split(',')[0])?' ('+String(Array.isArray(p.brands)?p.brands[0]:String(p.brands||'').split(',')[0]).trim()+')':'')).filter(Boolean))].slice(0,5);
 async function haFoodSearch(q){if(!HA.url||!HA.token||Date.now()-haFoodOff<600000)return null;
  try{const r=await haCall([{type:'call_service',domain:'rest_command',service:'sport_cockpit_food_search',service_data:{q},return_response:true}]);const m=r[0]||{};
   if(!m.success){haFoodOff=Date.now();return null}const resp=(m.result||{}).response||{};if(resp.status!==200||!resp.content)return null;
-  const c=typeof resp.content==='string'?JSON.parse(resp.content):resp.content;return(c.hits||[]).map(mapOFF).filter(Boolean)}catch(e){return null}}
+  const c=typeof resp.content==='string'?JSON.parse(resp.content):resp.content,hits=c.hits||[],res=hits.map(mapOFF).filter(Boolean);res.bare=offBare(hits);return res}catch(e){return null}}
 async function offSearch(q){const key=normQ(q);if(offCache.has(key)){sheet.results=offCache.get(key);sheet.busy=false;updRes();return}
  if(offAbort)offAbort.abort();const ac=new AbortController();offAbort=ac;sheet.busy=true;updRes();offLast=Date.now();
  const viaHA=await haFoodSearch(q);if(offAbort!==ac)return;
@@ -133,7 +136,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-n]');if(
  else if(a==='off'){clearTimeout(offT);offCache.delete(normQ(sheet.q.trim()));sheet.offErr='';offSearch(sheet.q.trim());return}
  else if(a==='scan'){sheet.step='scan';sheet.msg='';render();startScan();return}
  else if(a==='code'){const c=($('codeIn').value||'').replace(/\D/g,'');if(c)offCode(c);return}
- else if(a==='custom'){sheet.step='custom'}
+ else if(a==='custom'){sheet.cname=b.dataset.name||'';sheet.step='custom'}
  else if(a==='savecustom'){const v=i=>num($(i).value),n=$('cN').value.trim();if(!n||v('cK')==null){note('Name und kcal angeben');return}
   const f={id:'own'+Date.now().toString(36),name:n,kcal:v('cK'),p:v('cP')||0,c:v('cC')||0,z:v('cZ')||0,f:v('cF')||0,por:v('cG')?{l:'Portion '+fmt(v('cG'))+' g',g:v('cG')}:null,src:'own'};S.nut.foods.unshift(f);S.metaT=Date.now();sheet.food=f;sheet.g=f.por?String(f.por.g):'100';sheet.step='amount';persist()}
  else if(a==='tpl'){const its=ND(d).items.filter(i=>i.meal===b.dataset.m);const name=(MEALS.find(m=>m[0]===b.dataset.m)[1])+' '+new Date().toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'});S.nut.meals.unshift({id:'m'+Date.now().toString(36),name,items:its.map(({id,meal,...r})=>r)});S.metaT=Date.now();persist();note('Vorlage gespeichert')}
