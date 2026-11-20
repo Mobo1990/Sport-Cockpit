@@ -115,7 +115,7 @@ const DEF={push:[mk('bank',4,6,10,2.5),mk('schraeg',3,8,12,2),mk('schulter',3,8,
  legs:[mk('squat',4,6,10,2.5),mk('rdl',3,8,10,2.5),mk('presse',3,10,12,5),mk('beuger',3,10,15,2.5),mk('ausfall',3,10,12,2),mk('waden',4,12,15,5)]};
 const clone=o=>JSON.parse(JSON.stringify(o));
 const LS='sportcockpit.v1';
-let S={plan:clone(DEF),goal:4,rest:90,cgoal:150,sessions:[],del:[],metaT:0,prof:{name:'',sex:'m',year:'',height:'',weight:'',act:1.55},nut:{goal:'aufbau',maint:0,gkg:2,days:{},foods:[],meals:[],recent:[]}},drafts={},draftT=0,summary=null,view='train',day='push',recEx=null,confirmKey=null,picker=false;
+let S={plan:clone(DEF),goal:4,rest:90,cgoal:150,sessions:[],del:[],metaT:0,prof:{name:'',sex:'m',year:'',height:'',weight:'',act:1.55},nut:{goal:'aufbau',maint:0,gkg:2,days:{},foods:[],meals:[],recent:[]}},drafts={},draftT=0,summary=null,view='home',day='push',recEx=null,confirmKey=null,picker=false;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>(+n||0).toLocaleString('de-DE',{maximumFractionDigits:1});
@@ -233,7 +233,7 @@ function renderPlan(){
  <div class="actions"><button data-a="view" data-v="train" data-pick="1">+ Übung hinzufügen</button><button class="ghost" data-a="reset">${confirmKey==='reset'?'Wirklich zurücksetzen?':'Standardplan'}</button></div>
  <div class="settings"><div><label for="goal">Wochenziel (Einheiten)</label><input id="goal" inputmode="numeric" data-a="set" data-f="goal" value="${S.goal}"></div><div><label for="cgoal">Cardio-Ziel (Min./Woche)</label><input id="cgoal" inputmode="numeric" data-a="set" data-f="cgoal" value="${S.cgoal}"></div><div><label for="rest">Satzpause (Sekunden)</label><input id="rest" inputmode="numeric" data-a="set" data-f="rest" value="${S.rest}"></div></div>`}
 let ro=null;
-function render(){renderHead();const v=$('view');if(!profOK()){v.innerHTML=renderOnboarding();return}v.innerHTML=view==='train'?scoreLine()+nutLine()+renderTrain():view==='hist'?renderHist():view==='rec'?renderRec():view==='nut'?renderNut():renderPlan()+renderSettings();if(view==='nut')afterNut();
+function render(){renderHead();const v=$('view');if(!profOK()){v.innerHTML=renderOnboarding();return}v.innerHTML=view==='home'?renderHome():view==='train'?renderTrain():view==='hist'?renderHist():view==='rec'?renderRec():view==='nut'?renderNut():renderPlan()+`<div class="actions"><button data-a="view" data-v="hist">Verlauf aller Einheiten</button></div>`+renderSettings();if(view==='nut')afterNut();
  if(view==='rec'){const s=$('chart');if(s){if(ro)ro.disconnect();ro=new ResizeObserver(drawChart);ro.observe(s)}}}
 
 function finish(){const dr=draftFor(day),ex=[];
@@ -412,7 +412,8 @@ function haCall(cmds){return new Promise((res,rej)=>{let ws;try{ws=new WebSocket
   else if(m.type==='auth_ok'){if(!cmds.length){clearTimeout(to);ws.close();res([]);return}cmds.forEach(c=>ws.send(JSON.stringify({id:++id,...c})))}
   else if(m.type==='result'){out[m.id]=m;if(Object.keys(out).length===cmds.length){clearTimeout(to);ws.close();res(cmds.map((_,i)=>out[i+1]))}}};
  ws.onerror=()=>{clearTimeout(to);rej(new Error('Home Assistant nicht erreichbar'))}})}
-function health(m){if(!m||!m.success||!S.prof.name)return;const pre='input_number.sport_cockpit_'+slugN(S.prof.name)+'_',d=today(),h={};
+let partners=[];
+function health(m){if(!m||!m.success||!S.prof.name)return;const me='input_text.sport_cockpit_'+slugN(S.prof.name);partners=(m.result||[]).filter(e=>/^input_text\.sport_cockpit_[a-z0-9]+$/.test(e.entity_id)&&e.entity_id!==me).map(e=>{let j={};try{j=JSON.parse(e.state)}catch(x){}return{name:(e.attributes&&e.attributes.friendly_name||'').replace(/^Sport Cockpit /,''),...j}});const pre='input_number.sport_cockpit_'+slugN(S.prof.name)+'_',d=today(),h={};
  for(const e of m.result||[]){if(!e.entity_id.startsWith(pre)||iso(e.last_updated||e.last_changed)!==d)continue;const v=parseFloat(e.state);if(!isFinite(v))continue;h[e.entity_id.slice(pre.length)]=v}
  if(!Object.keys(h).length)return;const day=ND(d),old=JSON.stringify(day.h||{});day.h={st:h.schritte,ak:h.aktiv_kcal,tm:h.trainingsminuten};
  if(h.gewicht>30&&(!day.w||day.wsrc==='health')){day.w=h.gewicht;day.wsrc='health'}if(JSON.stringify(day.h)!==old)day.t=Date.now();S.hT=Math.max(...(m.result||[]).filter(e=>e.entity_id.startsWith(pre)).map(e=>Date.parse(e.last_updated)||0),0)}
@@ -492,6 +493,40 @@ async function tell(titel,nachricht){if(!HA.token||!S.prof.name)return;try{await
 function announce(s,prs){const n=S.prof.name||'Jemand',sets=s.ex.reduce((a,x)=>a+x.sets.length,0),cm=(s.cardio||[]).reduce((a,c)=>a+c.min,0);
  if(s.ex.length)tell(`${n} hat ${DAYS[s.day].n} trainiert`,`🏋️ ${sets} Sätze · ${fmt(Math.round(vol(s)))} kg bewegt${cm?` · ${cm} min Cardio`:''}${prs.length?` · ${prs.length} neue${prs.length>1?'':'r'} Bestwert${prs.length>1?'e':''}!`:''}\nDu bist dran 😉`);
  else if(cm)tell(`${n} war beim Cardio`,`🏃 ${cm} min ${(s.cardio[0]||{}).type||''}\nUnd du?`)}
+
+/* ===================== STARTSEITE ===================== */
+function renderHome(){const d=today(),sc=dayScore(d),g=sc.g,t=sc.t,hr=new Date().getHours(),gr=hr<11?'Guten Morgen':hr<17?'Hallo':'Guten Abend';
+ const ld=lastDay(),nx=ld?DAYS[ld].nx:'push',run=Object.entries(drafts).find(([k,dr])=>dr&&dr.ex&&Object.values(dr.ex).some(r=>r.some(x=>x.done)));
+ const runSets=run?Object.values(run[1].ex).reduce((a,r)=>a+r.filter(x=>x.done).length,0):0;
+ const dayW=(S.nut.days[d]||{}).w,water=(S.nut.days[d]||{}).water||0;
+ const mon=wk(Date.now()),cnt=S.sessions.filter(s=>wk(s.date)===mon&&s.ex.length).length;
+ const last=[...S.sessions].sort((a,b)=>b.date-a.date).slice(0,3);
+ const pt=partners.filter(p=>p.name);
+ return `${healthLink()}<section class="hero2"><div><p class="hk">${new Date().toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'})}</p><h2>${gr}, ${esc(S.prof.name)}</h2></div>
+ <div class="pts"><b class="cond">${sc.pt}</b><span>Punkte heute</span><small>Woche ${weekScore()}</small></div></section>
+ ${sc.why.length?`<div class="chips">${sc.why.map(w=>`<span>${esc(w)}</span>`).join('')}</div>`:'<p class="tip" style="padding:0 0 12px">Noch keine Punkte heute: Trainieren, im Kalorienziel bleiben und Protein schaffen bringt am meisten.</p>'}
+ <section class="tiles">
+  <button class="tile big" data-h="train" data-d="${run?run[0]:nx}"><small>${run?'Training läuft':'Als Nächstes'}</small><b>${DAYS[run?run[0]:nx].n}</b><span>${run?runSets+' Sätze erledigt – weiter':DAYS[nx].sub}</span><em>${run?'Fortsetzen':'Training starten'} ›</em></button>
+  <div class="tile"><small>Kalorien</small><b>${fmt(Math.round(t.kcal))}</b><span>von ${fmt(g.kcal)} kcal</span><i><s style="width:${Math.min(t.kcal/g.kcal,1)*100}%"></s></i></div>
+  <div class="tile"><small>Protein</small><b>${fmt(Math.round(t.p))} g</b><span>von ${g.p} g</span><i><s style="width:${Math.min(t.p/g.p,1)*100}%"></s></i></div>
+ </section>
+ <h3 class="sh">Essen eintragen</h3><div class="quick">${MEALS.map(([m,l])=>{const k=(S.nut.days[d]||{items:[]}).items.filter(i=>i.meal===m).reduce((a,i)=>a+i.kcal,0);return `<button data-h="meal" data-m="${m}"><b>${l}</b><span>${k?fmt(k)+' kcal':'+ eintragen'}</span></button>`}).join('')}</div>
+ <h3 class="sh">Schnell erledigt</h3><div class="quick q2">
+  <div class="qw"><b>Gewicht</b><div class="wrow" style="margin:6px 0 0"><input id="hW" inputmode="decimal" placeholder="${lastWeight()?fmt(lastWeight()):'kg'}" value="${dayW?fmt(dayW):''}" aria-label="Gewicht"><button data-h="w">${dayW?'✓':'Speichern'}</button></div></div>
+  <div class="qw"><b>Wasser ${fmt(water/1000)} l</b><div class="wrow" style="margin:6px 0 0"><button data-h="water" data-v="250">+ Glas</button><button data-h="water" data-v="500">+ Flasche</button></div></div>
+  <button data-h="cardio"><b>Cardio</b><span>${sc.c?sc.c+' min heute':'+ eintragen'}</span></button>
+  <button data-h="rec"><b>Kraft & Muskeln</b><span>Kurven, Muskel-Karte</span></button></div>
+ <h3 class="sh">Diese Woche · ${cnt} / ${S.goal} Krafteinheiten</h3><div class="week hw">${$('week')?$('week').innerHTML:''}</div>
+ ${pt.length?`<h3 class="sh">Challenge</h3>${pt.map(p=>`<div class="pcard"><b>${esc(p.name)}</b><span>${p.d===d?`${p.pt||0} Punkte heute${p.tr?' · '+esc(p.tr)+' trainiert':''} · Woche ${p.wp||0}`:'heute noch nichts eingetragen'}</span><em>${p.d===d?(sc.pt>=(p.pt||0)?'Du führst':'Du liegst hinten'):''}</em></div>`).join('')}`:''}
+ ${last.length?`<h3 class="sh">Zuletzt</h3>${last.map(s=>`<button class="frow" data-a="view" data-v="hist"><div><b>${s.ex.length?DAYS[s.day].n:'Cardio'} · ${dstr(s.date)}</b><small>${s.ex.length?s.ex.reduce((a,x)=>a+x.sets.length,0)+' Sätze · '+fmt(Math.round(vol(s)))+' kg':''}${(s.cardio||[]).length?' '+s.cardio.reduce((a,c)=>a+c.min,0)+' min Cardio':''}</small></div><span>›</span></button>`).join('')}<div class="actions"><button class="ghost" data-a="view" data-v="hist">Ganzer Verlauf</button></div>`:''}`}
+document.addEventListener('click',ev=>{const b=ev.target.closest('[data-h]');if(!b)return;const a=b.dataset.h,d=today();
+ if(a==='train'){day=b.dataset.d;view='train'}
+ else if(a==='meal'){view='nut';nDate=d;sheet={meal:b.dataset.m,step:'search',q:'',focus:true}}
+ else if(a==='w'){const w=num($('hW').value);if(w&&w>30&&w<300){ND(d).w=w;ND(d).wsrc='';touch(d)}else{note('Gewicht in kg eingeben');return}}
+ else if(a==='water'){const dd=ND(d);dd.water=(dd.water||0)+(+b.dataset.v);touch(d)}
+ else if(a==='cardio'){day='cardio';view='train'}
+ else if(a==='rec'){view='rec'}
+ else return;render();if(a!=='w'&&a!=='water')scrollTo({top:0})});
 
 /* ===================== ONBOARDING ===================== */
 const profOK=()=>{const P=S.prof;return P.name&&P.year&&P.height&&(P.weight||lastWeight())};
