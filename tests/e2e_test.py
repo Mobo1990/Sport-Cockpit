@@ -87,6 +87,12 @@ try:
         pg.click(".nav >> text=Mehr"); pg.fill("#haUrl", "http://localhost:8123"); pg.fill("#haTok", "tok"); pg.click("[data-s=ha]"); pg.wait_for_timeout(2500)
         check("Synchronisiert" in pg.text_content("#sync"), "Sync mit HA")
         check(pg.get_attribute("#sync", "data-st") == "ok", "Status-Punkt grün nach Sync")
+        print("Duell")
+        pg.click(".nav >> text=Start"); pg.wait_for_timeout(200)
+        check(pg.is_visible(".duel") and "Pauline" in pg.text_content(".dscore") and "180" in pg.text_content(".dscore"), "Duell-Karte mit Pauline (180 Wochenpunkte aus HA)")
+        sc0 = pg.text_content(".dnext"); pg.click(".dnext"); pg.wait_for_timeout(100)
+        check(pg.text_content(".dnext") != sc0 and pg.is_visible(".duel svg"), "Andere Szene per Knopf")
+        check(pg.evaluate("SCENES.every((s,i)=>{const h=s.draw(0.6,60,20)+s.draw(-1,0,90)+s.draw(0,0,0);return h.includes('<g')&&!h.includes('NaN')})"), "Alle Szenen zeichnen ohne Fehler (auch bei 0 Punkten)")
 
         print("Gym Mode")
         pg.click(".nav >> text=Start"); pg.click(".tile.big"); pg.wait_for_timeout(300)

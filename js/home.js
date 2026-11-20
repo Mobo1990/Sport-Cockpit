@@ -11,6 +11,7 @@ function renderHome(){const d=today(),sc=dayScore(d),g=sc.g,t=sc.t,hr=new Date()
  return `${healthLink()}<section class="hero2"><div><p class="hk">${new Date().toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'})}</p><h2>${gr}, ${esc(S.prof.name)}</h2></div>
  <div class="pts"><b class="cond">${sc.pt}</b><span>Punkte heute</span><small>Woche ${weekScore()}</small></div></section>
  ${sc.why.length?`<div class="chips">${sc.why.map(w=>`<span>${esc(w)}</span>`).join('')}</div>`:'<p class="tip" style="padding:0 0 12px">Noch keine Punkte heute: Trainieren, im Kalorienziel bleiben und Protein schaffen bringt am meisten.</p>'}
+ ${duelHtml()}
  <section class="tiles">
   <button class="tile big" data-gym="1" data-d="${run?run[0]:nx}"><small>${run?'Training läuft':'Als Nächstes'}</small><b>${DAYS[run?run[0]:nx].n}</b><span>${run?runSets+' Sätze erledigt – weiter':DAYS[nx].sub}</span><em>${run?'Fortsetzen':'Training starten'} ›</em></button>
   </section>
@@ -29,7 +30,6 @@ function renderHome(){const d=today(),sc=dayScore(d),g=sc.g,t=sc.t,hr=new Date()
   <button data-h="cardio"><b>Cardio</b><span>${sc.c?sc.c+' min heute':'+ eintragen'}</span></button>
   <button data-h="rec"><b>Kraft & Muskeln</b><span>Kurven, Muskel-Karte</span></button><button data-a="view" data-v="review"><b>Rückblick</b><span>Woche & Monat teilen</span></button><button data-gym="1" data-d="${nx}"><b>Gym Mode</b><span>Übung für Übung, Vollbild</span></button></div>
  <h3 class="sh">Diese Woche · ${cnt} / ${S.goal} Krafteinheiten</h3><div class="week hw">${$('week')?$('week').innerHTML:''}</div>
- ${pt.length?`<h3 class="sh">Challenge</h3>${pt.map(p=>`<div class="pcard"><b>${esc(p.name)}</b><span>${p.d===d?`${p.pt||0} Punkte heute${p.tr?' · '+esc(p.tr)+' trainiert':''} · Woche ${p.wp||0}`:'heute noch nichts eingetragen'}</span><em>${p.d===d?(sc.pt>=(p.pt||0)?'Du führst':'Du liegst hinten'):''}</em></div>`).join('')}`:''}
  ${last.length?`<h3 class="sh">Zuletzt</h3>${last.map(s=>`<button class="frow" data-a="view" data-v="hist"><div><b>${s.ex.length?DAYS[s.day].n:'Cardio'} · ${dstr(s.date)}</b><small>${s.ex.length?s.ex.reduce((a,x)=>a+x.sets.length,0)+' Sätze · '+fmt(Math.round(vol(s)))+' kg':''}${(s.cardio||[]).length?' '+s.cardio.reduce((a,c)=>a+c.min,0)+' min Cardio':''}</small></div><span>›</span></button>`).join('')}<div class="actions"><button class="ghost" data-a="view" data-v="hist">Ganzer Verlauf</button></div>`:''}`}
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-h]');if(!b)return;const a=b.dataset.h,d=today();
  if(a==='train'){day=b.dataset.d;view='train'}
