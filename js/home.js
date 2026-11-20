@@ -18,13 +18,13 @@ function renderHome(){const d=today(),sc=dayScore(d),g=sc.g,t=sc.t,hr=new Date()
   <div><div class="tl"><span>Kalorien</span><span><b>${fmt(Math.round(t.kcal))}</b> / ${fmt(g.kcal)}</span></div>${rbar(t.kcal,g.kcal,'eat')}</div>
   <div><div class="tl"><span>Protein</span><span><b>${fmt(Math.round(t.p))}</b> / ${g.p} g</span></div>${rbar(t.p,g.p,'up')}</div></div>
   <div class="tf"><span>${g.kcal-t.kcal>=0?fmt(Math.round(g.kcal-t.kcal))+' kcal frei':fmt(Math.round(t.kcal-g.kcal))+' kcal drüber'} · KH ${fmt(Math.round(t.c))}/${fmt(g.c)} · Fett ${fmt(Math.round(t.f))}/${fmt(g.f)}</span><em>Details ›</em></div></button>
+ ${goalsHtml()}
  ${coachHtml(3)}
  ${chHtml()}
  <h3 class="sh">Essen eintragen</h3><button class="primary eatnow" data-eatnow="1">+ Jetzt eintragen <small>· ${mealName(mealNow())}</small></button><div class="quick">${MEALS.map(([m,l])=>{const k=(S.nut.days[d]||{items:[]}).items.filter(i=>i.meal===m).reduce((a,i)=>a+i.kcal,0);return `<button data-h="meal" data-m="${m}"><b>${l}</b><span>${k?fmt(k)+' kcal':'+ eintragen'}</span></button>`}).join('')}</div>
  ${snackHtml()}
  <h3 class="sh">Schnell erledigt</h3><div class="quick q2">
   <div class="qw"><b>Gewicht</b><div class="wrow" style="margin:6px 0 0"><input id="hW" inputmode="decimal" placeholder="${lastWeight()?fmt(lastWeight()):'kg'}" value="${dayW?fmt(dayW):''}" aria-label="Gewicht"><button data-h="w">${dayW?'✓':'Speichern'}</button></div></div>
-  <div class="qw"><b>Wasser ${fmt(water/1000)} l</b><div class="wrow" style="margin:6px 0 0"><button data-h="water" data-v="250">+ Glas</button><button data-h="water" data-v="500">+ Flasche</button></div></div>
   <button data-h="cardio"><b>Cardio</b><span>${sc.c?sc.c+' min heute':'+ eintragen'}</span></button>
   <button data-h="rec"><b>Kraft & Muskeln</b><span>Kurven, Muskel-Karte</span></button><button data-a="view" data-v="review"><b>Rückblick</b><span>Woche & Monat teilen</span></button><button data-gym="1" data-d="${nx}"><b>Gym Mode</b><span>Übung für Übung, Vollbild</span></button></div>
  <h3 class="sh">Diese Woche · ${cnt} / ${S.goal} Krafteinheiten</h3><div class="week hw">${$('week')?$('week').innerHTML:''}</div>
@@ -34,8 +34,9 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-h]');if(
  if(a==='train'){day=b.dataset.d;view='train'}
  else if(a==='meal'){view='nut';nDate=d;sheet={meal:b.dataset.m,step:'search',q:'',focus:true}}
  else if(a==='w'){const w=num($('hW').value);if(w&&w>30&&w<300){ND(d).w=w;ND(d).wsrc='';touch(d)}else{note('Gewicht in kg eingeben');return}}
- else if(a==='water'){const dd=ND(d);dd.water=(dd.water||0)+(+b.dataset.v);touch(d)}
+ else if(a==='water'){const dd=ND(d);dd.water=Math.max(0,(dd.water||0)+(+b.dataset.v));touch(d)}
+ else if(a==='steps'){const v=num($('hSt').value);if(v==null||v<0||v>100000){note('Schritte als Zahl eingeben');return}ND(d).stm=Math.round(v);touch(d)}
  else if(a==='cardio'){day='cardio';view='train'}
  else if(a==='rec'){view='rec'}
- else return;render();if(a!=='w'&&a!=='water')scrollTo({top:0})});
+ else return;render();if(a!=='w'&&a!=='water'&&a!=='steps')scrollTo({top:0})});
 

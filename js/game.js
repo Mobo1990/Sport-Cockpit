@@ -38,14 +38,22 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-ch]');if
  const before=chDone(d).length;dd.ch=(dd.ch||[]).includes(id)?dd.ch.filter(x=>x!==id):[...(dd.ch||[]),id];touch(d);
  const after=chDone(d).length;if(after===3&&before<3)tell(`${S.prof.name||'Jemand'} hat alle Challenges geschafft`,`Heute alle 3 Coach-Challenges erledigt (+${chPoints(d)} Punkte). Und du?`);
  render()});
+/* Persönliche Tagesziele (im Profil einstellbar) */
+const waterGoal=()=>Math.round((num(S.prof.wgoal)||2)*1000),stepGoal=()=>Math.round(num(S.prof.sgoal)||10000);
+const daySteps=d=>{const x=S.nut.days[d]||{};return Math.max((x.h||{}).st||0,x.stm||0)};
+function goalsHtml(){const d=today(),w=(S.nut.days[d]||{}).water||0,wg=waterGoal(),st=daySteps(d),sg=stepGoal(),hs=((S.nut.days[d]||{}).h||{}).st;
+ return `<section class="dgoals"><div class="dg"><div class="tl"><span>Wasser</span><span><b>${fmt(w/1000)}</b> / ${fmt(wg/1000)} l</span></div>${rbar(w,wg,'up')}
+  <div class="dgb"><button data-h="water" data-v="250">+ Glas</button><button data-h="water" data-v="500">+ Flasche</button></div><div class="dgf">${w>=wg?'<small class="ok">Ziel geschafft · +10</small>':`<small>noch ${fmt((wg-w)/1000)} l · +10</small>`}${w?'<button class="undo" data-h="water" data-v="-250" aria-label="Ein Glas weniger">− Glas</button>':''}</div></div>
+ <div class="dg"><div class="tl"><span>Schritte</span><span><b>${fmt(st)}</b> / ${fmt(sg)}</span></div>${rbar(st,sg,'up')}
+  <div class="dgb">${hs?`<span class="src">aus Apple Health</span>`:`<input id="hSt" inputmode="numeric" placeholder="Schritte" aria-label="Schritte heute" value="${(S.nut.days[d]||{}).stm||''}"><button data-h="steps">OK</button>`}</div>${st>=sg?'<small class="ok">Ziel geschafft · +10</small>':`<small>noch ${fmt(sg-st)} · +10</small>`}</div></section>`}
 function dayScore(d){const g=goals(d),t=totals(d),day=S.nut.days[d]||{},ss=S.sessions.filter(s=>iso(s.date)===d);let pt=0;const why=[];
  const tr=ss.find(s=>s.ex.length);if(tr){pt+=30;why.push('Training +30')}
  const c=ss.reduce((a,s)=>a+(s.cardio||[]).reduce((b,x)=>b+x.min,0),0),hh=day.h||{};if(c>=20){pt+=15;why.push('Cardio +15')}else if((hh.tm||0)>=30){pt+=15;why.push('Bewegung (Watch) +15')}
- if((hh.st||0)>=10000){pt+=10;why.push('10.000 Schritte +10')}
+ if(daySteps(d)>=stepGoal()){pt+=10;why.push('Schrittziel +10')}
  if(t.kcal>0){if(t.p>=g.p){pt+=20;why.push('Protein +20')}else if(t.p>=g.p*.9){pt+=10;why.push('Protein fast +10')}
   const dev=Math.abs(t.kcal-g.kcal)/g.kcal;if(dev<=.1){pt+=20;why.push('Kalorien im Ziel +20')}else if(dev<=.2){pt+=10;why.push('Kalorien nah dran +10')}}
  const chp=chPoints(d);if(chp){pt+=chp;why.push((chDone(d).length===3?'Alle Challenges +':'Challenges +')+chp)}
- if(day.w){pt+=5;why.push('Gewogen +5')}if((day.water||0)>=2000){pt+=5;why.push('2 l Wasser +5')}
+ if(day.w){pt+=5;why.push('Gewogen +5')}if((day.water||0)>=waterGoal()){pt+=10;why.push('Wasserziel +10')}
  const prn=ss.reduce((a,s)=>a+(s.prn||0),0);if(prn){pt+=10*prn;why.push(prn+'× Bestwert +'+10*prn)}
  return{pt,why,g,t,c,tr:tr?DAYS[tr.day].n:''}}
 function weekScore(){const m=new Date(wk(Date.now()));let sum=0;for(let i=0;i<7;i++){const d=new Date(m);d.setDate(d.getDate()+i);if(d>new Date())break;sum+=dayScore(iso(d)).pt}return sum}

@@ -370,3 +370,19 @@ h1{letter-spacing:-.5px}
 .wobody .primary{margin-top:20px;width:100%;max-width:320px}
 .wo .gfoot{display:grid;grid-template-columns:1fr 2fr;gap:8px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:var(--s1);box-shadow:0 -1px 0 var(--line)}
 .wo .gfoot button{min-height:56px}
+/* Tagesziele Wasser & Schritte */
+.dgoals{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 4px}
+.dg{background:var(--s1);border-radius:var(--r);box-shadow:var(--sh);padding:14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.dg .tl{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--mute);gap:6px}
+.dg .tl b{font:700 20px 'Barlow Condensed';color:var(--ink)}
+.dg .rb{margin-top:0}
+.dgb{display:flex;gap:6px;min-width:0}
+.dgb button{flex:1;min-height:40px;padding:0 6px;font-size:14px}
+.dgb button.ghost{flex:0 0 40px}
+.dgb input{flex:1;min-width:0;min-height:40px;padding:0 10px}
+.dgb .src{font-size:12px;color:var(--mute);align-self:center}
+.dg small{font-size:12px;color:var(--mute)}
+.dg small.ok{color:#1a8f55;font-weight:600}
+.dgb button{white-space:nowrap}
+.dgf{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.dgf .undo{background:none;border:0;box-shadow:none;min-height:0;padding:2px 0;font-size:12px;color:var(--mute);text-decoration:underline;cursor:pointer}

@@ -11,6 +11,7 @@ Persönliche Web-App (PWA) für Push/Pull/Legs-Training, Cardio und Ernährung.
 - **Gym Mode:** eine Übung im Vollbild, große +/- Knöpfe, Pausen-Timer, wischen
 - **Coach:** Stillstand je Übung, Protein/Kalorien, Gewichtstrend, Muskelbalance, Entlastungswoche
 - **Challenges:** jeden Tag 3 kleine Aufgaben (z. B. 10 Liegestütze) zum Abhaken, je +5/+10 Punkte, alle 3 = +10 Bonus, für beide gleich
+- **Tagesziele:** Wasser und Schritte mit eigenem Ziel pro Person (Profil unter „Mehr“), je +10 Punkte; Schritte aus Apple Health oder von Hand
 - **Rückblick:** Woche/Monat mit Steigerungen, als Bild teilbar
 - **Foto-Erkennung:** Teller oder Nährwert-Etikett per Claude-API (eigener Schlüssel)
 
