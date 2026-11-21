@@ -45,7 +45,7 @@ function renderNut(){if(!nDate)nDate=today();const d=nDate,g=goals(d),t=totals(d
  const ws=Object.keys(S.nut.days).filter(k=>S.nut.days[k].w).sort();
  h+=`<section class="meal"><header><h3>Körpergewicht & Wasser</h3><span>${day.w?fmt(day.w)+' kg':''}</span></header>
  <div class="wrow"><input id="wIn" inputmode="decimal" placeholder="${lastWeight(d)?fmt(lastWeight(d)):'kg'}" value="${day.w?fmt(day.w):''}" aria-label="Gewicht in kg"><button data-n="w">Gewicht speichern</button></div>
- <div class="wrow"><span class="water">${fmt((day.water||0)/1000)} l Wasser</span><button data-n="water" data-v="250">+ 250 ml</button><button data-n="water" data-v="500">+ 500 ml</button><button class="ghost" data-n="water" data-v="-250">−</button></div>
+ <div class="wrow"><span class="water">${fmt((day.water||0)/1000)} l Wasser</span><button data-n="water" data-v="250">+ 250 ml</button><button data-n="water" data-v="750">+ 0,75 l</button><button class="ghost" data-n="water" data-v="-250">−</button></div>
  ${ws.length>1?`<div class="fig" style="min-height:200px"><svg id="wchart" role="img" aria-label="Gewichtsverlauf"></svg></div>`:''}</section>
  <details class="meal nset"><summary><h3>Ziele einstellen</h3><span>${fmt(g.kcal)} kcal · ${g.p} g Protein</span></summary>
  <div class="vars" style="margin:8px 0">${[['aufbau','Aufbau (+300)'],['halten','Halten'],['defi','Definieren (−450)']].map(([k,l])=>`<button data-n="goal" data-v="${k}" aria-pressed="${S.nut.goal===k}">${l}</button>`).join('')}</div>
