@@ -5,6 +5,9 @@
 let SR=window.SpeechRecognition||window.webkitSpeechRecognition;let srec=null;
 /* In der Homescreen-App auf dem iPhone ist die Browser-Spracherkennung oft gesperrt – dann merken und Tastatur-Diktat anbieten */
 try{if(localStorage.getItem('sc.srOff'))SR=null}catch(e){}
+/* iPhone/iPad als Homescreen-App: Browser-Spracherkennung kann dort die App abstürzen lassen – nur Tastatur-Diktat anbieten */
+const IOS_APP=(/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1))&&(navigator.standalone===true||matchMedia('(display-mode: standalone)').matches);
+if(IOS_APP)SR=null;
 const NUMW={ein:1,eine:1,einen:1,einem:1,einer:1,zwei:2,drei:3,vier:4,'fünf':5,fuenf:5,sechs:6,sieben:7,acht:8,neun:9,zehn:10,halbe:0.5,halben:0.5,halb:0.5};
 const MEALW=[['f',/frühstück|fruehstueck|morgens/],['m',/mittag/],['a',/abend|abends/],['s',/snack|zwischendurch/]];
 function sayMeal(t){const s=t.toLowerCase();for(const [m,r] of MEALW)if(r.test(s))return m;return null}
