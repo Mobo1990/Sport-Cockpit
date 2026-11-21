@@ -195,11 +195,7 @@ try:
         OFF["busy"] = False; pg.click("#fres [data-n=off]"); pg.wait_for_timeout(500)
         check("Testriegel Kakao" in pg.text_content("#fres"), "Nochmal versuchen klappt")
         print("Barcode")
-        def prod_route(r):
-            code = r.request.url.split("/product/")[1].split(".json")[0]
-            if code == "4000417025005": r.fulfill(status=200, content_type="application/json", body=json.dumps({"status": 1, "product": {"code": code, "product_name": "Scan-Müsli", "brands": "Test", "nutriments": {"energy-kcal_100g": 380, "proteins_100g": 10, "carbohydrates_100g": 60, "sugars_100g": 12, "fat_100g": 8}, "serving_quantity": "50"}}))
-            else: r.fulfill(status=404, content_type="application/json", body=json.dumps({"status": 0}))
-        pg.route("https://world.openfoodfacts.org/api/v2/product/**", prod_route)
+        pg.evaluate("""void(offFetch = async c => c === '4000417025005' ? {status: 1, product: {code: c, product_name: 'Scan-Müsli', brands: 'Test', nutriments: {'energy-kcal_100g': 380, proteins_100g: 10, carbohydrates_100g: 60, sugars_100g: 12, fat_100g: 8}, serving_quantity: '50'}} : {status: 0})""")
         pg.route("https://unpkg.com/**", lambda r: r.abort())
         pg.click(".srch [data-n=scan]"); pg.wait_for_timeout(300)
         check(pg.evaluate("eanOk('4000417025005') && !eanOk('4000417025006')"), "Prüfziffer filtert Fehllesungen")
@@ -210,9 +206,9 @@ try:
         pg.fill("#codeIn", "4000417025005"); pg.click("[data-n=code]")
         try: pg.wait_for_selector("#gIn", timeout=8000)
         except Exception: pass
-        check(pg.is_visible("#gIn") and pg.input_value("#gIn") == "50", "Barcode gefunden: Mengen-Schritt mit Portion (50 g) " + str(pg.evaluate("JSON.stringify({st:sheet&&sheet.step,msg:sheet&&sheet.msg,g:sheet&&sheet.g,f:sheet&&sheet.food&&sheet.food.name})")))
+        check(pg.is_visible("#gIn") and pg.input_value("#gIn") == "50", "Barcode gefunden: Mengen-Schritt mit Portion (50 g)")
         pg.click("[data-n=back]"); pg.wait_for_timeout(100)
-        pg.unroute("https://world.openfoodfacts.org/api/v2/product/**"); pg.unroute("https://unpkg.com/**")
+        pg.unroute("https://unpkg.com/**")
         print("Kein Springen")
         pg.fill("#fq", ""); pg.wait_for_timeout(100)
         box = lambda: pg.evaluate("(()=>{const r=document.querySelector('.sheetin').getBoundingClientRect(),f=document.getElementById('fq').getBoundingClientRect();return [Math.round(r.top),Math.round(r.height),Math.round(f.top)]})()")
