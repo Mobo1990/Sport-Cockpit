@@ -708,3 +708,5 @@ html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 .rwform button{grid-column:1/-1}
 .rwideas{margin-top:8px}
 .rwin p{margin:6px 0 10px;font-size:14px;color:var(--mute)}
+.v-rew .seg,.v-rew .dayrow,.v-rew .stats{display:none}
+.v-rew .top{padding-bottom:10px}
