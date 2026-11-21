@@ -49,12 +49,17 @@ function renderProfile(){const P=S.prof,g=goals(today());const f=(k,l,ph,mode='d
  <div class="full"><label>Alltag (ohne Training eingerechnet)</label><div class="vars">${[[1.4,'Büro, wenig Bewegung'],[1.55,'Büro + Training 3–4×'],[1.7,'Aktiv / Training 5–6×'],[1.85,'Körperlich harte Arbeit']].map(([v,l])=>`<button data-ps="act" data-v="${v}" aria-pressed="${S.prof.act==v}">${l}</button>`).join('')}</div></div></div>
  <div class="calc" id="pcalc">${pcalc()}</div>
  <p class="tip" style="padding:0">Gewicht: wird automatisch durch dein zuletzt eingetragenes Gewicht (Essen-Tab) ersetzt. Ziel (Aufbau/Halten/Definieren) stellst du im Essen-Tab ein.</p></section>`}
+/* Verbindung übertragen (z. B. nach Neuinstallation): Adresse + Token als Code in die Zwischenablage */
+function haCode(){return 'duo-ha:'+btoa(unescape(encodeURIComponent(JSON.stringify({u:HA.url,t:HA.token}))))}
+function haFromCode(s){const m=String(s||'').match(/duo-ha:([A-Za-z0-9+/=]+)/);if(!m)return null;try{const j=JSON.parse(decodeURIComponent(escape(atob(m[1]))));return j.u&&j.t?j:null}catch(e){return null}}
+async function haConnect(u,t){const old={...HA};HA.url=u;if(t)HA.token=t;note('Verbinde …');try{await haCall([]);localStorage.setItem('sc.ha',JSON.stringify(HA));note('Verbunden');render();syncNow();return true}catch(e){HA=old;note(e.message);return false}}
 function renderSettings(){return renderProfile()+`<section class="meal" style="margin-top:24px"><header><h3>Home Assistant</h3><span>${HA.url&&HA.token?'verbunden':'nicht eingerichtet'}</span></header>
  <p class="tip" style="padding:0 0 8px">Deine Daten werden in deinem Home Assistant gespeichert (pro HA-Benutzer). Adresse: deine Nabu-Casa-URL. Token: HA → Profil → Sicherheit → „Langlebiges Zugriffstoken erstellen“.</p>
  <div class="cform"><div class="full"><label for="haUrl">Adresse</label><input id="haUrl" placeholder="https://xxxxxxxx.ui.nabu.casa" value="${esc(HA.url)}" autocapitalize="off" autocorrect="off"></div>
  <div class="full"><label for="haTok">Token</label><input id="haTok" type="password" placeholder="${HA.token?'gespeichert – zum Ändern neu einfügen':'Token einfügen'}" autocapitalize="off" autocorrect="off"></div></div>
  ${HA.conflict?`<div class="haconf"><b>Dieses Home-Assistant-Konto gehört zu „${esc(HA.conflict)}“</b><p>Es wurde nichts übertragen. Jede Person braucht einen eigenen Home-Assistant-Benutzer mit eigenem Token – sonst vermischen sich Profil, Training und Essen.</p><p>Ist es wirklich dein Konto (z. B. weil „${esc(HA.conflict)}“ es vorher mitbenutzt hat)? Dann überschreibe es mit den Daten dieses Geräts:</p><button data-s="haforce" class="${haConfirm?'danger':''}">${haConfirm?'Wirklich überschreiben? Nochmal tippen':'Konto mit diesem Gerät überschreiben'}</button></div>`:''}
- <div class="actions"><button class="primary" data-s="ha">Verbinden & synchronisieren</button>${HA.token?'<button class="ghost" data-s="haoff">Trennen</button>':''}</div></section>
+ <div class="actions"><button class="primary" data-s="ha">Verbinden & synchronisieren</button>${HA.token?'<button class="ghost" data-s="haoff">Trennen</button>':''}</div>
+ ${HA.url&&HA.token?'<div class="hxfer"><button class="ghost" data-s="hacopy">Verbindung für neues Gerät kopieren</button><small>Kopiert Adresse und Token als Code. In der neu installierten App beim Start einfügen. Den Code nicht weitergeben – er ist dein Zugang.</small></div>':''}</section>
  <section class="meal"><header><h3>Daten übernehmen & sichern</h3></header>
  <p class="tip" style="padding:0 0 8px">Aus dem alten Cockpit in Claude: dort Verlauf → „Alle Daten kopieren“, hier einfügen.</p>
  <textarea id="imp" rows="4" placeholder="Kopierte Daten hier einfügen"></textarea>
@@ -63,8 +68,12 @@ function renderSettings(){return renderProfile()+`<section class="meal" style="m
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-ps]');if(!b)return;const k=b.dataset.ps;S.prof[k]=k==='act'?+b.dataset.v:b.dataset.v;S.metaT=Date.now();persist();render()});
 document.addEventListener('input',ev=>{const t=ev.target,k=t.dataset.p;if(!k)return;S.prof[k]=k==='name'?t.value:(num(t.value)??'');S.metaT=Date.now();persist();renderHead();const c=$('pcalc');if(c)c.innerHTML=pcalc()});
 document.addEventListener('click',async ev=>{const b=ev.target.closest('[data-s]');if(!b)return;const a=b.dataset.s;
- if(a==='ha'){let u=$('haUrl').value.trim().replace(/\/+$/,'');const t=$('haTok').value.trim();if(!/^https?:\/\//.test(u)){note('Adresse mit https:// angeben');return}
-  const old={...HA};HA.url=u;if(t)HA.token=t;note('Verbinde …');try{await haCall([]);localStorage.setItem('sc.ha',JSON.stringify(HA));note('Verbunden');render();syncNow()}catch(e){HA=old;note(e.message)}}
+ if(a==='ha'){const cj=haFromCode($('haUrl').value);if(cj){haConnect(cj.u,cj.t);return}
+  let u=$('haUrl').value.trim().replace(/\/+$/,'');const t=$('haTok').value.trim();if(!/^https?:\/\//.test(u)){note('Adresse mit https:// angeben');return}haConnect(u,t)}
+ else if(a==='hacopy'){navigator.clipboard.writeText(haCode()).then(()=>note('Verbindung kopiert – in der neuen App einfügen'),()=>note('Kopieren nicht erlaubt'))}
+ else if(a==='hapaste'){let v=($('obCode')||{}).value||'';if(!haFromCode(v)){try{v=await navigator.clipboard.readText()}catch(e){}}const j=haFromCode(v);
+  if(!j){const m=$('obmsg');if(m)m.textContent='Kein Verbindungscode gefunden. Kopiere ihn in der alten App unter „Mehr → Home Assistant“ und füge ihn hier ins Feld ein.';return}
+  if(!await haConnect(j.u,j.t)){const m=$('obmsg');if(m)m.textContent='Verbindung fehlgeschlagen – ist Home Assistant erreichbar?'}}
  else if(a==='haforce'){if(!haConfirm){haConfirm=true;render();return}haConfirm=false;HA.force=true;HA.conflict='';render();syncNow()}
  else if(a==='haoff'){HA={url:'',token:''};localStorage.removeItem('sc.ha');render();note('Getrennt – nur lokal')}
  else if(a==='exp'){navigator.clipboard.writeText(JSON.stringify({S,drafts})).then(()=>note('Backup kopiert'),()=>note('Kopieren nicht erlaubt'))}
