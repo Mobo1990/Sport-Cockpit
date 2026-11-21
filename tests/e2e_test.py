@@ -255,6 +255,7 @@ try:
         pg.evaluate("void(window._clip='', navigator.clipboard.writeText=t=>{window._clip=t;return Promise.resolve()})")
         pg.click(".nav >> text=Mehr"); pg.click("[data-s=hacopy]"); code = pg.evaluate("window._clip")
         check(code.startswith("duo-ha:") and "tok" not in code, "Verbindungscode wird kopiert (Token nicht im Klartext)")
+        check("Kopiert" in pg.text_content(".hxfer") and pg.input_value("#hxCode") == code, "Nach dem Tippen: Bestätigung und Code direkt sichtbar")
         pg.click(".nav >> text=Start")
         cx = b.new_page(viewport={"width": 400, "height": 860}); cx.on("pageerror", lambda e: errs.append(str(e)))
         cx.goto("http://localhost:8765/"); cx.wait_for_timeout(300)

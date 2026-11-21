@@ -717,3 +717,5 @@ html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 .hxfer{margin-top:12px;display:grid;gap:6px}.hxfer small{color:var(--mut,#6b6b6b);font-size:13px;line-height:1.35}
 .obxfer{background:var(--pastel1,#f3ece3);border-radius:14px;padding:12px 14px;margin:0 0 14px}.obxfer b{display:block;font-size:15px}.obxfer p{margin:4px 0 10px;font-size:13px;color:#555;line-height:1.35}
 .obrow{display:flex;gap:8px}.obrow input{flex:1;min-width:0}.obrow button{flex:none}
+.hxbtn{width:100%;background:var(--pastel1,#f3ece3);border-radius:12px;padding:12px;font-weight:600}
+.hxfer b{font-size:14px}.hxfer textarea{font-size:12px;word-break:break-all}
