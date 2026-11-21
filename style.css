@@ -676,3 +676,12 @@ html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 .tile.big b{color:#fff}
 .tile.big::after{border-color:var(--acc);opacity:.9}
 .tile.big::before{background:#2a2c31}
+/* Palette „Latte & Rosé" (Instagram-Look) */
+:root{--me:#6f8f7e;--pa:#c4917f;--me-soft:#a8bfb0;--pa-soft:#ebc9c1;--pastel1:#f3ece3;--pastel2:#f1ddd6}
+.bbar{background:var(--pa-soft);opacity:1}
+.bbar i{background:var(--me-soft)}
+.ava{border-color:var(--me-soft)}
+.ava.pa{border-color:var(--pa-soft)}
+.avawrap::after{background:var(--me-soft)}
+.wkbar.pa i,.wkbar.two s,.dot.pa{background:var(--pa-soft)}
+.weekbox .wkbar.two i,.wkc.cp .wkbar i,.dot.me{background:var(--me-soft)}
