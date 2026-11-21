@@ -293,6 +293,8 @@ try:
         check(c2.text_content(".tile.big").count("Pull") or "PULL" in c2.text_content(".tile.big").upper(), "Nächster Tag ist Pull")
         c2.evaluate("localStorage.removeItem('sc.partners')"); c2.reload(); c2.wait_for_timeout(3000)
         check(c2.is_visible(".board .bp.pa"), "Neustart ohne neue Daten: Partnerin erscheint trotzdem auf der Tafel")
+        c2.evaluate("void(delete S.nut.days[today()].h, render(), syncNow())"); c2.wait_for_timeout(2500)
+        check("11.234" in c2.text_content(".dgoals"), "Apple-Health-Schritte kommen an, während die App offen ist, und erscheinen sofort")
 
         print("Verbindung übertragen")
         pg.evaluate("void(window._clip='', navigator.clipboard.writeText=t=>{window._clip=t;return Promise.resolve()})")

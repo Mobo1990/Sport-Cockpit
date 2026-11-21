@@ -15,7 +15,7 @@ function health(m){if(!m||!m.success||!S.prof.name)return;const me='input_text.s
  if(JSON.stringify(np)!==JSON.stringify(partners)){partners=np;partnersCh=true;try{localStorage.setItem('sc.partners',JSON.stringify(np))}catch(e){}}const pre='input_number.sport_cockpit_'+slugN(S.prof.name)+'_',d=today(),h={};
  for(const e of m.result||[]){if(!e.entity_id.startsWith(pre)||iso(e.last_updated||e.last_changed)!==d)continue;const v=parseFloat(e.state);if(!isFinite(v))continue;h[e.entity_id.slice(pre.length)]=v}
  if(!Object.keys(h).length)return;const day=ND(d),old=JSON.stringify(day.h||{});day.h={st:h.schritte,ak:h.aktiv_kcal,tm:h.trainingsminuten};
- if(h.gewicht>30&&(!day.w||day.wsrc==='health')){day.w=h.gewicht;day.wsrc='health'}if(JSON.stringify(day.h)!==old)day.t=Date.now();S.hT=Math.max(...(m.result||[]).filter(e=>e.entity_id.startsWith(pre)).map(e=>Date.parse(e.last_updated)||0),0)}
+ if(h.gewicht>30&&(!day.w||day.wsrc==='health')){day.w=h.gewicht;day.wsrc='health'}if(JSON.stringify(day.h)!==old){day.t=Date.now();partnersCh=true}S.hT=Math.max(...(m.result||[]).filter(e=>e.entity_id.startsWith(pre)).map(e=>Date.parse(e.last_updated)||0),0)}
 function syncLater(){clearTimeout(syncT);if(HA.url&&HA.token)syncT=setTimeout(syncNow,1500)}
 function metaOf(){return{t:S.metaT,prof:S.prof,plan:S.plan,goal:S.goal,rest:S.rest,cgoal:S.cgoal,nut:{goal:S.nut.goal,maint:S.nut.maint,gkg:S.nut.gkg,foods:S.nut.foods,meals:S.nut.meals,recent:S.nut.recent},drafts,draftT}}
 function merge(R){let changed=false;const m=R.sc_meta;
