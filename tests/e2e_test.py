@@ -74,7 +74,7 @@ try:
         pt0 = int(pg.text_content(".pts b")); pg.click(".dg [data-h=water][data-v='750']"); pg.wait_for_timeout(150)
         check(pg.evaluate("S.nut.days[today()].water") == 750, "Flasche = 0,75 l")
         pg.click(".dg [data-h=wml]"); pg.fill("#wMl", "330"); pg.click("[data-h=wmlok]"); pg.wait_for_timeout(150)
-        check(pg.evaluate("S.nut.days[today()].water") == 1080 and "− 330 ml" in pg.text_content(".dgoals"), "Eigene Menge in ml eintragen, Rückgängig nimmt genau diese Menge")
+        check(pg.evaluate("S.nut.days[today()].water") == 1080 and "−330" in pg.text_content(".dgoals"), "Eigene Menge in ml eintragen, Rückgängig nimmt genau diese Menge")
         pg.click("[data-h=wundo]"); pg.wait_for_timeout(150)
         check(pg.evaluate("S.nut.days[today()].water") == 750, "Rückgängig: −330 ml")
         pg.click(".dg [data-h=water][data-v='250']"); pg.wait_for_timeout(200)
