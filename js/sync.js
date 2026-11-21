@@ -10,8 +10,9 @@ function haCall(cmds){return new Promise((res,rej)=>{let ws;try{ws=new WebSocket
   else if(m.type==='auth_ok'){if(!cmds.length){clearTimeout(to);ws.close();res([]);return}cmds.forEach(c=>ws.send(JSON.stringify({id:++id,...c})))}
   else if(m.type==='result'){out[m.id]=m;if(Object.keys(out).length===cmds.length){clearTimeout(to);ws.close();res(cmds.map((_,i)=>out[i+1]))}}};
  ws.onerror=()=>{clearTimeout(to);rej(new Error('Home Assistant nicht erreichbar'))}})}
-let partners=[];
-function health(m){if(!m||!m.success||!S.prof.name)return;const me='input_text.sport_cockpit_'+slugN(S.prof.name);partners=(m.result||[]).filter(e=>/^input_text\.sport_cockpit_[a-z0-9]+$/.test(e.entity_id)&&e.entity_id!==me).map(e=>{let j={};try{j=JSON.parse(e.state)}catch(x){}return{name:(e.attributes&&e.attributes.friendly_name||'').replace(/^Sport Cockpit /,''),...j}});const pre='input_number.sport_cockpit_'+slugN(S.prof.name)+'_',d=today(),h={};
+let partners=[],partnersCh=false;try{partners=JSON.parse(localStorage.getItem('sc.partners'))||[]}catch(e){}
+function health(m){if(!m||!m.success||!S.prof.name)return;const me='input_text.sport_cockpit_'+slugN(S.prof.name);const np=(m.result||[]).filter(e=>/^input_text\.sport_cockpit_[a-z0-9]+$/.test(e.entity_id)&&e.entity_id!==me).map(e=>{let j={};try{j=JSON.parse(e.state)}catch(x){}return{name:(e.attributes&&e.attributes.friendly_name||'').replace(/^Sport Cockpit /,''),...j}});
+ if(JSON.stringify(np)!==JSON.stringify(partners)){partners=np;partnersCh=true;try{localStorage.setItem('sc.partners',JSON.stringify(np))}catch(e){}}const pre='input_number.sport_cockpit_'+slugN(S.prof.name)+'_',d=today(),h={};
  for(const e of m.result||[]){if(!e.entity_id.startsWith(pre)||iso(e.last_updated||e.last_changed)!==d)continue;const v=parseFloat(e.state);if(!isFinite(v))continue;h[e.entity_id.slice(pre.length)]=v}
  if(!Object.keys(h).length)return;const day=ND(d),old=JSON.stringify(day.h||{});day.h={st:h.schritte,ak:h.aktiv_kcal,tm:h.trainingsminuten};
  if(h.gewicht>30&&(!day.w||day.wsrc==='health')){day.w=h.gewicht;day.wsrc='health'}if(JSON.stringify(day.h)!==old)day.t=Date.now();S.hT=Math.max(...(m.result||[]).filter(e=>e.entity_id.startsWith(pre)).map(e=>Date.parse(e.last_updated)||0),0)}
@@ -33,7 +34,7 @@ async function syncNow(){if(!HA.url||!HA.token)return;if(syncing){syncAgain=true
   HA.conflict='';const hadName=!!S.prof.name,changed=HA.force?false:merge(R);HA.force=false;if(!hadName&&S.prof.name)health(r[keys.length]);lsSave();
   await haCall([{type:'frontend/set_user_data',key:'sc_meta',value:metaOf()},{type:'frontend/set_user_data',key:'sc_sessions',value:{list:S.sessions,del:S.del}},{type:'frontend/set_user_data',key:'sc_nut',value:{days:S.nut.days}}]);
   note('Synchronisiert · '+new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}));publish();shareFetch();
-  const busy=document.activeElement&&document.activeElement.tagName==='INPUT';if(changed&&!busy&&!sheet)render()}
+  const busy=document.activeElement&&document.activeElement.tagName==='INPUT';if((changed||partnersCh)&&!busy&&!sheet)render();partnersCh=false}
  catch(e){note((navigator.onLine?e.message:'Offline')+' – lokal gespeichert')}
  syncing=false;if(syncAgain){syncAgain=false;syncNow()}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){clearTimeout(syncT);syncNow()}else syncNow()});
@@ -77,7 +78,7 @@ document.addEventListener('click',async ev=>{const b=ev.target.closest('[data-s]
   if(!j){const m=$('obmsg');if(m)m.textContent='Kein Verbindungscode gefunden. Kopiere ihn in der alten App unter „Mehr → Home Assistant“ und füge ihn hier ins Feld ein.';return}
   if(!await haConnect(j.u,j.t)){const m=$('obmsg');if(m)m.textContent='Verbindung fehlgeschlagen – ist Home Assistant erreichbar?'}}
  else if(a==='haforce'){if(!haConfirm){haConfirm=true;render();return}haConfirm=false;HA.force=true;HA.conflict='';render();syncNow()}
- else if(a==='haoff'){HA={url:'',token:''};localStorage.removeItem('sc.ha');render();note('Getrennt – nur lokal')}
+ else if(a==='haoff'){HA={url:'',token:''};localStorage.removeItem('sc.ha');partners=[];localStorage.removeItem('sc.partners');render();note('Getrennt – nur lokal')}
  else if(a==='exp'){navigator.clipboard.writeText(JSON.stringify({S,drafts})).then(()=>note('Backup kopiert'),()=>note('Kopieren nicht erlaubt'))}
  else if(a==='imp'){try{const j=JSON.parse($('imp').value);const src=j.S||j;let n=0;const ids=new Set(S.sessions.map(s=>s.id));for(const s of (src.sessions||[]))if(!ids.has(s.id)){s.t=s.t||Date.now();S.sessions.push(s);n++}
   if(src.plan&&!S.metaT){S.plan=src.plan;S.goal=src.goal||S.goal;S.rest=src.rest||S.rest;S.cgoal=src.cgoal||S.cgoal;S.metaT=Date.now()}

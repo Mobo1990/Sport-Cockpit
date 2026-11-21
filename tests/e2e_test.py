@@ -250,6 +250,8 @@ try:
         c2.evaluate("localStorage.setItem('sc.ha',JSON.stringify({url:'http://localhost:8123',token:'tok'}))"); c2.reload(); c2.wait_for_timeout(3000)
         check(c2.is_visible(".hero2"), "Profil kommt per Sync mit (kein Onboarding)")
         check(c2.text_content(".tile.big").count("Pull") or "PULL" in c2.text_content(".tile.big").upper(), "Nächster Tag ist Pull")
+        c2.evaluate("localStorage.removeItem('sc.partners')"); c2.reload(); c2.wait_for_timeout(3000)
+        check(c2.is_visible(".board .bp.pa"), "Neustart ohne neue Daten: Partnerin erscheint trotzdem auf der Tafel")
 
         print("Verbindung übertragen")
         pg.evaluate("void(window._clip='', navigator.clipboard.writeText=t=>{window._clip=t;return Promise.resolve()})")
