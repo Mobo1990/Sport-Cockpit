@@ -153,6 +153,7 @@ try:
         check(pg.is_visible(".rwacc") and "Paar-Konto" in pg.text_content(".rwacc"), "Tab Belohnungen unten in der Leiste öffnet die Belohnungen mit Paar-Konto")
         pg.click("[data-rw=new]"); pg.click("[data-rw=idea] >> nth=1"); pg.wait_for_timeout(100)
         check(pg.input_value("#rwN") == "Kino mit Popcorn", "Vorschlag aus den Ideen übernommen")
+        check(pg.evaluate("rwIcon('Kinoabend mit Popcorn').includes(RW_IC.popcorn) && rwIcon('Sushi-Abend').includes(RW_IC.sushi) && rwIcon('Irgendwas').includes(RW_IC.gift)"), "Belohnungen bekommen passende Symbole (sonst Geschenk)")
         pg.fill("#rwC", "100"); pg.click("[data-rw=send]"); pg.wait_for_timeout(1500)
         rw = [json.loads(t["description"]) for t in json.load(open("/tmp/todo.json")) if json.loads(t["description"] or "{}").get("kind") == "reward"]
         check(len(rw) == 1 and rw[0]["st"] == "proposed" and rw[0]["by"] == "michell", "Belohnung vorgeschlagen, wartet auf Pauline")
@@ -202,9 +203,13 @@ try:
         pg.route("https://unpkg.com/**", lambda r: r.abort())
         pg.click(".srch [data-n=scan]"); pg.wait_for_timeout(300)
         check(pg.evaluate("eanOk('4000417025005') && !eanOk('4000417025006')"), "Prüfziffer filtert Fehllesungen")
-        pg.fill("#codeIn", "4000417025006"); pg.click("[data-n=code]"); pg.wait_for_timeout(600)
+        pg.fill("#codeIn", "4000417025006"); pg.click("[data-n=code]")
+        try: pg.wait_for_function("(document.getElementById('scanmsg')||{}).textContent.includes('nicht gefunden')", timeout=8000)
+        except Exception: pass
         check(pg.is_visible("#scanbox") and "nicht gefunden" in pg.text_content("#scanmsg"), "Nicht gefunden: Scanner bleibt offen, Hinweis erscheint")
-        pg.fill("#codeIn", "4000417025005"); pg.click("[data-n=code]"); pg.wait_for_timeout(600)
+        pg.fill("#codeIn", "4000417025005"); pg.click("[data-n=code]")
+        try: pg.wait_for_selector("#gIn", timeout=8000)
+        except Exception: pass
         check(pg.is_visible("#gIn") and pg.input_value("#gIn") == "50", "Barcode gefunden: Mengen-Schritt mit Portion (50 g)")
         pg.click("[data-n=back]"); pg.wait_for_timeout(100)
         pg.unroute("https://world.openfoodfacts.org/api/v2/product/**"); pg.unroute("https://unpkg.com/**")
@@ -316,6 +321,7 @@ try:
         check(len(rw) == 1 and rw[0]["st"] == "active", "Pauline stimmt zu: Belohnung ist aktiv")
         pg.evaluate("myTotal=()=>5000;shareFetch().then(()=>{view='rew';render()})"); pg.wait_for_timeout(1500)
         check(pg.is_visible("[data-rw=redeem]"), "Michell kann einlösen (genug Punkte)")
+        check(pg.is_visible(".rwtier") and "Kleine Freuden" in pg.text_content(".rwlist") and pg.is_visible(".rwtile .rwic svg"), "Belohnungen als Kacheln mit Symbol, nach Punkte-Kategorie gruppiert")
         pg.click("[data-rw=redeem]"); pg.wait_for_timeout(1500)
         c4.evaluate("shareFetch()"); c4.wait_for_timeout(1500)
         check(c4.is_visible(".rwin") and "möchte einlösen" in c4.text_content(".rwin"), "Pauline wird um Zustimmung zum Einlösen gebeten")

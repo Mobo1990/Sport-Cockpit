@@ -723,3 +723,22 @@ html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 /* Feste Personenfarben: Mann Salbei, Frau Rosé – auf beiden Handys gleich (Klasse am <html>, gesetzt in renderHead) */
 :root.me-w{--me:#c4917f;--pa:#6f8f7e;--me-soft:#ebc9c1;--pa-soft:#a8bfb0;--bgme:#f4dfd7;--bgpa:#dfe9e2}
 .nav button{padding:0 2px}@media (max-width:350px){.nav button{font-size:10px}}
+/* Belohnungen als Kacheln mit Symbol */
+.rwgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:4px}
+.rwtile{position:relative;display:flex;flex-direction:column;gap:4px;border-radius:18px;padding:14px 12px 12px;min-height:168px;background:#fff;box-shadow:var(--sh)}
+.rwtile.t-latte .rwic{background:#f3ece3}.rwtile.t-rose .rwic{background:#f4dfd7}.rwtile.t-sage .rwic{background:#dfe9e2}
+.rwic{display:grid;place-items:center;width:52px;height:52px;border-radius:16px;margin-bottom:4px;color:var(--ink)}
+.rwic svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.rwic.sm{width:40px;height:40px;border-radius:12px;background:var(--pastel1,#f3ece3);margin:0}.rwic.sm svg{width:22px;height:22px}
+.rwtile b{font-size:15px;line-height:1.2}
+.rwtile em{font-style:normal;font-size:22px;font-weight:800;color:var(--ink);margin-top:auto}.rwtile em small{font:600 12px Barlow,sans-serif;color:var(--mute)}
+.rwtile i{display:block;height:6px;border-radius:99px;background:#f1eee9;overflow:hidden}.rwtile i s{display:block;height:100%;background:linear-gradient(90deg,var(--me-soft),var(--pa-soft))}
+.rwtile>small{font-size:12px;color:var(--mute)}
+.rwtile.ready{box-shadow:0 0 0 2px var(--pa-soft),var(--sh)}.rwtile.ready>small{color:var(--ink);font-weight:700}
+.rwtile button{min-height:38px;margin-top:6px}
+.rwrow{grid-template-columns:auto minmax(0,1fr) auto}
+.rwrow button{grid-column:1/-1}
+.rwin{display:grid;grid-template-columns:auto 1fr;column-gap:12px;align-items:center}.rwin>b{align-self:center}.rwin>p,.rwin>.shbtn{grid-column:1/-1}
+.rwtier{display:flex;align-items:baseline;justify-content:space-between;margin:18px 2px 8px}.rwtier:first-of-type{margin-top:6px}
+.rwtier h4{margin:0;font:800 20px 'Barlow Condensed';text-transform:uppercase;letter-spacing:.3px}.rwtier span{font-size:12px;color:var(--mute);font-weight:600}
+.rwlist{background:none;box-shadow:none;border:0;padding-left:0;padding-right:0}
