@@ -761,3 +761,6 @@ html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 .dgb.wbtn button{min-width:0;padding:0 4px;font-size:13px}
 .dgb.wbtn .wmlb{grid-column:1/-1;min-height:32px;font-size:13px;font-weight:600;color:var(--mute);background:none;border:1px dashed var(--line)}
 .dgf small,.dgf .undo{white-space:nowrap}
+/* Schritte: Feld breit, OK-Knopf schmal */
+.dgb #hSt{flex:1 1 auto;min-width:0;font-size:15px}
+.dgb #hSt+button[data-h=steps]{flex:0 0 46px;padding:0}
