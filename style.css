@@ -722,3 +722,4 @@ html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 .nbadge{position:absolute;top:9px;left:calc(50% + 8px);width:9px;height:9px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 2px #fff}
 /* Feste Personenfarben: Mann Salbei, Frau Rosé – auf beiden Handys gleich (Klasse am <html>, gesetzt in renderHead) */
 :root.me-w{--me:#c4917f;--pa:#6f8f7e;--me-soft:#ebc9c1;--pa-soft:#a8bfb0;--bgme:#f4dfd7;--bgpa:#dfe9e2}
+.nav button{padding:0 2px}@media (max-width:350px){.nav button{font-size:10px}}
