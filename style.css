@@ -665,3 +665,7 @@ html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 .wkbar.pa i,.wkbar.two s{background:var(--pa)}
 .dot.me{background:var(--me)}.dot.pa{background:var(--pa)}
 .weekbox .wkbar.two i,.wkc.cp .wkbar i{background:var(--me)}
+/* Salbeigrün statt Türkis */
+:root{--me:#5f8f77;--pastel1:#dde8e0;--mint1:#d3e2d8;--mint2:#e6eee8}
+.tile.big small,.tile.big span{color:#5a7466}
+.tile.big::after{border-color:#f3cfd9}
