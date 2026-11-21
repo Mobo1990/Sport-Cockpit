@@ -37,13 +37,19 @@ const advOpened=n=>!!(S.nut.days[advDay(n)]||{}).ao;
 function advDoneOn(n){for(const k in S.nut.days){if(k.slice(0,7)!==`${advYear()}-12`)continue;if(((S.nut.days[k]||{}).adv||[]).includes(n))return k}return null}
 /* Punkte des Tages d (für dayScore) */
 function advPoints(d){const l=(S.nut.days[d]||{}).adv||[];let p=0;for(const n of l){const x=ADV[n-1];if(!x)continue;p+=d===advDay(n)?x.pt:Math.round(x.pt/2)}return p}
+const ADV_STAR='<svg class="advstar" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7-6.2-3.7-6.2 3.7 1.6-7L2 9.2l7.1-.6z"/></svg>';
+const advLights=()=>`<div class="advl" aria-hidden="true">${[...Array(13)].map((_,i)=>`<i class="l${i%4}" style="animation-delay:${(i*0.37%1.6).toFixed(2)}s"></i>`).join('')}</div>`;
 function advHtml(){const n=advNow(),m=n.getMonth(),dd=n.getDate();
- if(m===10){const left=Math.ceil((new Date(n.getFullYear(),11,1)-n)/864e5);return `<section class="adv tease"><div class="advh"><b>Adventskalender</b><span>ab 1. Dezember</span></div><p>Noch <b>${left} ${left===1?'Tag':'Tage'}</b> – dann wartet jeden Tag ein Türchen mit einer kleinen Aufgabe auf euch. Manche nur zu zweit.</p><div class="advg mini">${ADV_ORDER.map(k=>`<i>${k}</i>`).join('')}</div></section>`}
+ if(m===10){const left=Math.ceil((new Date(n.getFullYear(),11,1)-n)/864e5);
+  return `<section class="adv xmas tease">${advLights()}<div class="snow" aria-hidden="true"></div><div class="advh">${ADV_STAR}<b>Adventskalender</b></div>
+  <div class="advcount"><b class="cond">${left}</b><span>${left===1?'Tag':'Tage'} bis zum ersten Türchen</span></div>
+  <p>Ab 1. Dezember wartet jeden Tag ein Geschenk mit einer kleinen Aufgabe auf euch – manche nur zu zweit.</p>
+  <div class="advg">${ADV_ORDER.map((k,i)=>`<span class="advd locked g${i%4}"><span class="leaf">${k}</span></span>`).join('')}</div></section>`}
  if(m!==11||dd>26)return '';const td=advToday();
- return `<section class="adv"><div class="advh"><b>Adventskalender</b><span>${td<=24?`Heute: Türchen ${td}`:'Frohe Weihnachten!'}</span></div>
- <div class="advg">${ADV_ORDER.map(k=>{const o=advOpened(k),dn=advDoneOn(k),can=k<=td;return `<button class="advd${o?' open':''}${dn?' done':''}${k===td?' today':''}${can?'':' locked'}" data-adv="${k}" aria-label="Türchen ${k}${dn?' erledigt':o?' offen':can?'':' noch zu'}"><span class="leaf">${k}</span><span class="in">${dn?'✓':`${k}${ADV[k-1].c?'<small>zu 2</small>':''}`}</span></button>`}).join('')}</div></section>`}
+ return `<section class="adv xmas">${advLights()}<div class="snow" aria-hidden="true"></div><div class="advh">${ADV_STAR}<b>Adventskalender</b><span>${td<=24?`Heute: Türchen ${td}`:'Frohe Weihnachten!'}</span></div>
+ <div class="advg">${ADV_ORDER.map((k,i)=>{const o=advOpened(k),dn=advDoneOn(k),can=k<=td;return `<button class="advd g${i%4}${o?' open':''}${dn?' done':''}${k===td?' today':''}${can?'':' locked'}" data-adv="${k}" aria-label="Türchen ${k}${dn?' erledigt':o?' offen':can?'':' noch zu'}"><span class="leaf">${k}</span><span class="in">${dn?'✓':`${k}${ADV[k-1].c?'<small>zu 2</small>':''}`}</span></button>`}).join('')}</div></section>`}
 function advSheet(){if(!advOpen)return '';const k=advOpen,x=ADV[k-1],dn=advDoneOn(k),late=today()!==advDay(k),p=late?Math.round(x.pt/2):x.pt;
- return `<div class="advm" role="dialog" aria-modal="true"><div class="advc"><span class="advn">${k}</span><small>${x.c?'Zu zweit':'Für dich'}</small><h2>${esc(x.t)}</h2><p>${esc(x.s)}</p>
+ return `<div class="advm" role="dialog" aria-modal="true"><div class="advc xmas">${advLights()}<span class="advn">${k}</span><small>${x.c?'Zu zweit':'Für dich'}</small><h2>${esc(x.t)}</h2><p>${esc(x.s)}</p>
  ${dn?`<p class="advok">Erledigt – ${dn===advDay(k)?'+'+x.pt:'+'+Math.round(x.pt/2)} Punkte</p>`:`<div class="advb">${x.w?`<button data-adv-wo="${x.w}">Jetzt starten ›</button>`:''}<button class="primary" data-adv-ok="${k}">Erledigt · +${p}${late?' (nachgeholt)':''}</button></div>`}
  <button class="ghost advx" data-adv-x>Schließen</button></div></div>`}
 let advEl=null;function advRender(){if(!advEl){advEl=document.createElement('div');document.body.appendChild(advEl)}advEl.innerHTML=advSheet()}

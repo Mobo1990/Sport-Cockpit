@@ -297,7 +297,7 @@ try:
         c6.goto("http://localhost:8765/"); c6.evaluate("localStorage.clear()"); c6.reload(); c6.wait_for_timeout(300)
         for k, v in [("name", "Michell"), ("year", "1990"), ("height", "182"), ("weight", "85")]: c6.fill("#p_" + k, v)
         c6.click("[data-ob=go]"); c6.wait_for_timeout(300)
-        check(c6.is_visible(".adv.tease") and "10 Tage" in c6.text_content(".adv.tease"), "November: Vorschau mit Countdown (noch 10 Tage)")
+        check(c6.is_visible(".adv.tease") and c6.text_content(".advcount b") == "10" and "Tage bis zum ersten Türchen" in c6.text_content(".advcount"), "November: Vorschau mit Countdown (noch 10 Tage)")
 
         check(not errs, "Keine JavaScript-Fehler" + ("" if not errs else ": " + "; ".join(errs)))
         b.close()
