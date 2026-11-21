@@ -210,7 +210,7 @@ try:
         pg.fill("#codeIn", "4000417025005"); pg.click("[data-n=code]")
         try: pg.wait_for_selector("#gIn", timeout=8000)
         except Exception: pass
-        check(pg.is_visible("#gIn") and pg.input_value("#gIn") == "50", "Barcode gefunden: Mengen-Schritt mit Portion (50 g)")
+        check(pg.is_visible("#gIn") and pg.input_value("#gIn") == "50", "Barcode gefunden: Mengen-Schritt mit Portion (50 g) " + str(pg.evaluate("JSON.stringify({st:sheet&&sheet.step,msg:sheet&&sheet.msg,g:sheet&&sheet.g,f:sheet&&sheet.food&&sheet.food.name})")))
         pg.click("[data-n=back]"); pg.wait_for_timeout(100)
         pg.unroute("https://world.openfoodfacts.org/api/v2/product/**"); pg.unroute("https://unpkg.com/**")
         print("Kein Springen")
