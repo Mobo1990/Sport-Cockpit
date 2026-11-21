@@ -150,7 +150,7 @@ function sheetRestore(p){const el=document.querySelector('.sheet:not(.ob) .sheet
  el.parentNode.classList.add('noanim');if(p.step===el.dataset.step)el.scrollTop=p.top;
  if(p.id){const i=document.getElementById(p.id);if(i&&document.activeElement!==i){i.focus({preventScroll:true});try{if(p.s!=null)i.setSelectionRange(p.s,p.e)}catch(x){}}}}
 function render(){const p=sheetSnap();renderCore();sheetRestore(p)}
-function renderCore(){memoReset();renderHead();const v=$('view');if(!profOK()){v.innerHTML=renderOnboarding();return}v.innerHTML=view==='home'?renderHome():view==='train'?renderTrain():view==='hist'?renderHist():view==='rec'?renderRec():view==='nut'?renderNut():view==='review'?renderReview():renderPlan()+`<div class="actions"><button data-a="view" data-v="hist">Verlauf aller Einheiten</button><button data-a="view" data-v="review">Rückblick</button></div>`+renderSettings()+renderAISettings();if(view==='nut')afterNut();
+function renderCore(){memoReset();renderHead();const v=$('view');if(!profOK()){v.innerHTML=renderOnboarding();return}v.innerHTML=view==='home'?renderHome():view==='train'?renderTrain():view==='hist'?renderHist():view==='rec'?renderRec():view==='nut'?renderNut():view==='review'?renderReview():view==='rew'?renderRewards():renderPlan()+`<div class="actions"><button data-a="view" data-v="hist">Verlauf aller Einheiten</button><button data-a="view" data-v="review">Rückblick</button><button data-a="view" data-v="rew">Belohnungen</button></div>`+renderSettings()+renderAISettings();if(view==='nut')afterNut();
  if(view==='rec'){const s=$('chart');if(s){if(ro)ro.disconnect();ro=new ResizeObserver(drawChart);ro.observe(s)}}}
 
 function finish(){const dr=draftFor(day),ex=[];

@@ -685,3 +685,26 @@ html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 .avawrap::after{background:var(--me-soft)}
 .wkbar.pa i,.wkbar.two s,.dot.pa{background:var(--pa-soft)}
 .weekbox .wkbar.two i,.wkc.cp .wkbar i,.dot.me{background:var(--me-soft)}
+/* Belohnungen */
+.rwline{display:block;width:100%;text-align:left;font:inherit;color:inherit;background:var(--s2);border:0;border-radius:12px;padding:12px;margin-top:14px;cursor:pointer}
+.rwline>div{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.rwline span{font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.rwline b{font-size:24px;font-weight:800}
+.rwline small{color:var(--mute);font-size:13px}
+.rwline i,.rwrow i{display:block;height:6px;border-radius:99px;background:#fff;overflow:hidden;margin-top:8px}
+.rwline i s,.rwrow i s{display:block;height:100%;background:linear-gradient(90deg,var(--me-soft),var(--pa-soft))}
+.rwh{margin:6px 0 10px;font-size:32px}
+.rwacc{background:linear-gradient(135deg,var(--pastel1),var(--pastel2));border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:var(--sh)}
+.rwacc span{display:block;font-size:12px;color:#857a86;text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.rwacc b{display:block;font-size:48px;line-height:1;font-weight:800}
+.rwacc small{color:#857a86;font-size:13px}
+.rwrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.rwrow:last-of-type{border-bottom:0}
+.rwrow b{display:block}.rwrow small{display:block;color:var(--mute);font-size:12px}
+.rwrow em{font:700 18px 'Barlow Condensed';font-style:normal;color:var(--pa)}
+.rwrow button{grid-column:1/-1;min-height:40px}
+.rwrow.muted b{color:var(--mute)}
+.rwform{display:grid;grid-template-columns:1fr 90px;gap:8px;margin-top:10px}
+.rwform button{grid-column:1/-1}
+.rwideas{margin-top:8px}
+.rwin p{margin:6px 0 10px;font-size:14px;color:var(--mute)}

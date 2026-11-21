@@ -13,7 +13,7 @@ for f in ("/tmp/calls.log", "/tmp/store.json", "/tmp/todo.json"):
 time.sleep(1.5)
 ok = 0
 def food_todo():
-    return [t for t in json.load(open("/tmp/todo.json")) if json.loads(t["description"] or "{}").get("kind") != "avatar"]
+    return [t for t in json.load(open("/tmp/todo.json")) if json.loads(t["description"] or "{}").get("kind") not in ("avatar", "reward")]
 def check(cond, msg):
     global ok
     if not cond: raise AssertionError(msg)
@@ -143,6 +143,15 @@ try:
         pg.click(".nav >> text=Start"); pg.click("[data-h=meal][data-m=f]"); pg.fill("#fq", "skyr"); pg.wait_for_timeout(200)
         pg.click(".frow >> nth=0"); pg.click("[data-n=addit]"); pg.wait_for_timeout(200)
         check("Skyr" in pg.text_content("#view"), "Lebensmittel eingetragen")
+        print("Belohnungen")
+        pg.click(".nav >> text=Mehr"); pg.click("text=Belohnungen"); pg.wait_for_timeout(200)
+        check(pg.is_visible(".rwacc") and "Paar-Konto" in pg.text_content(".rwacc"), "Belohnungen: Paar-Konto sichtbar")
+        pg.click("[data-rw=new]"); pg.click("[data-rw=idea] >> nth=1"); pg.wait_for_timeout(100)
+        check(pg.input_value("#rwN") == "Kino mit Popcorn", "Vorschlag aus den Ideen übernommen")
+        pg.fill("#rwC", "100"); pg.click("[data-rw=send]"); pg.wait_for_timeout(1500)
+        rw = [json.loads(t["description"]) for t in json.load(open("/tmp/todo.json")) if json.loads(t["description"] or "{}").get("kind") == "reward"]
+        check(len(rw) == 1 and rw[0]["st"] == "proposed" and rw[0]["by"] == "michell", "Belohnung vorgeschlagen, wartet auf Pauline")
+        pg.click("[data-a=view][data-v=home] >> nth=0"); pg.wait_for_timeout(100)
         print("Gemeinsam gegessen")
         pg.click(".nav >> text=Start"); pg.click("[data-h=meal][data-m=a]"); pg.fill("#fq", "reis"); pg.wait_for_timeout(200)
         pg.click(".frow >> nth=0"); pg.fill("#gIn", "200"); pg.wait_for_timeout(100)
@@ -257,6 +266,18 @@ try:
         c4.click("[data-ob=go]"); c4.wait_for_timeout(300)
         c4.click(".nav >> text=Mehr"); c4.fill("#haUrl", "http://localhost:8123"); c4.fill("#haTok", "tok2"); c4.click("[data-s=ha]"); c4.wait_for_timeout(2500)
         c4.click(".nav >> text=Start"); c4.wait_for_timeout(300)
+        check(c4.is_visible(".rwin") and "Kino mit Popcorn" in c4.text_content(".rwin"), "Pauline sieht den Vorschlag auf der Startseite")
+        c4.click(".rwin [data-rw=approve]"); c4.wait_for_timeout(1500)
+        rw = [json.loads(t["description"]) for t in json.load(open("/tmp/todo.json")) if json.loads(t["description"] or "{}").get("kind") == "reward"]
+        check(len(rw) == 1 and rw[0]["st"] == "active", "Pauline stimmt zu: Belohnung ist aktiv")
+        pg.evaluate("myTotal=()=>5000;shareFetch().then(()=>{view='rew';render()})"); pg.wait_for_timeout(1500)
+        check(pg.is_visible("[data-rw=redeem]"), "Michell kann einlösen (genug Punkte)")
+        pg.click("[data-rw=redeem]"); pg.wait_for_timeout(1500)
+        c4.evaluate("shareFetch()"); c4.wait_for_timeout(1500)
+        check(c4.is_visible(".rwin") and "möchte einlösen" in c4.text_content(".rwin"), "Pauline wird um Zustimmung zum Einlösen gebeten")
+        c4.click(".rwin [data-rw=confirm]"); c4.wait_for_timeout(1500)
+        pg.evaluate("shareFetch()"); pg.wait_for_timeout(1500)
+        check(pg.evaluate("rwBalance().spent") == 100 and pg.evaluate("REW.some(r=>r.st==='done')"), "Gemeinsam eingelöst: 100 Punkte abgebucht, in der Liste 'Eingelöst'")
         check(c4.is_visible(".board .ava.pa img") and "Michell" in c4.text_content(".board"), "Pauline sieht Michell mit Profilbild auf ihrer Tafel")
         check(c4.is_visible(".shin") and "Michell hat Abend" in c4.text_content(".shin") and "150 g" in c4.text_content(".shin"), "Pauline sieht: Michell hat Abend für dich eingetragen")
         c4.click(".shin [data-sh=pct][data-v='75']"); c4.wait_for_timeout(100)
