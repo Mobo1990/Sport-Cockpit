@@ -710,3 +710,6 @@ html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 .rwin p{margin:6px 0 10px;font-size:14px;color:var(--mute)}
 .v-rew .seg,.v-rew .dayrow,.v-rew .stats{display:none}
 .v-rew .top{padding-bottom:10px}
+/* Tafel-Hintergrund folgt dem Spielstand (Anteil an den Wochenpunkten) */
+:root{--bgme:#dfe9e2;--bgpa:#f4dfd7}
+.board.split{background:linear-gradient(90deg,var(--bgme) 0%,var(--bgme) calc(var(--split) - 16%),var(--bgpa) calc(var(--split) + 16%),var(--bgpa) 100%);transition:background .8s}
