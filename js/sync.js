@@ -43,6 +43,7 @@ addEventListener('online',()=>syncNow());
 function pcalc(){const g=goals(today());return `<div><b>${g.bmr?fmt(Math.round(g.bmr)):'–'}</b><small>Grundumsatz</small></div><div><b>${fmt(g.maint)}</b><small>Erhalt kcal</small></div><div><b>${fmt(g.kcal)}</b><small>Ziel kcal</small></div><div><b>${g.p}</b><small>Protein g</small></div>`}
 function renderProfile(){const P=S.prof,g=goals(today());const f=(k,l,ph,mode='decimal')=>`<div><label for="p_${k}">${l}</label><input id="p_${k}" inputmode="${mode}" data-p="${k}" placeholder="${ph}" value="${esc(P[k]??'')}"></div>`;
  return `<section class="meal"><header><h3>Mein Profil</h3><span>${P.name?esc(P.name):''}</span></header>
+ ${picProfileHtml()}
  <div class="cform">${f('name','Name','z. B. Michell','text')}<div><label>Geschlecht</label><div class="vars">${[['m','Mann'],['w','Frau']].map(([k,l])=>`<button data-ps="sex" data-v="${k}" aria-pressed="${P.sex===k}">${l}</button>`).join('')}</div></div>
  ${f('year','Geburtsjahr','z. B. 1990','numeric')}${f('height','Größe (cm)','z. B. 182','numeric')}${f('weight','Startgewicht (kg)','z. B. 85')}${f('wgoal','Wasser-Ziel (l/Tag)','2')}${f('sgoal','Schritt-Ziel pro Tag','10000','numeric')}
  <div class="full"><label>Alltag (ohne Training eingerechnet)</label><div class="vars">${[[1.4,'Büro, wenig Bewegung'],[1.55,'Büro + Training 3–4×'],[1.7,'Aktiv / Training 5–6×'],[1.85,'Körperlich harte Arbeit']].map(([v,l])=>`<button data-ps="act" data-v="${v}" aria-pressed="${S.prof.act==v}">${l}</button>`).join('')}</div></div></div>

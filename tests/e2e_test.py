@@ -12,6 +12,8 @@ for f in ("/tmp/calls.log", "/tmp/store.json", "/tmp/todo.json"):
     if os.path.exists(f): os.remove(f)
 time.sleep(1.5)
 ok = 0
+def food_todo():
+    return [t for t in json.load(open("/tmp/todo.json")) if json.loads(t["description"] or "{}").get("kind") != "avatar"]
 def check(cond, msg):
     global ok
     if not cond: raise AssertionError(msg)
@@ -93,6 +95,15 @@ try:
         check("Synchronisiert" in pg.text_content("#sync"), "Sync mit HA")
         check(pg.get_attribute("#sync", "data-st") == "ok", "Status-Punkt grün nach Sync")
 
+        print("Anzeigetafel & Profilbild")
+        pg.click(".nav >> text=Start"); pg.wait_for_timeout(200)
+        check(pg.is_visible(".board") and "Pauline" in pg.text_content(".board") and "Woche" in pg.text_content(".board"), "Anzeigetafel oben: du und Pauline mit Wochenpunkten")
+        import base64
+        open("/tmp/sc_face.png", "wb").write(base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAFklEQVR4nGNkYGBgYGBgYGBgYGBgAAAABQABkJ8yHQAAAABJRU5ErkJggg=="))
+        pg.set_input_files(".board input[data-pic=file]", "/tmp/sc_face.png"); pg.wait_for_timeout(1500)
+        check(pg.evaluate("(S.prof.pic||'').startsWith('data:image/jpeg') && S.prof.pic.length < 40000") and pg.is_visible(".board .ava.me img"), "Profilbild gewählt, klein gerechnet, auf der Tafel")
+        td = json.load(open("/tmp/todo.json"))
+        check(any(json.loads(t["description"]).get("kind") == "avatar" and json.loads(t["description"]).get("from") == "michell" for t in td), "Profilbild für Pauline in Home Assistant abgelegt")
         print("Gym Mode")
         pg.click(".nav >> text=Start"); pg.click(".tile.big"); pg.wait_for_timeout(300)
         check(pg.is_visible("#gym.on"), "Gym Mode öffnet")
@@ -139,7 +150,7 @@ try:
         pg.check("[data-sh-in=on]"); pg.wait_for_timeout(150)
         check(pg.input_value("#shG") == "200", "Paulines Menge vorgeschlagen (gleich viel)")
         pg.fill("#shG", "150"); pg.click("[data-n=addit]"); pg.wait_for_timeout(1500)
-        td = json.load(open("/tmp/todo.json"))
+        td = food_todo()
         check(len(td) == 1 and json.loads(td[0]["description"])["to"] == "pauline" and json.loads(td[0]["description"])["items"][0]["g"] == 150, "Geteiltes Essen liegt für Pauline bereit (150 g)")
         check(pg.evaluate("S.nut.shr") < 1, "Verhältnis gelernt (Pauline isst weniger)")
         print("Suche")
@@ -246,15 +257,16 @@ try:
         c4.click("[data-ob=go]"); c4.wait_for_timeout(300)
         c4.click(".nav >> text=Mehr"); c4.fill("#haUrl", "http://localhost:8123"); c4.fill("#haTok", "tok2"); c4.click("[data-s=ha]"); c4.wait_for_timeout(2500)
         c4.click(".nav >> text=Start"); c4.wait_for_timeout(300)
+        check(c4.is_visible(".board .ava.pa img") and "Michell" in c4.text_content(".board"), "Pauline sieht Michell mit Profilbild auf ihrer Tafel")
         check(c4.is_visible(".shin") and "Michell hat Abend" in c4.text_content(".shin") and "150 g" in c4.text_content(".shin"), "Pauline sieht: Michell hat Abend für dich eingetragen")
         c4.click(".shin [data-sh=pct][data-v='75']"); c4.wait_for_timeout(100)
         check("113 g" in c4.text_content(".shin"), "Portion anpassbar (75 % = 113 g)")
         c4.click(".shin [data-sh=ok]"); c4.wait_for_timeout(1000)
-        check(c4.evaluate("S.nut.days[today()].items.some(i=>i.g===113&&i.meal==='a')") and not c4.is_visible(".shin") and json.load(open("/tmp/todo.json")) == [], "Übernommen: steht in Paulines Abendessen, Liste ist wieder leer")
+        check(c4.evaluate("S.nut.days[today()].items.some(i=>i.g===113&&i.meal==='a')") and not c4.is_visible(".shin") and food_todo() == [], "Übernommen: steht in Paulines Abendessen, Liste ist wieder leer")
         c4.evaluate("haCall([{type:'call_service',domain:'todo',service:'add_item',target:{entity_id:SHARE_E},service_data:{item:'Siri',description:JSON.stringify({v:1,kind:'say',to:'pauline',text:'200 g Reis',from:'Siri'})}}]).then(()=>shareFetch())"); c4.wait_for_timeout(1500)
         check(c4.is_visible(".shin.say") and "200 g Reis" in c4.text_content(".shin.say"), "Siri-Notiz erscheint als Karte")
         c4.click("[data-say=siri]"); c4.wait_for_timeout(800)
-        check(c4.locator(".airow").count() == 1 and json.load(open("/tmp/todo.json")) == [], "Siri-Notiz wird erkannt und aus der Liste entfernt")
+        check(c4.locator(".airow").count() == 1 and food_todo() == [], "Siri-Notiz wird erkannt und aus der Liste entfernt")
         c4.click("[data-ai=add]"); c4.wait_for_timeout(200)
 
         print("Ganze Mahlzeit teilen")
@@ -262,7 +274,7 @@ try:
         pg.click("[data-sh=meal][data-m=a]"); pg.wait_for_timeout(200)
         check(pg.is_visible(".shlist") and pg.locator(".shrow").count() >= 1, "Mahlzeit-Teilen zeigt alle Zutaten mit Mengen für Pauline")
         pg.click("[data-sh=ratio][data-v='50']"); pg.wait_for_timeout(100); pg.click("[data-sh=send]"); pg.wait_for_timeout(1500)
-        td = json.load(open("/tmp/todo.json"))
+        td = food_todo()
         check(len(td) == 1 and json.loads(td[0]["description"])["items"][0]["g"] == 100, "Ganze Mahlzeit mit 50 % an Pauline geschickt")
 
         print("Adventskalender")
