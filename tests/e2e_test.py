@@ -150,7 +150,7 @@ try:
         check("Skyr" in pg.text_content("#view"), "Lebensmittel eingetragen")
         print("Belohnungen")
         pg.click(".nav [data-v=rew]"); pg.wait_for_timeout(200)
-        check(pg.is_visible(".rwacc") and "Paar-Konto" in pg.text_content(".rwacc"), "Tab Belohnungen unten in der Leiste öffnet die Belohnungen mit Paar-Konto")
+        check(pg.is_visible(".rwacc") and "Unser Punktekonto" in pg.text_content(".rwacc") and pg.locator(".rwacc .rwduo .ava").count() == 2, "Tab Belohnung öffnet das gemeinsame Punktekonto mit beiden Profilbildern")
         pg.click("[data-rw=new]"); pg.click("[data-rw=idea] >> nth=1"); pg.wait_for_timeout(100)
         check(pg.input_value("#rwN") == "Kino mit Popcorn", "Vorschlag aus den Ideen übernommen")
         check(pg.evaluate("rwIcon('Kinoabend mit Popcorn').includes(RW_IC.popcorn) && rwIcon('Sushi-Abend').includes(RW_IC.sushi) && rwIcon('Irgendwas').includes(RW_IC.gift)"), "Belohnungen bekommen passende Symbole (sonst Geschenk)")

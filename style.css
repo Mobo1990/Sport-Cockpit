@@ -743,3 +743,11 @@ html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 .rwtier h4{margin:0;font:800 20px 'Barlow Condensed';text-transform:uppercase;letter-spacing:.3px}.rwtier span{font-size:12px;color:var(--mute);font-weight:600}
 .rwlist{background:none;box-shadow:none;border:0;padding-left:0;padding-right:0}
 .sayerr{margin:0 0 8px;padding:10px 12px;border-radius:12px;background:#f4dfd7;font-size:13px;line-height:1.35}
+/* Gemeinsames Punktekonto */
+.rwacc{position:relative;text-align:center;padding:18px 16px 16px}
+.rwduo{display:flex;justify-content:center;margin-bottom:8px}.rwduo .ava{width:56px;height:56px;border-width:3px;box-shadow:0 0 0 3px #fff}.rwduo .ava+.ava{margin-left:-14px}
+.rwacc>span{display:block}.rwacc>b{margin:2px 0 10px}
+.rwsplit{display:flex;height:10px;border-radius:99px;overflow:hidden;background:var(--pa-soft)}.rwsplit i{display:block;background:var(--me-soft)}.rwsplit s{flex:1}
+.rwwho{display:flex;justify-content:space-between;margin-top:6px;font-size:13px;color:#6b6470;font-weight:600}.rwwho .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:1px}
+.rwacc .rwduo .ava{display:grid;place-items:center;font-size:22px;letter-spacing:0;text-transform:none;color:inherit}
+.rwacc .rwwho span{display:inline;font-size:13px;text-transform:none;letter-spacing:0;color:#6b6470}

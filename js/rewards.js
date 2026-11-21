@@ -49,10 +49,15 @@ function rwInboxHtml(){const me=meSlug();return REW.filter(r=>(r.st==='proposed'
 /* Zeile in der Woche-Karte */
 function rwLineHtml(){if(!HA.token)return '';const b=rwBalance(),next=REW.filter(r=>r.st==='active').sort((a,c)=>a.cost-c.cost)[0];
  return `<button class="rwline" data-a="view" data-v="rew"><div><span>Paar-Konto</span><b class="cond">${fmt(b.bal)}</b>${next?`<small>→ ${esc(next.name)} · ${fmt(next.cost)}</small>`:'<small>Belohnungen festlegen ›</small>'}</div>${next?`<i><s style="width:${Math.min(b.bal/next.cost,1)*100}%"></s></i>`:''}</button>`}
+/* Gemeinsames Konto: beide Profilbilder, Summe, Anteile */
+function rwAccHtml(b,p){const me=S.prof.name||'Ich',tot=Math.max(1,b.me+b.pa),sm=b.me/tot*100;
+ return `<section class="rwacc"><div class="rwduo">${avaHtml(me,true)}${p?avaHtml(p.name,false):''}</div><span>Unser Punktekonto</span><b class="cond">${fmt(b.bal)}</b>
+ ${p?`<div class="rwsplit"><i style="width:${sm.toFixed(1)}%"></i><s></s></div><div class="rwwho"><span><i class="dot me"></i>${esc(me)} ${fmt(b.me)}</span><span><i class="dot pa"></i>${esc(p.name)} ${fmt(b.pa)}</span></div>`:'<small>Partner noch nicht verbunden</small>'}
+ ${b.spent?`<small>Schon eingelöst: ${fmt(b.spent)} Punkte</small>`:''}</section>`}
 function renderRewards(){const b=rwBalance(),p=rwPartner(),me=meSlug(),act=REW.filter(r=>r.st==='active'||r.st==='redeem').sort((a,c)=>a.cost-c.cost),prop=REW.filter(r=>r.st==='proposed'),done=REW.filter(r=>r.st==='done').sort((a,c)=>(c.at||'').localeCompare(a.at||''));
  if(!HA.token)return `<section class="meal"><header><h3>Belohnungen</h3></header><p class="tip" style="padding:0">Belohnungen funktionieren zu zweit über Home Assistant. Verbinde die App unter „Mehr → Home Assistant“.</p></section>`;
  return `<h2 class="rwh">Belohnungen</h2>
- <section class="rwacc"><span>Paar-Konto</span><b class="cond">${fmt(b.bal)}</b><small>${esc(S.prof.name||'Ich')} ${fmt(b.me)} · ${p?esc(p.name)+' '+fmt(b.pa):'Partner noch nicht verbunden'} · eingelöst ${fmt(b.spent)}</small></section>
+ ${rwAccHtml(b,p)}
  ${rwInboxHtml()}
  <section class="meal rwlist"><header><h3>Gemeinsame Belohnungen</h3></header>
  ${act.length?RW_TIERS.map((T,ti)=>{const lo=ti?RW_TIERS[ti-1].max:0,list=act.filter(r=>r.cost>lo&&r.cost<=T.max);if(!list.length)return '';return `<div class="rwtier"><h4>${T.t}</h4><span>${T.r}</span></div><div class="rwgrid">${list.map((r,i)=>{const can=b.bal>=r.cost,waiting=r.st==='redeem';return `<div class="rwtile t-${RW_TONES[i%3]}${can&&!waiting?' ready':''}"><span class="rwic">${rwIcon(r.name)}</span><b>${esc(r.name)}</b><em class="cond">${fmt(r.cost)}<small> Punkte</small></em>
