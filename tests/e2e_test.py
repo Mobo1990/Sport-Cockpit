@@ -2,7 +2,7 @@
 Startet einen lokalen Webserver und einen nachgebauten Home Assistant, spielt die
 wichtigsten Abläufe im Browser durch und bricht bei Fehlern ab.
 Aufruf:  python3 tests/e2e_test.py"""
-import json, os, subprocess, sys, time, pathlib
+import json, os, subprocess, sys, time, pathlib, datetime
 from playwright.sync_api import sync_playwright
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -201,6 +201,17 @@ try:
         req = [x for x in api_reqs if "Gesagt" in json.dumps(x)]
         check(bool(req) and req[-1].get("output_config", {}).get("format", {}).get("type") == "json_schema", "Anfrage nutzt strukturierte Ausgabe (JSON-Schema)")
         pg.click("[data-n=back]"); pg.wait_for_timeout(100); pg.click("[data-n=close]"); pg.wait_for_timeout(100)
+        print("Wochen- und Paar-Challenge")
+        pg.click(".nav >> text=Start"); pg.wait_for_timeout(200)
+        check(pg.locator(".wkc").count() == 2 and "Pauline" in pg.text_content(".wkc.cp"), "Wochen-Challenge und Paar-Challenge mit Pauline auf der Startseite")
+        check(pg.evaluate("myWeekStats().s") >= 1, "Wochenwerte zählen das Training von heute")
+        pt0 = int(pg.text_content(".pts b"))
+        pg.evaluate("weekly=()=>({k:'s',g:1,t:'1 Training',u:'Einheiten',s:'Test'});partners=[{name:'Pauline',d:today(),w:{s:9}}];couple=()=>({k:'s',g:5,m:'sum',t:'Zusammen 5 Trainings',u:'Einheiten'});render()"); pg.wait_for_timeout(200)
+        check("Wochen-Challenge +50" in pg.text_content(".chips") and "Paar-Challenge +75" in pg.text_content(".chips") and int(pg.text_content(".pts b")) == pt0 + 125, "Geschafft: +50 und +75, einmal pro Woche")
+        pg.evaluate("render()"); pg.wait_for_timeout(100)
+        check(int(pg.text_content(".pts b")) == pt0 + 125, "Kein doppeltes Buchen beim Neuzeichnen")
+        pg.evaluate("publish()"); pg.wait_for_timeout(800)
+        check('\\"w\\":{' in open("/tmp/calls.log").read(), "Wochenwerte gehen an Home Assistant (für den Partner)")
         print("Rückblick & Coach")
         pg.click(".nav >> text=Mehr"); pg.click("text=Rückblick"); pg.wait_for_timeout(200)
         check(pg.is_visible(".rvgrid"), "Rückblick zeigt Kennzahlen")
@@ -253,6 +264,28 @@ try:
         pg.click("[data-sh=ratio][data-v='50']"); pg.wait_for_timeout(100); pg.click("[data-sh=send]"); pg.wait_for_timeout(1500)
         td = json.load(open("/tmp/todo.json"))
         check(len(td) == 1 and json.loads(td[0]["description"])["items"][0]["g"] == 100, "Ganze Mahlzeit mit 50 % an Pauline geschickt")
+
+        print("Adventskalender")
+        c5 = b.new_page(viewport={"width": 400, "height": 860}); c5.on("pageerror", lambda e: errs.append(str(e)))
+        c5.clock.install(time=datetime.datetime(2026, 12, 3, 19, 0))
+        c5.goto("http://localhost:8765/"); c5.evaluate("localStorage.clear()"); c5.reload(); c5.wait_for_timeout(300)
+        for k, v in [("name", "Michell"), ("year", "1990"), ("height", "182"), ("weight", "85")]: c5.fill("#p_" + k, v)
+        c5.click("[data-ob=go]"); c5.wait_for_timeout(300)
+        check(c5.is_visible(".adv") and c5.locator(".advd").count() == 24 and "Türchen 3" in c5.text_content(".adv"), "Kalender mit 24 Türchen, heute Türchen 3")
+        c5.click("[data-adv='5']"); c5.wait_for_timeout(200)
+        check(not c5.is_visible(".advm") and "5. Dezember" in c5.text_content("#sync"), "Türchen 5 ist noch zu")
+        pt0 = int(c5.text_content(".pts b"))
+        c5.click("[data-adv='3']"); c5.wait_for_timeout(900)
+        check(c5.is_visible(".advm") and "Punsch-Pause" in c5.text_content(".advm"), "Türchen 3 geht auf: Punsch-Pause")
+        c5.click("[data-adv-ok]"); c5.wait_for_timeout(200)
+        check(int(c5.text_content(".pts b")) == pt0 + 15 and c5.is_visible(".advd.done"), "Erledigt am Tag: +15, Türchen abgehakt")
+        c5.click("[data-adv='1']"); c5.wait_for_timeout(900); c5.click("[data-adv-ok]"); c5.wait_for_timeout(200)
+        check(int(c5.text_content(".pts b")) == pt0 + 15 + 8, "Nachgeholt (Türchen 1): halbe Punkte (+8)")
+        c6 = b.new_page(viewport={"width": 400, "height": 860}); c6.clock.install(time=datetime.datetime(2026, 11, 21, 10, 0))
+        c6.goto("http://localhost:8765/"); c6.evaluate("localStorage.clear()"); c6.reload(); c6.wait_for_timeout(300)
+        for k, v in [("name", "Michell"), ("year", "1990"), ("height", "182"), ("weight", "85")]: c6.fill("#p_" + k, v)
+        c6.click("[data-ob=go]"); c6.wait_for_timeout(300)
+        check(c6.is_visible(".adv.tease") and "10 Tage" in c6.text_content(".adv.tease"), "November: Vorschau mit Countdown (noch 10 Tage)")
 
         check(not errs, "Keine JavaScript-Fehler" + ("" if not errs else ": " + "; ".join(errs)))
         b.close()

@@ -68,6 +68,8 @@ function dayScore(d){const g=goals(d),t=totals(d),day=S.nut.days[d]||{},ss=S.ses
  if(day.af){const n=afStreak(d),p=afPts(n)+(AF_MS[n]||0);pt+=p;why.push(`Alkoholfrei Tag ${n} +${p}`)}
  const chp=chPoints(d);if(chp){pt+=chp;why.push((chDone(d).length===3?'Alle Challenges +':'Challenges +')+chp)}
  if(day.w){pt+=5;why.push('Gewogen +5')}if((day.water||0)>=waterGoal()){pt+=10;why.push('Wasserziel +10')}
+ if(day.wkc){pt+=WK_PTS;why.push('Wochen-Challenge +'+WK_PTS)}if(day.cpc){pt+=CP_PTS;why.push('Paar-Challenge +'+CP_PTS)}
+ {const ap=advPoints(d);if(ap){pt+=ap;why.push('Adventstürchen +'+ap)}}
  const prn=ss.reduce((a,s)=>a+(s.prn||0),0);if(prn){pt+=10*prn;why.push(prn+'× Bestwert +'+10*prn)}
  return{pt,why,g,t,c,tr:tr?DAYS[tr.day].n:''}}
 function weekScore(){const m=new Date(wk(Date.now()));let sum=0;for(let i=0;i<7;i++){const d=new Date(m);d.setDate(d.getDate()+i);if(d>new Date())break;sum+=dayScore(iso(d)).pt}return sum}
@@ -77,7 +79,7 @@ function healthLink(){if(!HA.token)return '';const age=S.hT?Date.now()-S.hT:Infi
 function scoreLine(){const s=dayScore(today());return healthLink()+`<p class="nline" data-a="view" data-v="nut">Heute <b>${s.pt} Punkte</b> · Woche <b>${weekScore()}</b>${s.why.length?' · '+s.why.join(', '):' · Trainiere, iss im Ziel und trink genug, um Punkte zu sammeln'}</p>`}
 let lastPub='';
 async function publish(){if(!HA.token||!S.prof.name)return;const d=today(),s=dayScore(d);
- const v=JSON.stringify({d,k:Math.round(s.t.kcal),kz:s.g.kcal,p:Math.round(s.t.p),pz:s.g.p,tr:s.tr,c:Math.round(s.c),pt:s.pt,wp:weekScore()});if(v===lastPub)return;
+ const v=JSON.stringify({d,k:Math.round(s.t.kcal),kz:s.g.kcal,p:Math.round(s.t.p),pz:s.g.p,tr:s.tr,c:Math.round(s.c),pt:s.pt,wp:weekScore(),w:myWeekStats()});if(v===lastPub)return;
  try{const r=await haCall([{type:'call_service',domain:'input_text',service:'set_value',service_data:{entity_id:'input_text.sport_cockpit_'+slugN(S.prof.name),value:v.slice(0,255)}}]);if(r[0]&&r[0].success)lastPub=v}catch(e){}
  const dd=S.nut.days[d];if(dd&&s.t.p>=s.g.p&&!dd.pg){dd.pg=1;touch(d);tell('Proteinziel geschafft','💪 '+S.prof.name+' hat heute '+Math.round(s.t.p)+' g Protein gegessen.')}}
 async function tell(titel,nachricht){if(!HA.token||!S.prof.name)return;try{await haCall([{type:'call_service',domain:'script',service:'sport_cockpit_meldung',service_data:{von:S.prof.name,titel,nachricht}}])}catch(e){}}

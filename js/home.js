@@ -1,7 +1,7 @@
 /* Sport Cockpit – Startseite */
 'use strict';
 /* ===================== STARTSEITE ===================== */
-function renderHome(){const d=today(),sc=dayScore(d),g=sc.g,t=sc.t,hr=new Date().getHours(),gr=hr<11?'Guten Morgen':hr<17?'Hallo':'Guten Abend';
+function renderHome(){weeklyCheck();const d=today(),sc=dayScore(d),g=sc.g,t=sc.t,hr=new Date().getHours(),gr=hr<11?'Guten Morgen':hr<17?'Hallo':'Guten Abend';
  const ld=lastDay(),nx=ld?DAYS[ld].nx:'push',run=Object.entries(drafts).find(([k,dr])=>dr&&dr.ex&&Object.values(dr.ex).some(r=>r.some(x=>x.done)));
  const runSets=run?Object.values(run[1].ex).reduce((a,r)=>a+r.filter(x=>x.done).length,0):0;
  const dayW=(S.nut.days[d]||{}).w,water=(S.nut.days[d]||{}).water||0;
@@ -19,10 +19,12 @@ function renderHome(){const d=today(),sc=dayScore(d),g=sc.g,t=sc.t,hr=new Date()
   <div><div class="tl"><span>Kalorien</span><span><b>${fmt(Math.round(t.kcal))}</b> / ${fmt(g.kcal)}</span></div>${rbar(t.kcal,g.kcal,'eat')}</div>
   <div><div class="tl"><span>Protein</span><span><b>${fmt(Math.round(t.p))}</b> / ${g.p} g</span></div>${rbar(t.p,g.p,'up')}</div></div>
   <div class="tf"><span>${g.kcal-t.kcal>=0?fmt(Math.round(g.kcal-t.kcal))+' kcal frei':fmt(Math.round(t.kcal-g.kcal))+' kcal drüber'} · KH ${fmt(Math.round(t.c))}/${fmt(g.c)} · Fett ${fmt(Math.round(t.f))}/${fmt(g.f)}</span><em>Details ›</em></div></button>
+ ${advHtml()}
  ${goalsHtml()}
  ${afHtml()}
  ${coachHtml(3)}
  ${chHtml()}
+ ${weeklyHtml()}
  <h3 class="sh">Essen eintragen</h3><button class="primary eatnow" data-eatnow="1">+ Jetzt eintragen <small>· ${mealName(mealNow())}</small></button><div class="quick">${MEALS.map(([m,l])=>{const k=(S.nut.days[d]||{items:[]}).items.filter(i=>i.meal===m).reduce((a,i)=>a+i.kcal,0);return `<button data-h="meal" data-m="${m}"><b>${l}</b><span>${k?fmt(k)+' kcal':'+ eintragen'}</span></button>`}).join('')}</div>
  ${snackHtml()}
  <h3 class="sh">Schnell erledigt</h3><div class="quick q2">
