@@ -657,3 +657,6 @@ html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 .tile.big b{color:var(--ink)}
 .tile.big::after{border-color:#ffd2c4;opacity:1}
 .tile.big::before{background:#fff}
+/* Türkisgrün-Pastell */
+:root{--me:#1fa596;--pastel1:#d9f6f0;--pastel2:#f1ecff;--mint1:#cdf1e9;--mint2:#e3f7f3}
+.tile.big small,.tile.big span{color:#4d7c72}
