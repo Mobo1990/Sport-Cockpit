@@ -15,24 +15,18 @@ function renderHome(){weeklyCheck();const d=today(),sc=dayScore(d),g=sc.g,t=sc.t
  <section class="tiles">
   <button class="tile big" data-gym="1" data-d="${run?run[0]:nx}"><small>${run?'Training läuft':'Als Nächstes'}</small><b>${DAYS[run?run[0]:nx].n}</b><span>${run?runSets+' Sätze erledigt – weiter':DAYS[nx].sub}</span><em>${run?'Fortsetzen':'Training starten'} ›</em></button>
   </section>
+ ${advHtml()}
+ <section class="todaybox"><div class="tbh"><b>Heute</b><span>${sc.pt} Punkte</span></div>
  <button class="eatday" data-a="view" data-v="nut" aria-label="Essen heute, zum Essen-Tab"><div class="trow">
   <div><div class="tl"><span>Kalorien</span><span><b>${fmt(Math.round(t.kcal))}</b> / ${fmt(g.kcal)}</span></div>${rbar(t.kcal,g.kcal,'eat')}</div>
   <div><div class="tl"><span>Protein</span><span><b>${fmt(Math.round(t.p))}</b> / ${g.p} g</span></div>${rbar(t.p,g.p,'up')}</div></div>
-  <div class="tf"><span>${g.kcal-t.kcal>=0?fmt(Math.round(g.kcal-t.kcal))+' kcal frei':fmt(Math.round(t.kcal-g.kcal))+' kcal drüber'} · KH ${fmt(Math.round(t.c))}/${fmt(g.c)} · Fett ${fmt(Math.round(t.f))}/${fmt(g.f)}</span><em>Details ›</em></div></button>
- ${advHtml()}
+  <div class="tf"><span>${g.kcal-t.kcal>=0?fmt(Math.round(g.kcal-t.kcal))+' kcal frei':fmt(Math.round(t.kcal-g.kcal))+' kcal drüber'}</span><em>Details ›</em></div></button>
+ <div class="tmeals">${MEALS.map(([m,l])=>{const k=(S.nut.days[d]||{items:[]}).items.filter(i=>i.meal===m).reduce((a,i)=>a+i.kcal,0);return `<button data-h="meal" data-m="${m}"${m===mealNow()?' class="now"':''}><b>+ ${l}</b>${k?`<span>${fmt(k)} kcal</span>`:''}</button>`}).join('')}</div>
  ${goalsHtml()}
  ${afHtml()}
- ${coachHtml(3)}
  ${chHtml()}
- ${weeklyHtml()}
- <h3 class="sh">Essen eintragen</h3><button class="primary eatnow" data-eatnow="1">+ Jetzt eintragen <small>· ${mealName(mealNow())}</small></button><div class="quick">${MEALS.map(([m,l])=>{const k=(S.nut.days[d]||{items:[]}).items.filter(i=>i.meal===m).reduce((a,i)=>a+i.kcal,0);return `<button data-h="meal" data-m="${m}"><b>${l}</b><span>${k?fmt(k)+' kcal':'+ eintragen'}</span></button>`}).join('')}</div>
- ${snackHtml()}
- <h3 class="sh">Schnell erledigt</h3><div class="quick q2">
-  <div class="qw"><b>Gewicht</b><div class="wrow" style="margin:6px 0 0"><input id="hW" inputmode="decimal" placeholder="${lastWeight()?fmt(lastWeight()):'kg'}" value="${dayW?fmt(dayW):''}" aria-label="Gewicht"><button data-h="w">${dayW?'✓':'Speichern'}</button></div></div>
-  <button data-h="cardio"><b>Cardio</b><span>${sc.c?sc.c+' min heute':'+ eintragen'}</span></button>
-  <button data-h="rec"><b>Kraft & Muskeln</b><span>Kurven, Muskel-Karte</span></button><button data-a="view" data-v="review"><b>Rückblick</b><span>Woche & Monat teilen</span></button><button data-gym="1" data-d="${nx}"><b>Gym Mode</b><span>Übung für Übung, Vollbild</span></button></div>
- <h3 class="sh">Diese Woche · ${cnt} / ${S.goal} Krafteinheiten</h3><div class="week hw">${$('week')?$('week').innerHTML:''}</div>
- ${last.length?`<h3 class="sh">Zuletzt</h3>${last.map(s=>`<button class="frow" data-a="view" data-v="hist"><div><b>${s.ex.length?DAYS[s.day].n:'Cardio'} · ${dstr(s.date)}</b><small>${s.ex.length?s.ex.reduce((a,x)=>a+x.sets.length,0)+' Sätze · '+fmt(Math.round(vol(s)))+' kg':''}${(s.cardio||[]).length?' '+s.cardio.reduce((a,c)=>a+c.min,0)+' min Cardio':''}</small></div><span>›</span></button>`).join('')}<div class="actions"><button class="ghost" data-a="view" data-v="hist">Ganzer Verlauf</button></div>`:''}`}
+ </section>
+ <section class="weekbox">${weeklyHtml()}</section>`}
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-h]');if(!b)return;const a=b.dataset.h,d=today();
  if(a==='train'){day=b.dataset.d;view='train'}
  else if(a==='meal'){view='nut';nDate=d;sheet={meal:b.dataset.m,step:'search',q:'',focus:true}}

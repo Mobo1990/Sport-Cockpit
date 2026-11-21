@@ -612,3 +612,48 @@ html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 .advm.grid{align-items:center}
 .adv.xmas.full{width:100%;max-width:420px;max-height:88vh;overflow:auto;margin:0}
 .advclose{margin-left:auto;min-height:34px;width:34px;padding:0;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;border:0;font-size:15px}
+/* Startseite aufgeräumt: eine Karte "Heute", eine Karte "Woche" */
+.todaybox,.weekbox{background:var(--s1);border-radius:var(--r);box-shadow:var(--sh);padding:14px;margin:10px 0 12px}
+.tbh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.tbh b{font:800 24px 'Barlow Condensed'}
+.tbh span{font:700 16px 'Barlow Condensed';color:var(--acc)}
+.todaybox .eatday{box-shadow:none;background:none;padding:0;margin:4px 0 0}
+.tmeals{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:10px 0 2px}
+.tmeals button{min-height:44px;padding:4px 2px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--s2);border:0;border-radius:10px;font-size:12px;line-height:1.15}
+.tmeals button b{font-weight:700}
+.tmeals button span{font-size:11px;color:var(--mute)}
+.tmeals button.now{background:var(--acc2);color:#b8361a}
+.todaybox .dgoals{margin:12px 0 0;padding-top:12px;border-top:1px solid var(--line)}
+.todaybox .dg{box-shadow:none;background:var(--s2);padding:12px}
+.todaybox .afc{box-shadow:none;background:none;padding:12px 0 0;margin:12px 0 0;border-top:1px solid var(--line);border-radius:0;gap:10px}
+.todaybox .afn b{font-size:34px}
+.todaybox .sh{margin:14px 0 8px;padding-top:12px;border-top:1px solid var(--line);font-size:20px}
+.todaybox .chl{gap:0}
+.todaybox .chi{box-shadow:none;background:none;border-radius:0;padding:10px 0;border-bottom:1px solid var(--line)}
+.todaybox .chi:last-child{border-bottom:0;padding-bottom:0}
+.weekbox .sh{margin:0 0 8px}
+.weekbox .wkc{box-shadow:none;background:none;padding:0;margin:0}
+.weekbox .wkc+.wkc{margin-top:14px;padding-top:14px;border-top:1px solid var(--line);border-radius:0}
+.weekbox .wkc.done{box-shadow:none}
+/* Pastell statt Schwarz: Anzeigetafel und Training-Karte */
+:root{--me:#6f7fe8;--pa:#ff7f5f;--pastel1:#ffeae1;--pastel2:#efe9ff;--mint1:#e2f6ec;--mint2:#e8f0ff}
+.board{background:linear-gradient(135deg,var(--pastel1) 0%,var(--pastel2) 100%);color:var(--ink);box-shadow:var(--sh)}
+.board small,.bmid .bk,.bhint{color:#857a86}
+.board .pts b{color:var(--me)}
+.board .bp.pa .bpt{color:var(--pa)}
+.bmid b{color:var(--ink)}
+.bmid b i{color:#c9bcc9}
+.bmid em{color:#857a86}.bmid em.me{color:var(--me)}.bmid em.pa{color:var(--pa)}
+.bbar{background:var(--pa);opacity:.9}
+.bbar i{background:var(--me)}
+.ava{background:#fff;border-color:var(--me)}
+.ava.pa{border-color:var(--pa)}
+.ava i{color:var(--me)}
+.ava.pa i{color:var(--pa)}
+.avawrap::after{background:var(--me);border-color:#fff}
+.crown{fill:#ffc83d;stroke:#fff}
+.tile.big{background:linear-gradient(135deg,var(--mint1) 0%,var(--mint2) 100%);border-color:transparent;color:var(--ink);box-shadow:var(--sh)}
+.tile.big small,.tile.big span{color:#5f7a6e}
+.tile.big b{color:var(--ink)}
+.tile.big::after{border-color:#ffd2c4;opacity:1}
+.tile.big::before{background:#fff}
