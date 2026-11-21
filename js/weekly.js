@@ -38,11 +38,15 @@ function weeklyCheck(){const me=myWeekStats(),w=weekly(),c=couple(),pw=partnerWe
  if(me[w.k]>=w.g&&!weekFlag('wkc')){ND(today()).wkc=1;touch(today());toast('Wochen-Challenge geschafft!',`${w.t} · +${WK_PTS} Punkte`);tell(`${S.prof.name} hat die Wochen-Challenge geschafft`,`${w.t} – erledigt. Und du?`)}
  if(pw){const v=+(pw.w[c.k]||0),done=c.m==='both'?Math.min(me[c.k],v)>=c.g:me[c.k]+v>=c.g;
   if(done&&!weekFlag('cpc')){ND(today()).cpc=1;touch(today());toast('Paar-Challenge geschafft!',`${c.t} · +${CP_PTS} Punkte für euch beide`)}}}
+/* Kurz-Workouts direkt starten (für die Wochen-Challenge „3 Kurz-Workouts“) */
+function woPickHtml(){const dn=(S.nut.days[today()]||{}).ch||[];
+ return `<div class="wopick">${[['core','wo_core','Core','6 min'],['zirkel','wo_zirkel','Zirkel','7 min'],['mobil','wo_mobil','Mobility','5 min']].map(([k,id,n,m])=>{const ok=dn.includes(id);
+  return `<button class="${ok?'ok':''}" data-wo="${k}" data-woc="${id}"${ok?' aria-pressed="true"':''}><b>${n}</b><small>${ok?'heute erledigt':m+' · Start ›'}</small></button>`}).join('')}</div><p class="wohint">Jedes Workout zählt einmal pro Tag.</p>`}
 function daysLeft(){const n=7-weekDaysIso().length;return n===0?'letzter Tag':n===1?'noch 1 Tag':`noch ${n} Tage`}
 const fmtV=(k,v)=>fmt(k==='st'?Math.round(v):v);
 function weeklyHtml(){weeklyCheck();const me=myWeekStats(),w=weekly(),c=couple(),pw=partnerWeek(),wd=weekFlag('wkc'),cd=weekFlag('cpc'),pc=Math.min(me[w.k]/w.g,1)*100;
  let h=`<h3 class="sh">Challenges der Woche <small class="chn">${daysLeft()}</small></h3><section class="wkc${wd?' done':''}"><div class="wkh"><span>Wochen-Challenge</span><em>+${WK_PTS}</em></div><b>${esc(w.t)}</b><small>${esc(w.s)}</small>
- <div class="wkbar"><i style="width:${pc.toFixed(1)}%"></i></div><div class="wkf"><span>${fmtV(w.k,Math.min(me[w.k],w.g))} / ${fmtV(w.k,w.g)} ${w.u}</span><span>${wd?'Geschafft':Math.round(pc)+' %'}</span></div></section>`;
+ <div class="wkbar"><i style="width:${pc.toFixed(1)}%"></i></div><div class="wkf"><span>${fmtV(w.k,Math.min(me[w.k],w.g))} / ${fmtV(w.k,w.g)} ${w.u}</span><span>${wd?'Geschafft':Math.round(pc)+' %'}</span></div>${w.k==='o'?woPickHtml():''}</section>`;
  if(pw){const v=+(pw.w[c.k]||0),both=c.m==='both',a=both?Math.min(me[c.k],c.g):Math.min(me[c.k],c.g),b=both?Math.min(v,c.g):Math.min(v,Math.max(0,c.g-a)),
   sum=me[c.k]+v,pa=both?a/c.g*50:a/c.g*100,pb=both?b/c.g*50:b/c.g*100;
   h+=`<section class="wkc cp${cd?' done':''}"><div class="wkh"><span>Paar-Challenge</span><em>+${CP_PTS} für beide</em></div><b>${esc(c.t)}</b>
