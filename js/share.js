@@ -16,7 +16,7 @@ async function shareFetch(){if(!HA.url||!HA.token||!S.prof.name)return;
  try{const r=await haCall([{type:'call_service',domain:'todo',service:'get_items',target:{entity_id:SHARE_E},service_data:{status:'needs_action'},return_response:true}]);const m=r[0];if(!m||!m.success)return;
   const its=(((m.result||{}).response||{})[SHARE_E]||{}).items||[],me=slugN(S.prof.name),old=JSON.stringify(shareInbox.map(x=>x.uid));const pch=picsFrom(its)|rewardsFrom(its);
   shareInbox=its.map(it=>{try{return{uid:it.uid,...JSON.parse(it.description||'')}}catch(e){return null}}).filter(x=>x&&x.to===me&&(Array.isArray(x.items)||(x.kind==='say'&&x.text)));
-  if((pch||JSON.stringify(shareInbox.map(x=>x.uid))!==old)&&(view==='nut'||view==='home'||view==='more')&&!sheet)render()}catch(e){}}
+  if((pch||JSON.stringify(shareInbox.map(x=>x.uid))!==old)&&(view==='nut'||view==='home'||view==='more'||view==='rew')&&!sheet)render()}catch(e){}}
 async function shareDone(uid){try{await haCall([{type:'call_service',domain:'todo',service:'remove_item',target:{entity_id:SHARE_E},service_data:{item:uid}}])}catch(e){}
  shareInbox=shareInbox.filter(x=>x.uid!==uid);render()}
 function shareAccept(uid){const s=shareInbox.find(x=>x.uid===uid);if(!s)return;const f=(sharePct[uid]||100)/100,d=s.d&&s.d<=today()?s.d:today(),dd=ND(d);

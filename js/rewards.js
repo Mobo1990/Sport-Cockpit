@@ -17,6 +17,8 @@ async function rwSave(r){const {uid,...data}=r;const cmds=[];if(uid)cmds.push({t
  if(data.st!=='gone')cmds.push({type:'call_service',domain:'todo',service:'add_item',target:{entity_id:SHARE_E},service_data:{item:`Belohnung: ${data.name}`,description:JSON.stringify({v:1,kind:'reward',...data})}});
  try{await haCall(cmds)}catch(e){note('Home Assistant nicht erreichbar');return}await shareFetch();render()}
 const rwName=s=>{const p=rwPartner();return s===meSlug()?(S.prof.name||'Ich'):(p&&slugN(p.name)===s?p.name:s)};
+/* Anzahl offener Antworten (Punkt am Shop-Tab) */
+function rwOpen(){const me=meSlug();return REW.filter(r=>(r.st==='proposed'&&!(r.ok||[]).includes(me))||(r.st==='redeem'&&r.rq!==me)).length}
 /* Karten, die eine Antwort brauchen (Startseite oben) */
 function rwInboxHtml(){const me=meSlug();return REW.filter(r=>(r.st==='proposed'&&!(r.ok||[]).includes(me))||(r.st==='redeem'&&r.rq!==me)).map(r=>{const red=r.st==='redeem';
  return `<section class="shin rwin"><b>${esc(rwName(red?r.rq:r.by))} ${red?'möchte einlösen':'schlägt eine Belohnung vor'}: ${esc(r.name)}</b><p>${fmt(r.cost)} Punkte aus dem Paar-Konto${red?' – sobald du zustimmst, wird abgebucht.':'.'}</p>
@@ -26,7 +28,7 @@ function rwLineHtml(){if(!HA.token)return '';const b=rwBalance(),next=REW.filter
  return `<button class="rwline" data-a="view" data-v="rew"><div><span>Paar-Konto</span><b class="cond">${fmt(b.bal)}</b>${next?`<small>→ ${esc(next.name)} · ${fmt(next.cost)}</small>`:'<small>Belohnungen festlegen ›</small>'}</div>${next?`<i><s style="width:${Math.min(b.bal/next.cost,1)*100}%"></s></i>`:''}</button>`}
 function renderRewards(){const b=rwBalance(),p=rwPartner(),me=meSlug(),act=REW.filter(r=>r.st==='active'||r.st==='redeem').sort((a,c)=>a.cost-c.cost),prop=REW.filter(r=>r.st==='proposed'),done=REW.filter(r=>r.st==='done').sort((a,c)=>(c.at||'').localeCompare(a.at||''));
  if(!HA.token)return `<section class="meal"><header><h3>Belohnungen</h3></header><p class="tip" style="padding:0">Belohnungen funktionieren zu zweit über Home Assistant. Verbinde die App unter „Mehr → Home Assistant“.</p></section>`;
- return `<button class="back" data-a="view" data-v="home">‹ Start</button><h2 class="rwh">Belohnungen</h2>
+ return `<h2 class="rwh">Belohnungen</h2>
  <section class="rwacc"><span>Paar-Konto</span><b class="cond">${fmt(b.bal)}</b><small>${esc(S.prof.name||'Ich')} ${fmt(b.me)} · ${p?esc(p.name)+' '+fmt(b.pa):'Partner noch nicht verbunden'} · eingelöst ${fmt(b.spent)}</small></section>
  ${rwInboxHtml()}
  <section class="meal"><header><h3>Gemeinsame Belohnungen</h3></header>

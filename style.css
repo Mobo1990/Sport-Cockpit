@@ -221,8 +221,8 @@ h1{letter-spacing:-.5px}
 .row.done input{background:var(--acc2);color:var(--ink)}
 .exfoot button,.mfoot button{background:var(--s2);border-color:transparent}
 .pill{border-radius:6px;background:var(--dark);color:#fff}
-.nav{grid-template-columns:repeat(5,1fr)}
-.nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font:700 12px Barlow,sans-serif;color:#9a9ca2;min-height:62px;background:none!important;box-shadow:none!important}
+.nav{grid-template-columns:repeat(6,1fr)}
+.nav button{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font:700 12px Barlow,sans-serif;color:#9a9ca2;min-height:62px;background:none!important;box-shadow:none!important}
 .nav button svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .nav button[aria-selected=true]{color:var(--ink);box-shadow:none}
 .nav button[aria-selected=true] svg{stroke:var(--acc)}
@@ -719,3 +719,6 @@ html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 .obrow{display:flex;gap:8px}.obrow input{flex:1;min-width:0}.obrow button{flex:none}
 .hxbtn{width:100%;background:var(--pastel1,#f3ece3);border-radius:12px;padding:12px;font-weight:600}
 .hxfer b{font-size:14px}.hxfer textarea{font-size:12px;word-break:break-all}
+.nbadge{position:absolute;top:9px;left:calc(50% + 8px);width:9px;height:9px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 2px #fff}
+/* Feste Personenfarben: Mann Salbei, Frau Rosé – auf beiden Handys gleich (Klasse am <html>, gesetzt in renderHead) */
+:root.me-w{--me:#c4917f;--pa:#6f8f7e;--me-soft:#ebc9c1;--pa-soft:#a8bfb0;--bgme:#f4dfd7;--bgpa:#dfe9e2}
