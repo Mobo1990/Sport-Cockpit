@@ -742,3 +742,4 @@ html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 .rwtier{display:flex;align-items:baseline;justify-content:space-between;margin:18px 2px 8px}.rwtier:first-of-type{margin-top:6px}
 .rwtier h4{margin:0;font:800 20px 'Barlow Condensed';text-transform:uppercase;letter-spacing:.3px}.rwtier span{font-size:12px;color:var(--mute);font-weight:600}
 .rwlist{background:none;box-shadow:none;border:0;padding-left:0;padding-right:0}
+.sayerr{margin:0 0 8px;padding:10px 12px;border-radius:12px;background:#f4dfd7;font-size:13px;line-height:1.35}

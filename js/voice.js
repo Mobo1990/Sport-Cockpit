@@ -2,7 +2,9 @@
    In der App: diktieren (Tastatur-Mikrofon oder Spracherkennung des Browsers) -> erkennen -> bestätigen (wie Foto-Erkennung).
    Per Siri: Kurzbefehl legt den Text über Home Assistant in todo.sport_cockpit_geteiltes_essen ab ({kind:'say'}), die App holt ihn ab. */
 'use strict';
-const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let srec=null;
+let SR=window.SpeechRecognition||window.webkitSpeechRecognition;let srec=null;
+/* In der Homescreen-App auf dem iPhone ist die Browser-Spracherkennung oft gesperrt – dann merken und Tastatur-Diktat anbieten */
+try{if(localStorage.getItem('sc.srOff'))SR=null}catch(e){}
 const NUMW={ein:1,eine:1,einen:1,einem:1,einer:1,zwei:2,drei:3,vier:4,'fünf':5,fuenf:5,sechs:6,sieben:7,acht:8,neun:9,zehn:10,halbe:0.5,halben:0.5,halb:0.5};
 const MEALW=[['f',/frühstück|fruehstueck|morgens/],['m',/mittag/],['a',/abend|abends/],['s',/snack|zwischendurch/]];
 function sayMeal(t){const s=t.toLowerCase();for(const [m,r] of MEALW)if(r.test(s))return m;return null}
@@ -43,12 +45,19 @@ async function sayParse(){const text=(sheet.say||'').trim();if(!text){note('Erst
 function sayDone(){if(sheet&&sheet.sayUid){const u=sheet.sayUid;sheet.sayUid=null;shareDone(u)}}
 function renderSayStep(){const sh=sheet;
  return `<button class="back" data-n="back">‹ Zurück</button><h2>Per Sprache eintragen</h2>
- <p class="tip" style="padding:0 0 8px">Sag einfach, was du gegessen hast – z. B. „zwei Eier und eine Scheibe Vollkornbrot zum Frühstück“. ${SR?'':'Tipp: Mikrofon unten auf der Tastatur antippen.'}</p>
+ <p class="tip" style="padding:0 0 8px">Sag einfach, was du gegessen hast – z. B. „zwei Eier und eine Scheibe Vollkornbrot zum Frühstück“. ${SR?'':'Tipp: ins Feld tippen und unten auf der Tastatur das Mikrofon antippen.'}</p>${sh.sayErr?`<p class="sayerr">${esc(sh.sayErr)}</p>`:''}
  <textarea id="sayIn" data-say="in" rows="3" placeholder="Was hast du gegessen?">${esc(sh.say||'')}</textarea>
  <div class="sayb">${SR?`<button data-say="mic" class="${srec?'rec':''}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>${srec?'Hört zu … tippen zum Stoppen':'Sprechen'}</button>`:''}<button class="primary" data-say="go">Erkennen</button></div>`}
 function sayMic(){if(srec){srec.stop();return}const r=new SR();r.lang='de-DE';r.interimResults=true;r.continuous=false;const base=(sheet.say||'').trim();
  r.onresult=e=>{let t='';for(const x of e.results)t+=x[0].transcript;sheet.say=(base?base+' ':'')+t;const el=$('sayIn');if(el)el.value=sheet.say};
- r.onend=()=>{srec=null;render()};r.onerror=e=>{srec=null;note(e.error==='not-allowed'?'Mikrofon nicht erlaubt':'Spracherkennung: '+e.error);render()};srec=r;r.start();render()}
+ r.onend=()=>{srec=null;render()};
+ r.onerror=e=>{srec=null;const blocked=/not-allowed|service-not-allowed|audio-capture/.test(e.error);
+  if(blocked&&e.error==='service-not-allowed'){SR=null;try{localStorage.setItem('sc.srOff','1')}catch(x){}}
+  if(sheet)sheet.sayErr=e.error==='not-allowed'?'Mikrofon nicht erlaubt – in den iPhone-Einstellungen unter Safari bzw. Duo freigeben. Oder ins Feld tippen und das Mikrofon der Tastatur nutzen.'
+   :e.error==='no-speech'?'Nichts gehört – nochmal versuchen.'
+   :'Spracherkennung klappt hier nicht. Tipp ins Feld und nutze das Mikrofon unten auf der Tastatur.';
+  render();if(!SR)setTimeout(()=>{const t=$('sayIn');if(t)t.focus()},50)};
+ if(sheet)sheet.sayErr='';srec=r;try{r.start()}catch(x){srec=null;SR=null;if(sheet)sheet.sayErr='Spracherkennung klappt hier nicht. Tipp ins Feld und nutze das Mikrofon unten auf der Tastatur.'}render()}
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-say]');if(!b||b.tagName==='TEXTAREA')return;const a=b.dataset.say;
  if(a==='open'){sheet.step='say';sheet.say=sheet.say||sheet.q||'';render();setTimeout(()=>{const t=$('sayIn');if(t&&!SR)t.focus()},50)}
  else if(a==='mic')sayMic();else if(a==='go'){if(srec)srec.stop();sayParse()}
