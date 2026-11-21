@@ -11,7 +11,7 @@ function boardPartner(){const p=(typeof partners!=='undefined'?partners:[]).find
  const inWeek=p.d&&wk(new Date(p.d+'T12:00:00'))===wk(Date.now());return{name:p.name,today:p.d===today()?(+p.pt||0):0,week:inWeek?(+p.wp||0):0,tr:p.d===today()?p.tr:''}}
 function boardHtml(sc){const me=S.prof.name||'Ich',p=boardPartner(),a=weekScore(),ta=sc.pt;
  const meCol=lead=>`<div class="bp"><label class="avawrap" title="Profilbild ändern">${lead?CROWN:''}${avaHtml(me,true)}<input type="file" accept="image/*" data-pic="file" hidden></label><span class="bn">${esc(me)}</span><span class="pts"><b class="cond">${fmt(ta)}</b></span><small>heute</small></div>`;
- if(!p)return `<section class="board solo">${meCol(false)}<div class="bmid"><span class="bk">Woche</span><b class="cond">${fmt(a)}</b><em>Punkte</em></div><p class="bhint">Sobald Pauline mit Home Assistant verbunden ist, steht hier euer Vergleich.</p></section>`;
+ if(!p)return `<section class="board solo">${meCol(false)}<div class="bmid"><span class="bk">Woche</span><b class="cond">${fmt(a)}</b><em>Punkte</em></div><p class="bhint">Sobald dein Partner mit Home Assistant verbunden ist, steht hier euer Vergleich.</p></section>`;
  const b=p.week,d=Math.abs(a-b),lead=a===b?0:a>b?1:-1,share=a+b?a/(a+b)*100:50;
  const txt=lead===0?'Gleichstand':lead>0?`Du führst mit ${fmt(d)}`:`${esc(p.name)} führt mit ${fmt(d)}`;
  const split=Math.max(12,Math.min(88,share));

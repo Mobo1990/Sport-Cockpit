@@ -24,7 +24,7 @@ function renderReview(){const r=rvData();
  <div class="actions"><button class="primary" data-rv="share">Als Bild teilen</button></div><p class="tip" id="rvmsg" style="padding:0"></p>`}
 async function rvImage(){const r=rvData(),c=document.createElement('canvas');c.width=1080;c.height=1350;const x=c.getContext('2d');
  x.fillStyle='#0b0c0e';x.fillRect(0,0,1080,1350);x.fillStyle='#ff5a36';x.fillRect(0,0,1080,14);
- const F=(w,s)=>`${w} ${s}px "Barlow Condensed", Barlow, sans-serif`;x.fillStyle='#8f949d';x.font=F(600,40);x.fillText('SPORT COCKPIT'+(S.prof.name?' · '+S.prof.name.toUpperCase():''),70,110);
+ const F=(w,s)=>`${w} ${s}px "Barlow Condensed", Barlow, sans-serif`;x.fillStyle='#8f949d';x.font=F(600,40);x.fillText('DUO'+(S.prof.name?' · '+S.prof.name.toUpperCase():''),70,110);
  x.fillStyle='#eeece8';x.font=F(800,96);x.fillText(r.label.toUpperCase(),70,220);
  const cells=[[r.n,'Krafteinheiten'],[r.sets,'Sätze'],[fmt(Math.round(r.vol/100)/10)+' t','bewegt'],[r.cmin+' min','Cardio'],[r.pts,'Punkte'],[r.dw==null?'–':(r.dw>0?'+':'')+fmt(r1(r.dw))+' kg','Gewicht']];
  cells.forEach(([v,l],i)=>{const cx=70+(i%2)*480,cy=300+Math.floor(i/2)*230;x.fillStyle='#141619';x.fillRect(cx,cy,450,200);x.fillStyle=i===4?'#ff5a36':'#eeece8';x.font=F(800,104);x.fillText(String(v),cx+30,cy+120);x.fillStyle='#8f949d';x.font=F(600,38);x.fillText(l,cx+30,cy+170)});

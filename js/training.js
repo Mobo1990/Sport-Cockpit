@@ -41,7 +41,7 @@ function prevWk(k){const d=new Date(k);d.setDate(d.getDate()-7);return wk(d)}
 function draftFor(d){if(!drafts[d])drafts[d]={start:Date.now(),ex:{},extra:[]};const dr=drafts[d];dr.extra=dr.extra||[];dr.ex=dr.ex||{};dr.cardio=dr.cardio||(d==='cardio'?[{type:CT[0],min:'',km:'',lvl:'m'}]:[]);for(const e of dayEx(d)){if(!dr.ex[e.id])dr.ex[e.id]=Array.from({length:e.sets},()=>({kg:'',reps:'',done:false}))}return dr}
 function lastDay(){const s=[...S.sessions].filter(s=>s.day!=='cardio'&&DAYS[s.day]).sort((a,b)=>b.date-a.date)[0];return s?s.day:null}
 
-function renderHead(){document.body.className='v-'+view;const br=document.querySelector('.brand');if(br)br.textContent='SPORT COCKPIT'+(S.prof&&S.prof.name?' · '+S.prof.name.toUpperCase():' · 3ER-SPLIT');
+function renderHead(){document.body.className='v-'+view;const br=document.querySelector('.brand');if(br)br.textContent='DUO'+(S.prof&&S.prof.name?' · '+S.prof.name.toUpperCase():' · 3ER-SPLIT');
  $('dayName').textContent=DAYS[day].n;$('daySub').textContent=DAYS[day].sub;
  const ld=lastDay();$('nextDay').textContent=ld?`Als Nächstes dran: ${DAYS[DAYS[ld].nx].n}`:'Los geht’s mit Push';
  document.querySelectorAll('[data-a=day]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.d===day));

@@ -264,6 +264,8 @@ try:
         check("Kein Verbindungscode" in cx.text_content("#obmsg"), "Falscher Code: verständlicher Hinweis")
         cx.fill("#obCode", code); cx.click("[data-s=hapaste]"); cx.wait_for_timeout(3000)
         check(cx.is_visible(".hero2") and cx.evaluate("S.prof.name") == "Michell", "Mit Code verbunden: Profil und Daten sind zurück, kein Onboarding")
+        check(cx.is_visible(".board .bp.pa") and "Pauline" in cx.text_content(".board"), "Nach Neuinstallation: Partnerin steht sofort auf der Anzeigetafel")
+        check(cx.text_content(".brand").startswith("DUO"), "Kopfzeile heißt DUO")
         cx.close()
 
         print("Fremdes Konto")

@@ -30,7 +30,7 @@ async function syncNow(){if(!HA.url||!HA.token)return;if(syncing){syncAgain=true
   /* Schutz: Konto gehört erkennbar einer anderen Person -> nicht mischen, nichts hochladen */
   const rn=R.sc_meta&&R.sc_meta.prof&&R.sc_meta.prof.name;
   if(!HA.force&&rn&&S.prof.name&&slugN(rn)!==slugN(S.prof.name)){HA.conflict=rn;syncing=false;note(`Konto gehört zu „${rn}“ – nicht synchronisiert`);if(view==='more')render();return}
-  HA.conflict='';const changed=HA.force?false:merge(R);HA.force=false;lsSave();
+  HA.conflict='';const hadName=!!S.prof.name,changed=HA.force?false:merge(R);HA.force=false;if(!hadName&&S.prof.name)health(r[keys.length]);lsSave();
   await haCall([{type:'frontend/set_user_data',key:'sc_meta',value:metaOf()},{type:'frontend/set_user_data',key:'sc_sessions',value:{list:S.sessions,del:S.del}},{type:'frontend/set_user_data',key:'sc_nut',value:{days:S.nut.days}}]);
   note('Synchronisiert · '+new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}));publish();shareFetch();
   const busy=document.activeElement&&document.activeElement.tagName==='INPUT';if(changed&&!busy&&!sheet)render()}
