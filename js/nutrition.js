@@ -82,7 +82,7 @@ function renderSheet(){const sh=sheet,ml=MEALS.find(m=>m[0]===sh.meal)[1];let b=
  else if(sh.step==='custom'){b=`<button class="back" data-n="back">‹ Zurück</button><h2>Eigenes Produkt</h2><p class="tip" style="padding:0">Werte von der Packung, pro 100 g.</p>
   <div class="cform"><div class="full"><label>Name</label><input id="cN" value="${esc(sh.cname||sh.q||'')}"></div>${[['cK','kcal'],['cP','Protein g'],['cC','Kohlenhydrate g'],['cZ','davon Zucker g'],['cF','Fett g'],['cG','Portion g (optional)']].map(([i,l])=>`<div><label>${l}</label><input id="${i}" inputmode="decimal"></div>`).join('')}</div>
   <button class="primary" data-n="savecustom" style="width:100%">Speichern & weiter</button>`}
- else if(sh.step==='scan'){b=`<button class="back" data-n="back">‹ Zurück</button><h2>Barcode scannen</h2><div id="scanbox"></div><p class="tip" style="padding:8px 0">${esc(sh.msg||'Barcode in den Rahmen halten.')}</p><div class="wrow"><input id="codeIn" inputmode="numeric" placeholder="oder Nummer eintippen"><button data-n="code">Suchen</button></div>`}
+ else if(sh.step==='scan'){b=`<button class="back" data-n="back">‹ Zurück</button><h2>Barcode scannen</h2><div id="scanbox"></div><p class="tip" id="scanmsg" style="padding:8px 0">${esc(sh.msg||'Barcode waagerecht in den Rahmen halten, etwa 15 cm Abstand.')}</p><div class="wrow"><input id="codeIn" inputmode="numeric" placeholder="oder Nummer eintippen"><button data-n="code">Suchen</button></div>`}
  else{b=`<div class="shtop"><h2>Essen eintragen</h2><button class="ghost" data-n="close">Schließen</button></div>${mealChips(sh.meal)}
   <div class="srch"><input id="fq" data-n="q" placeholder="Lebensmittel suchen …" value="${esc(sh.q||'')}" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="search"><button data-n="scan" aria-label="Barcode scannen">▦ Scan</button><button data-say="open" aria-label="Per Sprache eintragen" class="saybtn"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button><label class="filebtn">Foto<input type="file" accept="image/*" capture="environment" data-ai="file" hidden></label></div>
   <div id="fres">${sheetList(sh)}</div>
@@ -116,13 +116,27 @@ async function offSearch(q){const key=normQ(q);if(offCache.has(key)){sheet.resul
   offCache.delete(key);offCache.set(key,res);offStore();if(sheet&&normQ(sheet.q.trim())===key)sheet.results=res}
  catch(e){if(offAbort!==ac)return;if(sheet){sheet.results=[];sheet.offErr=!navigator.onLine?'Kein Internet – Online-Suche nicht möglich.':ac.signal.aborted?'Open Food Facts antwortet gerade nicht.':'Die Online-Suche von Open Food Facts ist gerade gestört.';offDown=Date.now()}}
  offAbort=null;if(sheet){sheet.busy=false;updRes()}}
-async function offCode(code){if(!sheet)return;sheet.msg='Suche '+code+' …';render();try{const r=await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code)}.json?fields=${OFF_FIELDS}`);const j=await r.json();const f=j.status===1&&mapOFF({...j.product,code});
- if(f){stopScan();sheet.food=f;sheet.g=f.por?String(f.por.g):'100';sheet.step='amount'}else{sheet.msg=`Produkt ${code} nicht gefunden oder ohne Nährwerte – leg es als eigenes Produkt an.`}}catch(e){sheet.msg='Open Food Facts nicht erreichbar.'}render()}
-let scanner=null,scanLib=null;
+/* Meldung im Scanner setzen, ohne die Seite neu aufzubauen (sonst verschwindet das Kamerabild) */
+function scanMsg(t){if(!sheet)return;sheet.msg=t;const e=$('scanmsg');if(e&&sheet.step==='scan')e.textContent=t;else render()}
+async function offFetch(code){const u=`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code)}.json?fields=${OFF_FIELDS}`;
+ for(let i=0;i<2;i++){try{const r=await fetch(u);if(r.status===404)return{status:0};return await r.json()}catch(e){if(i)throw e;await new Promise(r=>setTimeout(r,800))}}}
+let scanBusy=false;
+async function offCode(code){if(!sheet)return;scanBusy=true;scanMsg('Suche '+code+' …');
+ try{const j=await offFetch(code);const f=j&&j.status===1&&mapOFF({...j.product,code});
+  if(f){stopScan();sheet.food=f;sheet.g=f.por?String(f.por.g):'100';sheet.step='amount';sheet.msg='';render()}
+  else scanMsg(`Produkt ${code} nicht gefunden oder ohne Nährwerte – nochmal scannen oder als eigenes Produkt anlegen.`)}
+ catch(e){scanMsg('Open Food Facts nicht erreichbar – gleich nochmal versuchen.')}
+ setTimeout(()=>{scanBusy=false},1500)}
+let scanner=null,scanLib=null,scanLast='';
 function loadScanLib(){if(scanLib)return scanLib;scanLib=new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js';s.onload=()=>res();s.onerror=()=>{scanLib=null;rej()};document.head.appendChild(s)});return scanLib}
-async function startScan(){try{await loadScanLib();await new Promise(r=>setTimeout(r,50));if(!$('scanbox'))return;
- scanner=new Html5Qrcode('scanbox',{formatsToSupport:[Html5QrcodeSupportedFormats.EAN_13,Html5QrcodeSupportedFormats.EAN_8,Html5QrcodeSupportedFormats.UPC_A,Html5QrcodeSupportedFormats.UPC_E],verbose:false});
- let done=false;await scanner.start({facingMode:'environment'},{fps:10,qrbox:{width:260,height:140}},code=>{if(done)return;done=true;try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}offCode(code)},()=>{})}catch(e){if(sheet){sheet.msg='Kamera nicht verfügbar – Kamera-Zugriff erlauben oder Nummer eintippen.';render()}}}
+/* EAN-Prüfziffer: Fehllesungen gar nicht erst nachschlagen */
+function eanOk(c){if(!/^\d{8}$|^\d{12,13}$/.test(c))return false;const d=c.padStart(13,'0').split('').map(Number);const s=d.slice(0,12).reduce((a,x,i)=>a+x*(i%2?3:1),0);return (10-s%10)%10===d[12]}
+async function startScan(){try{await loadScanLib();await new Promise(r=>setTimeout(r,50));if(!$('scanbox'))return;stopScan();scanBusy=false;scanLast='';
+ const F=Html5QrcodeSupportedFormats;scanner=new Html5Qrcode('scanbox',{formatsToSupport:[F.EAN_13,F.EAN_8,F.UPC_A,F.UPC_E],verbose:false,experimentalFeatures:{useBarCodeDetectorIfSupported:true}});
+ const w=Math.min(320,($('scanbox').clientWidth||320)-20);
+ await scanner.start({facingMode:'environment'},{fps:15,qrbox:{width:w,height:Math.round(w*.5)},disableFlip:true,videoConstraints:{facingMode:'environment',width:{ideal:1920},height:{ideal:1080},advanced:[{focusMode:'continuous'}]}},
+  code=>{if(scanBusy||!eanOk(code)||code===scanLast&&sheet&&/nicht gefunden/.test(sheet.msg||''))return;scanLast=code;try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}offCode(code)},()=>{})}
+ catch(e){if(sheet){sheet.msg='Kamera nicht verfügbar – in den iPhone-Einstellungen Kamera-Zugriff erlauben oder Nummer eintippen.';render()}}}
 function stopScan(){if(scanner){const s=scanner;scanner=null;s.stop().catch(()=>{}).finally(()=>{try{s.clear()}catch(e){}})}}
 let offT=null;
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-n]');if(!b||b.tagName==='INPUT')return;const a=b.dataset.n,d=nDate||today();
