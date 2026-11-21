@@ -1,6 +1,6 @@
 # Sport Cockpit – Projektwissen für Claude Code
 
-Persönliche PWA (Push/Pull/Legs-Training, Cardio, Ernährung, Gamification) für Michell und Pauline.
+Persönliche PWA „Duo“ (früher „Sport Cockpit“): Push/Pull/Legs-Training, Cardio, Ernährung, Gamification für Michell und Pauline. Icon: Schriftzug „duo“ (Fraunces 900, o mit Herz-Loch) auf Creme.
 Live: https://mobo1990.github.io/Sport-Cockpit/ (GitHub Pages, Branch `main`, Ordner `/`; Groß-/Kleinschreibung zählt, `/sport-cockpit/` ergibt 404).
 
 ## Sprache & Stil

@@ -4,7 +4,7 @@
 const profOK=()=>{const P=S.prof;return P.name&&P.year&&P.height&&(P.weight||lastWeight())};
 let ob={step:0};
 function renderOnboarding(){const P=S.prof,f=(k,l,ph,mode='decimal')=>`<div><label for="p_${k}">${l}</label><input id="p_${k}" inputmode="${mode}" data-p="${k}" placeholder="${ph}" value="${esc(P[k]??'')}"></div>`;
- return `<div class="sheet ob"><div class="sheetin"><h2>Willkommen im Sport Cockpit</h2>
+ return `<div class="sheet ob"><div class="sheetin"><h2>Willkommen bei Duo</h2>
  <p class="tip" style="padding:0 0 12px">Bevor es losgeht, brauchen wir ein paar Angaben. Daraus berechnet die App deinen Kalorienbedarf und dein Proteinziel. Alles kannst du später unter „Mehr“ ändern.</p>
  <div class="cform">${f('name','Dein Name','z. B. Michell','text')}<div><label>Geschlecht</label><div class="vars">${[['m','Mann'],['w','Frau']].map(([k,l])=>`<button data-ps="sex" data-v="${k}" aria-pressed="${P.sex===k}">${l}</button>`).join('')}</div></div>
  ${f('year','Geburtsjahr','z. B. 1990','numeric')}${f('height','Größe (cm)','z. B. 182','numeric')}${f('weight','Gewicht (kg)','z. B. 85')}

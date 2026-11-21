@@ -59,7 +59,7 @@ function renderSettings(){return renderProfile()+`<section class="meal" style="m
  <p class="tip" style="padding:0 0 8px">Aus dem alten Cockpit in Claude: dort Verlauf → „Alle Daten kopieren“, hier einfügen.</p>
  <textarea id="imp" rows="4" placeholder="Kopierte Daten hier einfügen"></textarea>
  <div class="actions"><button data-s="imp">Importieren</button><button class="ghost" data-s="exp">Backup kopieren</button></div></section>
- <p class="tip" style="padding:0 0 20px">Sport Cockpit · Lebensmittel-Daten: Open Food Facts (ODbL) und eingebaute Richtwerte.</p>`}
+ <p class="tip" style="padding:0 0 20px">Duo · Lebensmittel-Daten: Open Food Facts (ODbL) und eingebaute Richtwerte.</p>`}
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-ps]');if(!b)return;const k=b.dataset.ps;S.prof[k]=k==='act'?+b.dataset.v:b.dataset.v;S.metaT=Date.now();persist();render()});
 document.addEventListener('input',ev=>{const t=ev.target,k=t.dataset.p;if(!k)return;S.prof[k]=k==='name'?t.value:(num(t.value)??'');S.metaT=Date.now();persist();renderHead();const c=$('pcalc');if(c)c.innerHTML=pcalc()});
 document.addEventListener('click',async ev=>{const b=ev.target.closest('[data-s]');if(!b)return;const a=b.dataset.s;

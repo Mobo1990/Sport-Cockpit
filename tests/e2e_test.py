@@ -46,6 +46,11 @@ try:
         pg.unroute("https://world.openfoodfacts.org/**"); pg.route("https://world.openfoodfacts.org/**", off_route2)
         pg.goto("http://localhost:8765/"); pg.evaluate("localStorage.clear()"); pg.reload(); pg.wait_for_timeout(500)
 
+        print("Name & Icon")
+        man = pg.evaluate("fetch('manifest.webmanifest').then(r=>r.json())")
+        check(man["name"] == "Duo" and man["short_name"] == "Duo" and pg.title() == "Duo", "App heißt Duo (Manifest + Titel)")
+        check(pg.evaluate("fetch('icons/icon-maskable-512.png').then(r=>r.ok)") and any(i.get("purpose") == "maskable" for i in man["icons"]), "Icons inkl. maskable vorhanden")
+
         print("Onboarding")
         check(pg.is_visible(".ob"), "Profil-Pflicht beim ersten Start")
         pg.click("[data-ob=go]"); check("ausfüllen" in pg.text_content("#obmsg"), "Ohne Angaben geht es nicht weiter")
