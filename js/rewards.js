@@ -3,7 +3,7 @@
    als {kind:'reward', id, name, cost, by, ok:[…], st:'proposed'|'active'|'redeem'|'done', rq, at}. */
 'use strict';
 let REW=[];try{REW=JSON.parse(localStorage.getItem('sc.rew'))||[]}catch(e){}
-const RW_IDEAS=[['Burger-Abend',1700],['Kino mit Popcorn',2400],['Essen gehen',3200],['Sauna-Tag',4500],['Neue Sport-Klamotten',6000]];
+const RW_IDEAS=[['Burger-Abend',1700],['Kino mit Popcorn',2400],['Essen gehen',3200],['Beauty-Tag zu Hause',4500],['Neue Sport-Klamotten',6000]];
 let rwForm=null;
 /* Gesamtpunkte (alle Tage mit Einträgen) */
 function myTotal(){const ds=new Set([...Object.keys(S.nut.days),...S.sessions.map(s=>iso(s.date))]),t=today();let sum=0;for(const d of ds)if(d<=t)sum+=dayScore(d).pt;return sum}
