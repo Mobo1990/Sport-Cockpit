@@ -669,3 +669,10 @@ html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 :root{--me:#5f8f77;--pastel1:#dde8e0;--mint1:#d3e2d8;--mint2:#e6eee8}
 .tile.big small,.tile.big span{color:#5a7466}
 .tile.big::after{border-color:#f3cfd9}
+/* Pauline Altrosa; Training-Karte wieder schwarz */
+:root{--pa:#c08776;--pastel2:#f4e4dc}
+.tile.big{background:var(--dark);border-color:var(--dark);color:#fff;box-shadow:0 14px 30px rgba(17,18,20,.22)}
+.tile.big small,.tile.big span{color:#9a9ca2}
+.tile.big b{color:#fff}
+.tile.big::after{border-color:var(--acc);opacity:.9}
+.tile.big::before{background:#2a2c31}
