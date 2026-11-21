@@ -660,3 +660,8 @@ html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 /* Türkisgrün-Pastell */
 :root{--me:#1fa596;--pastel1:#d9f6f0;--pastel2:#f1ecff;--mint1:#cdf1e9;--mint2:#e3f7f3}
 .tile.big small,.tile.big span{color:#4d7c72}
+/* Pauline: Rosa-Pastell; Tafel Türkis -> Rosa; gleiche Farben in der Paar-Challenge */
+:root{--pa:#e8719f;--pastel2:#fde5ef}
+.wkbar.pa i,.wkbar.two s{background:var(--pa)}
+.dot.me{background:var(--me)}.dot.pa{background:var(--pa)}
+.weekbox .wkbar.two i,.wkc.cp .wkbar i{background:var(--me)}
