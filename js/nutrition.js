@@ -137,7 +137,7 @@ async function startScan(){try{await loadScanLib();await new Promise(r=>setTimeo
  await scanner.start({facingMode:'environment'},{fps:15,qrbox:{width:w,height:Math.round(w*.5)},disableFlip:true,videoConstraints:{facingMode:'environment',width:{ideal:1920},height:{ideal:1080},advanced:[{focusMode:'continuous'}]}},
   code=>{if(scanBusy||!eanOk(code)||code===scanLast&&sheet&&/nicht gefunden/.test(sheet.msg||''))return;scanLast=code;try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}offCode(code)},()=>{})}
  catch(e){scanMsg('Kamera nicht verfügbar – in den iPhone-Einstellungen Kamera-Zugriff erlauben oder Nummer eintippen.')}}
-function stopScan(){if(scanner){const s=scanner;scanner=null;s.stop().catch(()=>{}).finally(()=>{try{s.clear()}catch(e){}})}}
+function stopScan(){if(scanner){const s=scanner;scanner=null;let p;try{p=s.stop()}catch(e){p=Promise.resolve()}Promise.resolve(p).catch(()=>{}).finally(()=>{try{s.clear()}catch(e){}})}}
 let offT=null;
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-n]');if(!b||b.tagName==='INPUT')return;const a=b.dataset.n,d=nDate||today();
  if(a==='prev'||a==='next'){const x=new Date(d+'T12:00');x.setDate(x.getDate()+(a==='prev'?-1:1));nDate=iso(x)}

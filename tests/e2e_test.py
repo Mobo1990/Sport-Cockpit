@@ -203,6 +203,7 @@ try:
         try: pg.wait_for_function("(document.getElementById('scanmsg')||{}).textContent.includes('nicht gefunden')", timeout=8000)
         except Exception: pass
         check(pg.is_visible("#scanbox") and "nicht gefunden" in pg.text_content("#scanmsg"), "Nicht gefunden: Scanner bleibt offen, Hinweis erscheint")
+        pg.evaluate("void(scanner={stop(){throw new Error('Cannot stop, scanner is not scanning')},clear(){}})")
         pg.fill("#codeIn", "4000417025005"); pg.click("[data-n=code]")
         try: pg.wait_for_selector("#gIn", timeout=8000)
         except Exception: pass
