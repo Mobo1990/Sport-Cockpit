@@ -80,7 +80,9 @@ function healthLink(){if(!HA.token)return '';const age=S.hT?Date.now()-S.hT:Infi
 function scoreLine(){const s=dayScore(today());return healthLink()+`<p class="nline" data-a="view" data-v="nut">Heute <b>${s.pt} Punkte</b> · Woche <b>${weekScore()}</b>${s.why.length?' · '+s.why.join(', '):' · Trainiere, iss im Ziel und trink genug, um Punkte zu sammeln'}</p>`}
 let lastPub='';
 async function publish(){if(!HA.token||!S.prof.name)return;const d=today(),s=dayScore(d);
- const v=JSON.stringify({d,k:Math.round(s.t.kcal),kz:s.g.kcal,p:Math.round(s.t.p),pz:s.g.p,tr:s.tr,c:Math.round(s.c),pt:s.pt,wp:weekScore(),w:myWeekStats(),tp:myTotal()});if(v===lastPub)return;
+ const base={d,k:Math.round(s.t.kcal),kz:s.g.kcal,p:Math.round(s.t.p),pz:s.g.p,tr:s.tr,c:Math.round(s.c),pt:s.pt,wp:weekScore(),w:myWeekStats(),tp:myTotal()};
+ /* Wasser und Schritte von heute (für den Zwischenstand um 22 Uhr) – nur wenn es in 255 Zeichen passt, nie abgeschnittenes JSON */
+ const full={...base,wa:(S.nut.days[d]||{}).water||0,wz:waterGoal(),s:daySteps(d),sz:stepGoal()};let v=JSON.stringify(full);if(v.length>255)v=JSON.stringify(base);if(v===lastPub)return;
  try{const r=await haCall([{type:'call_service',domain:'input_text',service:'set_value',service_data:{entity_id:'input_text.sport_cockpit_'+slugN(S.prof.name),value:v.slice(0,255)}}]);if(r[0]&&r[0].success)lastPub=v}catch(e){}
  const dd=S.nut.days[d];if(dd&&s.t.p>=s.g.p&&!dd.pg){dd.pg=1;touch(d);tell('Proteinziel geschafft','💪 '+S.prof.name+' hat heute '+Math.round(s.t.p)+' g Protein gegessen.')}}
 async function tell(titel,nachricht){if(!HA.token||!S.prof.name)return;try{await haCall([{type:'call_service',domain:'script',service:'sport_cockpit_meldung',service_data:{von:S.prof.name,titel,nachricht}}])}catch(e){}}
