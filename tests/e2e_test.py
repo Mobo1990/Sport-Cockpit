@@ -268,6 +268,8 @@ try:
         wk_k = pg.evaluate("document.querySelector('.wopick [data-wo]:not(.ok)').dataset.wo")
         pg.click(".wopick [data-wo=%s]" % wk_k); pg.wait_for_timeout(200)
         check(pg.is_visible("#wo.on"), "Workout startet mit Timer")
+        check(pg.locator("#wo .wofig line").count() >= 8 and pg.locator("#wo .wofig animate").count() > 20, "Strichmännchen zeigt die Übung animiert")
+        check(pg.evaluate("Object.values(WO).every(w=>w.steps.every(s=>s[0]==='Pause'||!!moveFor(s[0])))"), "Jede Workout-Übung hat ein Strichmännchen")
         pg.evaluate("woFinish()"); pg.wait_for_timeout(150); pg.click("#wo [data-wo-a=close] >> nth=0"); pg.wait_for_timeout(150)
         check(pg.evaluate("myWeekStats().o") == o0 + 1 and "heute erledigt" in pg.text_content(".wopick [data-wo=%s]" % wk_k), "Fertiges Workout zählt für die Woche und ist als erledigt markiert")
         pg.evaluate("void(weekly=()=>({k:'s',g:999,t:'x',u:'',s:''}), couple=()=>({k:'s',g:999,m:'sum',t:'x',u:''}), weekDaysIso().forEach(d=>{const x=S.nut.days[d];if(x){delete x.wkc;delete x.cpc}}), render())"); pg.wait_for_timeout(150)
@@ -293,6 +295,8 @@ try:
         check(c2.text_content(".tile.big").count("Pull") or "PULL" in c2.text_content(".tile.big").upper(), "Nächster Tag ist Pull")
         c2.evaluate("localStorage.removeItem('sc.partners')"); c2.reload(); c2.wait_for_timeout(3000)
         check(c2.is_visible(".board .bp.pa"), "Neustart ohne neue Daten: Partnerin erscheint trotzdem auf der Tafel")
+        c2.evaluate("void(delete S.nut.days[today()].h, render(), syncNow())"); c2.wait_for_timeout(2500)
+        check("11.234" in c2.text_content(".dgoals"), "Apple-Health-Schritte kommen an, während die App offen ist, und erscheinen sofort")
 
         print("Verbindung übertragen")
         pg.evaluate("void(window._clip='', navigator.clipboard.writeText=t=>{window._clip=t;return Promise.resolve()})")

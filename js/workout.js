@@ -32,6 +32,7 @@ function woRender(){if(!wo){woEl.classList.remove('on');woEl.innerHTML='';return
  <div class="gprog">${st.slice(1).map((x,i)=>`<i class="${i+1<wo.i?'d':i+1===wo.i?'c':''}${x[0]==='Pause'?' p':''}"></i>`).join('')}</div>
  <div class="wobody${isP?' rest':''}"><small class="wok">${wo.i===0?'Bereit machen':cur[0]==='Pause'?'Pause':'Übung '+(wi>0?wi:'')+' von '+work.length}</small>
   <h2 class="won">${esc(cur[0]==='Pause'?'Durchatmen':cur[0])}</h2>${cur[2]&&cur[0]!=='Pause'&&wo.i>0?`<p class="wosub">${esc(cur[2])}</p>`:''}
+  ${(()=>{const fn=cur[0]==='Pause'?(nx?nx[0]:''):(wo.i===0?st[1][0]:cur[0]);return fn&&fn!=='Pause'?moveSvg(fn,'wofig'+(cur[0]==='Pause'||wo.i===0?' soon':'')):''})()}
   <div class="woring"><svg viewBox="0 0 110 110" aria-hidden="true"><circle cx="55" cy="55" r="48" class="bg"/><circle id="woR" cx="55" cy="55" r="48" class="fg" stroke-dasharray="301.6" stroke-dashoffset="0"/></svg><b id="woT" class="cond">${Math.ceil(wo.left)}</b></div>
   ${nx?`<p class="wonx">Als Nächstes: <b>${esc(nx[0])}</b>${nx[0]==='Pause'?'':' · '+nx[1]+' s'}</p>`:'<p class="wonx">Letzte Runde!</p>'}</div>
  <div class="gfoot"><button data-wo-a="pause">${wo.paused?'Weiter':'Pause'}</button><button class="primary" data-wo-a="skip">Überspringen ›</button></div>`;woUpd()}
