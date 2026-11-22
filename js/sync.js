@@ -13,6 +13,7 @@ function haCall(cmds){return new Promise((res,rej)=>{let ws;try{ws=new WebSocket
 let partners=[],partnersCh=false;try{partners=JSON.parse(localStorage.getItem('sc.partners'))||[]}catch(e){}
 function health(m){if(!m||!m.success||!S.prof.name)return;const me='input_text.sport_cockpit_'+slugN(S.prof.name);const np=(m.result||[]).filter(e=>/^input_text\.sport_cockpit_[a-z0-9]+$/.test(e.entity_id)&&e.entity_id!==me).map(e=>{let j={};try{j=JSON.parse(e.state)}catch(x){}return{name:(e.attributes&&e.attributes.friendly_name||'').replace(/^Sport Cockpit /,''),...j}});
  if(JSON.stringify(np)!==JSON.stringify(partners)){partners=np;partnersCh=true;try{localStorage.setItem('sc.partners',JSON.stringify(np))}catch(e){}}const pre='input_number.sport_cockpit_'+slugN(S.prof.name)+'_',d=today(),h={};
+ if(window.DUO_NATIVE_HEALTH)return;
  for(const e of m.result||[]){if(!e.entity_id.startsWith(pre)||iso(e.last_updated||e.last_changed)!==d)continue;const v=parseFloat(e.state);if(!isFinite(v))continue;h[e.entity_id.slice(pre.length)]=v}
  if(!Object.keys(h).length)return;const day=ND(d),old=JSON.stringify(day.h||{});day.h={st:h.schritte,ak:h.aktiv_kcal,tm:h.trainingsminuten};
  if(h.gewicht>30&&(!day.w||day.wsrc==='health')){day.w=h.gewicht;day.wsrc='health'}if(JSON.stringify(day.h)!==old){day.t=Date.now();partnersCh=true}S.hT=Math.max(...(m.result||[]).filter(e=>e.entity_id.startsWith(pre)).map(e=>Date.parse(e.last_updated)||0),0)}

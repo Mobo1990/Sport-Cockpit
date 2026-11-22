@@ -1,0 +1,21 @@
+{
+  "name": "duo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Duo – Fitness zu zweit. Web-App (GitHub Pages) und iOS-App (Capacitor) aus demselben Code.",
+  "scripts": {
+    "build:www": "node scripts/build-www.mjs",
+    "ios": "npm run build:www && npx cap sync ios && npx cap open ios",
+    "sync": "npm run build:www && npx cap sync ios"
+  },
+  "dependencies": {
+    "@capacitor/core": "8.6.2",
+    "@capacitor/ios": "8.6.2",
+    "@capgo/capacitor-health": "8.13.0",
+    "@capgo/capacitor-speech-recognition": "8.6.0",
+    "@capacitor/barcode-scanner": "3.1.4"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.6.2"
+  }
+}
