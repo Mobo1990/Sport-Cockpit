@@ -764,3 +764,12 @@ html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 /* Schritte: Feld breit, OK-Knopf schmal */
 .dgb #hSt{flex:1 1 auto;min-width:0;font-size:15px}
 .dgb #hSt+button[data-h=steps]{flex:0 0 46px;padding:0}
+/* Strichmännchen in den Kurz-Workouts */
+.wofig{display:block;width:min(74vw,300px);height:auto;margin:6px auto 0}
+.wofig.soon{opacity:.55}
+.wofig .mvf{stroke:var(--ink);stroke-width:6;stroke-linecap:round;fill:none}
+.wofig .mvb{stroke:#a9a39b;stroke-width:6;stroke-linecap:round}
+.wofig .mvh{fill:var(--ink)}
+.wofig .mvw{stroke:#e2dcd3;stroke-width:3;stroke-linecap:round}
+.wobody:has(.wofig) .woring{width:150px;height:150px;margin:8px 0 4px}
+.wobody:has(.wofig) .woring b{font-size:58px}
