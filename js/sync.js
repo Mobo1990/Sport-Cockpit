@@ -15,7 +15,9 @@ function health(m){if(!m||!m.success||!S.prof.name)return;const me='input_text.s
  if(JSON.stringify(np)!==JSON.stringify(partners)){partners=np;partnersCh=true;try{localStorage.setItem('sc.partners',JSON.stringify(np))}catch(e){}}const pre='input_number.sport_cockpit_'+slugN(S.prof.name)+'_',d=today(),h={};
  for(const e of m.result||[]){if(!e.entity_id.startsWith(pre)||iso(e.last_updated||e.last_changed)!==d)continue;const v=parseFloat(e.state);if(!isFinite(v))continue;h[e.entity_id.slice(pre.length)]=v}
  if(!Object.keys(h).length)return;const day=ND(d),old=JSON.stringify(day.h||{});day.h={st:h.schritte,ak:h.aktiv_kcal,tm:h.trainingsminuten};
- if(h.gewicht>30&&(!day.w||day.wsrc==='health')){day.w=h.gewicht;day.wsrc='health'}if(JSON.stringify(day.h)!==old){day.t=Date.now();partnersCh=true}S.hT=Math.max(...(m.result||[]).filter(e=>e.entity_id.startsWith(pre)).map(e=>Date.parse(e.last_updated)||0),0)}
+ if(h.gewicht>30&&(!day.w||day.wsrc==='health')){day.w=h.gewicht;day.wsrc='health'}/* Health-Werte sind abgeleitet (kommen bei jedem Sync neu) – den Tag NICHT als bearbeitet markieren,
+  sonst überschreibt ein Gerät mit leerem Tag die Einträge der anderen (Datenverlust 22.11.) */
+ if(JSON.stringify(day.h)!==old)partnersCh=true;S.hT=Math.max(...(m.result||[]).filter(e=>e.entity_id.startsWith(pre)).map(e=>Date.parse(e.last_updated)||0),0)}
 function syncLater(){clearTimeout(syncT);if(HA.url&&HA.token)syncT=setTimeout(syncNow,1500)}
 function metaOf(){return{t:S.metaT,prof:S.prof,plan:S.plan,goal:S.goal,rest:S.rest,cgoal:S.cgoal,nut:{goal:S.nut.goal,maint:S.nut.maint,gkg:S.nut.gkg,foods:S.nut.foods,meals:S.nut.meals,recent:S.nut.recent},drafts,draftT}}
 function merge(R){let changed=false;const m=R.sc_meta;
@@ -26,12 +28,12 @@ function merge(R){let changed=false;const m=R.sc_meta;
  const rn=R.sc_nut;if(rn&&rn.days){for(const k in rn.days){const o=S.nut.days[k];if(!o||(rn.days[k].t||0)>(o.t||0)){S.nut.days[k]=rn.days[k];changed=true}}}
  if(changed)migrate();return changed}
 async function syncNow(){if(!HA.url||!HA.token)return;if(syncing){syncAgain=true;return}syncing=true;note('Synchronisiere …');
- try{const keys=['sc_meta','sc_sessions','sc_nut'],r=await haCall([...keys.map(k=>({type:'frontend/get_user_data',key:k})),{type:'get_states'}]),R={};health(r[keys.length]);
+ try{const keys=['sc_meta','sc_sessions','sc_nut'],r=await haCall([...keys.map(k=>({type:'frontend/get_user_data',key:k})),{type:'get_states'}]),R={};
   r.forEach((m,i)=>{if(m&&m.success&&m.result)R[keys[i]]=m.result.value});
   /* Schutz: Konto gehört erkennbar einer anderen Person -> nicht mischen, nichts hochladen */
   const rn=R.sc_meta&&R.sc_meta.prof&&R.sc_meta.prof.name;
   if(!HA.force&&rn&&S.prof.name&&slugN(rn)!==slugN(S.prof.name)){HA.conflict=rn;syncing=false;note(`Konto gehört zu „${rn}“ – nicht synchronisiert`);if(view==='more')render();return}
-  HA.conflict='';const hadName=!!S.prof.name,changed=HA.force?false:merge(R);HA.force=false;if(!hadName&&S.prof.name)health(r[keys.length]);lsSave();
+  HA.conflict='';const changed=HA.force?false:merge(R);HA.force=false;health(r[keys.length]);lsSave();
   await haCall([{type:'frontend/set_user_data',key:'sc_meta',value:metaOf()},{type:'frontend/set_user_data',key:'sc_sessions',value:{list:S.sessions,del:S.del}},{type:'frontend/set_user_data',key:'sc_nut',value:{days:S.nut.days}}]);
   note('Synchronisiert · '+new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}));publish();shareFetch();
   const busy=document.activeElement&&document.activeElement.tagName==='INPUT';if((changed||partnersCh)&&!busy&&!sheet)render();partnersCh=false}

@@ -297,6 +297,9 @@ try:
         check(c2.is_visible(".board .bp.pa"), "Neustart ohne neue Daten: Partnerin erscheint trotzdem auf der Tafel")
         c2.evaluate("void(delete S.nut.days[today()].h, render(), syncNow())"); c2.wait_for_timeout(2500)
         check("11.234" in c2.text_content(".dgoals"), "Apple-Health-Schritte kommen an, während die App offen ist, und erscheinen sofort")
+        n_remote = c2.evaluate("(S.nut.days[today()]||{items:[]}).items.length")
+        c2.evaluate("void(delete S.nut.days[today()], persist())"); c2.evaluate("syncNow()"); c2.wait_for_timeout(2500)
+        check(n_remote > 0 and c2.evaluate("S.nut.days[today()].items.length") == n_remote, "Gerät mit leerem Tag + neue Health-Werte: Essen der anderen Geräte bleibt erhalten (kein Überschreiben)")
 
         print("Verbindung übertragen")
         pg.evaluate("void(window._clip='', navigator.clipboard.writeText=t=>{window._clip=t;return Promise.resolve()})")
