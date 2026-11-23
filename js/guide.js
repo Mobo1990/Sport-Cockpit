@@ -110,7 +110,7 @@ Object.assign(MOVES,{
   {head:[141,38],neck:[131,48],hip:[108,76],kneeL:[132,100],footL:[134,MV_FLOOR],kneeR:[90,99],footR:[72,MV_FLOOR],elbow:[146,48],hand:[159,42]}]}
 });
 MOVES['gym:hammer']=MOVES['gym:curl'];
-const gymMove=e=>MOVES['gym:'+e.id]?'gym:'+e.id:null;
+const gymMove=e=>MOVES['gym:'+e.id+'|'+e.v]?'gym:'+e.id+'|'+e.v:MOVES['gym:'+e.id]?'gym:'+e.id:null;
 
 /* Dehn-Programme nach dem Training: optional, ohne Punkte und ohne Wochen-Challenge */
 Object.assign(WO,{
@@ -118,3 +118,62 @@ Object.assign(WO,{
  flex_pull:{n:'Dehnen nach Pull',min:5,steps:[['Schulterkreisen',30,'Locker, große Kreise vor und zurück.'],['Kindhaltung',50,'Hände weit nach vorn schieben – dehnt den Latissimus.'],['Katze-Kuh',40,'Im Vierfüßler, Rücken rund und hohl.'],['Brustdehnung links',35,'Gegenspieler zum Rücken: Brust öffnen.'],['Brustdehnung rechts',35,'Gegenspieler zum Rücken: Brust öffnen.'],['Weltbeste Dehnung',50,'Ausfallschritt, Arm zur Decke drehen, Seiten wechseln.'],['Vorbeuge',40,'Knie leicht gebeugt, locker hängen lassen.']]},
  flex_legs:{n:'Dehnen nach Legs',min:5,steps:[['Quadrizepsdehnung links',35,'Ferse zum Po, Knie zeigen nach unten, Bauch fest.'],['Quadrizepsdehnung rechts',35,'Ferse zum Po, Knie zeigen nach unten, Bauch fest.'],['Hüftbeuger links',40,'Ausfallschritt, Hüfte nach vorn schieben.'],['Hüftbeuger rechts',40,'Ausfallschritt, Hüfte nach vorn schieben.'],['Wadendehnung links',30,'Hinteres Bein gestreckt, Ferse am Boden.'],['Wadendehnung rechts',30,'Hinteres Bein gestreckt, Ferse am Boden.'],['Vorbeuge',45,'Dehnt die Beinbeuger. Knie leicht gebeugt.'],['Weltbeste Dehnung',45,'Ausfallschritt, Arm zur Decke drehen, Seiten wechseln.']]}
 });
+
+/* Eigene Animation je Ausführung, wo sie sich sichtbar unterscheidet (Schlüssel gym:<id>|<Variante>) */
+{const M=MOVES,B=k=>M['gym:'+k],X=(k,o)=>({...B(k),...o}),RAIL='97,-8 97,121',
+ SEAT_F={hip:[100,74],kneeL:[92,92],footL:[92,MV_FLOOR],kneeR:[108,92],footR:[108,MV_FLOOR]},
+ SEAT_S={head:[78,32],neck:[76,46],hip:[80,88],knee:[108,88],foot:[112,MV_FLOOR]},SEAT_P=['70,92 104,92','72,92 66,40','86,92 86,121'];
+ const alt=(o1,o2)=>[{...GSTAND,elbowL:[102,56],handL:o1,elbowR:[102,56],handR:o2},{...GSTAND,elbowL:[102,56],handL:o2,elbowR:[102,56],handR:o1}];
+ Object.assign(M,{
+ 'gym:bank|Kurzhantel':X('bank',{lr:5,load:['hand']}),
+ 'gym:bank|Multipresse':X('bank',{props:[...B('bank').props,'136,-8 136,121']}),
+ 'gym:bank|Maschine':{dur:2.4,load:['hand'],lr:4,props:SEAT_P,poses:[{...SEAT_S,elbow:[66,62],hand:[90,52]},{...SEAT_S,elbow:[98,50],hand:[122,48]}]},
+ 'gym:schraeg|Kurzhantel':X('schraeg',{lr:5}),
+ 'gym:schraeg|Multipresse':X('schraeg',{props:[...B('schraeg').props,'138,-8 138,121']}),
+ 'gym:schraeg|Maschine':{dur:2.4,load:['hand'],lr:4,props:SEAT_P,poses:[{...SEAT_S,elbow:[66,60],hand:[88,46]},{...SEAT_S,elbow:[96,38],hand:[116,26]}]},
+ 'gym:fly|Butterfly-Maschine':{dur:2.6,props:['78,76 122,76'],poses:[{...GFRONT,...SEAT_F,elbowL:[72,38],handL:[70,16],elbowR:[128,38],handR:[130,16]},{...GFRONT,...SEAT_F,elbowL:[92,42],handL:[96,18],elbowR:[108,42],handR:[104,18]}]},
+ 'gym:fly|Kurzhantel':X('bank',{lr:5,poses:[{...BENCH_LIE,elbow:[134,74],hand:[136,56]},{...BENCH_LIE,elbow:[130,98],hand:[148,104]}]}),
+ 'gym:schulter|Langhantel':{dur:2.4,load:['hand'],poses:[{...GSTAND,elbow:[112,50],hand:[108,32]},{...GSTAND,elbow:[104,12],hand:[102,-6]}]},
+ 'gym:schulter|Maschine':X('schulter',{props:['78,76 122,76'],lr:4,poses:B('schulter').poses.map(p=>({...p,...SEAT_F}))}),
+ 'gym:seit|Kabelzug':{dur:2.4,cable:[[78,121,'handR']],poses:[{...GFRONT,elbowL:[86,54],handL:[94,72],elbowR:[110,56],handR:[96,76]},{...GFRONT,elbowL:[86,54],handL:[94,72],elbowR:[124,40],handR:[142,40]}]},
+ 'gym:seit|Maschine':{dur:2.4,props:['78,76 122,76'],poses:[{...GFRONT,...SEAT_F,elbowL:[86,56],handL:[86,74],elbowR:[114,56],handR:[114,74]},{...GFRONT,...SEAT_F,elbowL:[72,38],handL:[72,56],elbowR:[128,38],handR:[128,56]}]},
+ 'gym:dips|Assistiert':X('dips',{load:['knee'],lr:6,poses:B('dips').poses.map(p=>({...p,knee:[p.hip[0]-2,p.hip[1]+24],foot:[p.hip[0]-24,p.hip[1]+26]}))}),
+ 'gym:dips|Maschine':{dur:2.4,load:['hand'],lr:4,props:['80,92 112,92','82,92 76,48','96,92 96,121'],poses:[
+  {head:[99,38],neck:[98,52],hip:[96,90],knee:[124,90],foot:[126,MV_FLOOR],elbow:[86,60],hand:[102,66]},{head:[99,38],neck:[98,52],hip:[96,90],knee:[124,90],foot:[126,MV_FLOOR],elbow:[94,72],hand:[100,94]}]},
+ 'gym:trizeps|Kurzhantel über Kopf':{dur:2.6,load:['hand'],lr:6,props:['80,92 112,92','96,92 96,121'],poses:[
+  {head:[100,38],neck:[98,52],hip:[96,90],knee:[124,90],foot:[126,MV_FLOOR],elbow:[104,30],hand:[106,8]},{head:[100,38],neck:[98,52],hip:[96,90],knee:[124,90],foot:[126,MV_FLOOR],elbow:[104,30],hand:[86,46]}]},
+ 'gym:klimm|Assistiert':X('klimm',{load:['knee'],lr:6,poses:B('klimm').poses.map(p=>({...p,knee:[p.hip[0]+2,p.hip[1]+24],foot:[p.hip[0]-20,p.hip[1]+28]}))}),
+ 'gym:rudern|Kurzhantel einarmig':{dur:2.2,load:['handR'],lr:5,props:['60,96 132,96','70,96 70,121','122,96 122,121'],poses:[
+  {head:[130,70],neck:[118,72],hip:[80,74],kneeL:[90,96],footL:[66,96],kneeR:[78,98],footR:[76,MV_FLOOR],elbowL:[118,84],handL:[118,96],elbowR:[120,90],handR:[120,110]},
+  {head:[130,70],neck:[118,72],hip:[80,74],kneeL:[90,96],footL:[66,96],kneeR:[78,98],footR:[76,MV_FLOOR],elbowL:[118,84],handL:[118,96],elbowR:[100,62],handR:[108,86]}]},
+ 'gym:rudern|Kabelzug sitzend':{dur:2.4,cable:[[184,92,'hand']],props:['70,104 100,104','142,88 142,114'],poses:[
+  {head:[92,48],neck:[90,62],hip:[84,100],knee:[116,88],foot:[140,102],elbow:[112,74],hand:[132,80]},{head:[88,48],neck:[88,62],hip:[84,100],knee:[116,88],foot:[140,102],elbow:[72,74],hand:[96,84]}]},
+ 'gym:rudern|Maschine':{dur:2.4,load:['hand'],lr:4,props:['70,96 100,96','86,96 86,121','126,46 126,82'],poses:[
+  {head:[120,44],neck:[112,54],hip:[84,92],knee:[114,92],foot:[118,MV_FLOOR],elbow:[132,62],hand:[150,64]},{head:[120,44],neck:[112,54],hip:[84,92],knee:[114,92],foot:[118,MV_FLOOR],elbow:[94,60],hand:[112,66]}]},
+ 'gym:latzug|Breiter Griff':{dur:2.4,cable:[[100,-10,'handL'],[100,-10,'handR']],props:['76,84 124,84'],poses:[
+  {head:[100,32],neck:[100,46],hip:[100,82],kneeL:[90,98],footL:[88,MV_FLOOR],kneeR:[110,98],footR:[112,MV_FLOOR],elbowL:[74,22],handL:[62,0],elbowR:[126,22],handR:[138,0]},
+  {head:[100,32],neck:[100,46],hip:[100,82],kneeL:[90,98],footL:[88,MV_FLOOR],kneeR:[110,98],footR:[112,MV_FLOOR],elbowL:[68,58],handL:[66,36],elbowR:[132,58],handR:[134,36]}]},
+ 'gym:latzug|Enger Griff':{dur:2.6,cable:[[100,-10,'handL'],[100,-10,'handR']],props:['76,84 124,84'],poses:[
+  {head:[100,32],neck:[100,46],hip:[100,82],kneeL:[90,98],footL:[88,MV_FLOOR],kneeR:[110,98],footR:[112,MV_FLOOR],elbowL:[94,22],handL:[97,0],elbowR:[106,22],handR:[103,0]},
+  {head:[100,32],neck:[100,46],hip:[100,82],kneeL:[90,98],footL:[88,MV_FLOOR],kneeR:[110,98],footR:[112,MV_FLOOR],elbowL:[84,66],handL:[96,46],elbowR:[116,66],handR:[104,46]}]},
+ 'gym:revfly|Kabelzug':X('revfly',{load:[],cable:[[16,30,'handR'],[184,30,'handL']]}),
+ 'gym:revfly|Kurzhantel':{dur:2.4,load:['hand'],lr:5,poses:[
+  {head:[132,40],neck:[120,46],hip:[82,70],knee:[88,96],foot:[86,MV_FLOOR],elbow:[124,66],hand:[126,86]},{head:[132,40],neck:[120,46],hip:[82,70],knee:[88,96],foot:[86,MV_FLOOR],elbow:[118,34],hand:[116,16]}]},
+ 'gym:curl|Kurzhantel':{dur:3,load:['handL','handR'],lr:5,poses:alt([106,78],[118,40])},
+ 'gym:curl|Kabelzug':X('curl',{lr:4,cable:[[132,121,'hand']]}),
+ 'gym:hammer':{dur:3,load:['handL','handR'],lr:5,poses:alt([106,78],[118,40])},
+ 'gym:hammer|Kabelzug Seil':X('curl',{lr:4,cable:[[132,121,'hand']]}),
+ 'gym:squat|Multipresse':X('squat',{props:[RAIL]}),
+ 'gym:squat|Goblet Kurzhantel':X('squat',{lr:6,poses:[{...GSTAND,elbow:[108,52],hand:[112,38]},{head:[110,46],neck:[104,58],hip:[76,92],knee:[110,94],foot:[100,MV_FLOOR],elbow:[112,78],hand:[120,64]}]}),
+ 'gym:rdl|Kurzhantel':X('rdl',{lr:5}),
+ 'gym:presse|Horizontal':{dur:2.6,props:['50,100 90,100','52,100 44,56','136,80 136,108'],poses:[
+  {head:[50,44],neck:[54,58],hip:[70,96],knee:[92,72],foot:[110,92],elbow:[62,80],hand:[74,98]},{head:[50,44],neck:[54,58],hip:[70,96],knee:[102,90],foot:[132,94],elbow:[62,80],hand:[74,98]}]},
+ 'gym:beuger|Sitzend':{dur:2.4,props:SEAT_P,poses:[{...SEAT_S,foot:[136,88],elbow:[84,70],hand:[98,84]},{...SEAT_S,foot:[104,116],elbow:[84,70],hand:[98,84]}]},
+ 'gym:ausfall|Langhantel':X('ausfall',{lr:7,poses:B('ausfall').poses.map((p,i)=>({...p,elbow:[p.neck[0]-12,p.neck[1]+12],hand:[p.neck[0]-4,p.neck[1]-2]}))}),
+ 'gym:waden|Sitzend':{dur:1.8,load:['knee'],lr:5,props:['60,80 100,80','80,80 80,121'],poses:[
+  {head:[70,22],neck:[70,36],hip:[74,76],knee:[104,76],foot:[106,MV_FLOOR],elbow:[86,60],hand:[100,72]},{head:[70,18],neck:[70,32],hip:[74,72],knee:[104,70],foot:[108,MV_FLOOR-4],elbow:[86,56],hand:[100,68]}]},
+ 'gym:waden|An der Beinpresse':X('presse',{dur:1.8,poses:[
+  {head:[42,58],neck:[48,70],hip:[72,104],knee:[90,88],foot:[108,70],elbow:[60,92],hand:[72,104]},{head:[42,58],neck:[48,70],hip:[72,104],knee:[91,87],foot:[114,64],elbow:[60,92],hand:[72,104]}]})
+ });
+ M['gym:ausfall|Multipresse']={...M['gym:ausfall|Langhantel'],props:[RAIL]};
+}

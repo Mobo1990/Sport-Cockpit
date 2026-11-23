@@ -146,6 +146,7 @@ try:
         pg.fill("#gkg", "80"); pg.fill("#grp", "8"); pg.evaluate("document.querySelector('[data-g=set]').click()"); pg.wait_for_timeout(100)
         check("3 Sekunden" in pg.text_content(".gch"), "Letzter Satz: 3-Sekunden-Challenge")
         check(pg.evaluate("Object.keys(CAT).every(id=>GUIDE[id]&&MOVES['gym:'+id]&&moveSvg('gym:'+id).includes('<animate'))"), "Anleitung und Strichmännchen für alle Gym-Übungen")
+        check(pg.evaluate("Object.keys(MOVES).filter(k=>k.includes('|')).length>=30 && Object.entries(CAT).every(([id,c])=>c.v.every(v=>{const m=gymMove({id,v});return m&&moveSvg(m).includes('<animate')})) && gymMove({id:'rudern',v:'Kabelzug sitzend'})!==gymMove({id:'rudern',v:'Langhantel'})"), "Eigene Animation je Ausführung (z. B. Rudern am Kabelzug)")
         check(pg.evaluate("['push','pull','legs'].every(d=>WO['flex_'+d].steps.every(x=>moveFor(x[0])))"), "Dehn-Programme mit Strichmännchen für jede Dehnung")
         check(pg.evaluate("(()=>{const o=clone(S.plan),v=S.planV;S.plan.push=S.plan.push.filter(x=>x.id!=='fly');S.planV=1;const a=planMigrate(),ok=a&&S.plan.push[S.plan.push.length-1].id==='fly'&&S.plan.pull.filter(x=>x.id==='revfly').length===1&&!planMigrate();S.plan=o;S.planV=v;return ok})()"), "7. Übung wird einmalig an bestehende Pläne angehängt")
         check(pg.evaluate("['push','pull','legs'].every(d=>S.plan[d].length===7)"), "Neuer Plan: 7 Übungen pro Tag")
