@@ -112,10 +112,13 @@ const isA=k=>/assist/i.test(String(k));
 const r25=x=>Math.max(0,Math.round(x/2.5)*2.5);
 function plates(kg){let side=(kg-20)/2;if(side<=0)return null;const out=[];for(const p of [25,20,15,10,5,2.5,1.25]){while(side>=p-1e-9){out.push(p);side-=p}}return side>0.01?null:out.map(fmt).join(' + ')}
 const mk=(id,sets,min,max,step)=>({id,sets,min,max,step,v:CAT[id].v[0]});
-const DEF={push:[mk('bank',4,6,10,2.5),mk('schraeg',3,8,12,2),mk('schulter',3,8,12,2),mk('seit',3,12,15,1),mk('dips',3,8,12,2.5),mk('trizeps',3,10,15,2.5)],
- pull:[mk('klimm',4,6,10,2.5),mk('rudern',3,8,12,2.5),mk('latzug',3,10,12,2.5),mk('face',3,12,15,2.5),mk('curl',3,8,12,2.5),mk('hammer',3,10,12,1)],
- legs:[mk('squat',4,6,10,2.5),mk('rdl',3,8,10,2.5),mk('presse',3,10,12,5),mk('beuger',3,10,15,2.5),mk('ausfall',3,10,12,2),mk('waden',4,12,15,5)]};
+const DEF={push:[mk('bank',4,6,10,2.5),mk('schraeg',3,8,12,2),mk('schulter',3,8,12,2),mk('seit',3,12,15,1),mk('dips',3,8,12,2.5),mk('trizeps',3,10,15,2.5),mk('fly',3,12,15,2.5)],
+ pull:[mk('klimm',4,6,10,2.5),mk('rudern',3,8,12,2.5),mk('latzug',3,10,12,2.5),mk('face',3,12,15,2.5),mk('curl',3,8,12,2.5),mk('hammer',3,10,12,1),mk('revfly',3,12,15,1)],
+ legs:[mk('squat',4,6,10,2.5),mk('rdl',3,8,10,2.5),mk('presse',3,10,12,5),mk('beuger',3,10,15,2.5),mk('ausfall',3,10,12,2),mk('waden',4,12,15,5),mk('strecker',3,12,15,2.5)]};
 const clone=o=>JSON.parse(JSON.stringify(o));
+/* Plan-Version 2: je eine 7. Übung (Push: Brust zusammenführen, Pull: Reverse Flys, Legs: Beinstrecker) – einmalig an bestehende Pläne anhängen */
+const PLAN_V=2,PLAN_ADD={push:'fly',pull:'revfly',legs:'strecker'};
+function planMigrate(){if((S.planV||0)>=PLAN_V)return false;let add=false;for(const [d,id] of Object.entries(PLAN_ADD)){const p=S.plan[d];if(p&&!p.some(x=>x.id===id)){p.push(clone(DEF[d].find(x=>x.id===id)));add=true}}S.planV=PLAN_V;return add}
 
 /* Startgewichte fürs erste Mal (Männer, leichter Einstieg). Frauen: 60 %, Hilfe bei assistierten Übungen höher.
    Kurzhantel = pro Hand. Danach übernimmt die doppelte Progression aus dem eigenen Verlauf. */

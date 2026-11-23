@@ -147,6 +147,8 @@ try:
         check("3 Sekunden" in pg.text_content(".gch"), "Letzter Satz: 3-Sekunden-Challenge")
         check(pg.evaluate("Object.keys(CAT).every(id=>GUIDE[id]&&MOVES['gym:'+id]&&moveSvg('gym:'+id).includes('<animate'))"), "Anleitung und Strichmännchen für alle Gym-Übungen")
         check(pg.evaluate("['push','pull','legs'].every(d=>WO['flex_'+d].steps.every(x=>moveFor(x[0])))"), "Dehn-Programme mit Strichmännchen für jede Dehnung")
+        check(pg.evaluate("(()=>{const o=clone(S.plan),v=S.planV;S.plan.push=S.plan.push.filter(x=>x.id!=='fly');S.planV=1;const a=planMigrate(),ok=a&&S.plan.push[S.plan.push.length-1].id==='fly'&&S.plan.pull.filter(x=>x.id==='revfly').length===1&&!planMigrate();S.plan=o;S.planV=v;return ok})()"), "7. Übung wird einmalig an bestehende Pläne angehängt")
+        check(pg.evaluate("['push','pull','legs'].every(d=>S.plan[d].length===7)"), "Neuer Plan: 7 Übungen pro Tag")
         pg.evaluate("gym.fin={day:'push',sets:12,vol:4000,prevVol:3200,prs:[],ups:[{n:'Bankdrücken',d:2.5}],dur:48};renderGym()")
         t = pg.text_content("#gym")
         check("Sauber" in t and "+25 %" in t and "+2,5 kg" in t and "48" in t and "Dehnen starten" in t, "Abschluss im Gym Mode: Glückwunsch, Dauer, Steigerung, Dehnen-Angebot")

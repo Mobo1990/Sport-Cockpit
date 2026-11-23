@@ -1,7 +1,7 @@
 /* Sport Cockpit – Start der App */
 'use strict';
 /* ===================== START ===================== */
-lsLoad();{const ld=lastDay();if(ld)day=DAYS[ld].nx}
+lsLoad();if(planMigrate())savePlan();{const ld=lastDay();if(ld)day=DAYS[ld].nx}
 if(location.hash==='#nut')view='nut';
 render();note(HA.token?'Lokal · verbinde …':'Nur auf diesem Gerät');
 syncNow();
