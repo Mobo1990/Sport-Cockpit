@@ -34,7 +34,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-h]');if(
  else if(a==='water'){const dd=ND(d),v=+b.dataset.v;dd.water=Math.max(0,(dd.water||0)+v);if(v>0)dd.wlast=v;touch(d)}
  else if(a==='wml'){wml=!wml;render();if(wml)setTimeout(()=>{const i=$('wMl');if(i)i.focus()},30);return}
  else if(a==='wmlok'){const v=Math.round(num($('wMl').value)||0);if(v<10||v>3000){note('Menge in ml eingeben (10–3000)');return}const dd=ND(d);dd.water=(dd.water||0)+v;dd.wlast=v;wml=false;touch(d)}
- else if(a==='wundo'){const dd=ND(d);dd.water=Math.max(0,(dd.water||0)-(dd.wlast||250));dd.wlast=0;touch(d)}
+ else if(a==='wundo'){const dd=ND(d);if(!dd.wlast)return;dd.water=Math.max(0,(dd.water||0)-dd.wlast);dd.wlast=0;touch(d)}
  else if(a==='steps'){const v=num($('hSt').value);if(v==null||v<0||v>100000){note('Schritte als Zahl eingeben');return}ND(d).stm=Math.round(v);touch(d)}
  else if(a==='cardio'){day='cardio';view='train'}
  else if(a==='rec'){view='rec'}
