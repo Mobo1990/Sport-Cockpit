@@ -46,7 +46,7 @@ function remember(food){const N=S.nut;if(food.src==='off'||food.src==='own'){if(
 function nutLine(){const d=today(),g=goals(d),t=totals(d);if(!t.kcal&&!lastWeight())return '';return `<p class="nline" data-a="view" data-v="nut">Ernährung heute: <b>${fmt(t.kcal)}</b> / ${fmt(g.kcal)} kcal · <b>${fmt(Math.round(t.p))}</b> / ${g.p} g Protein${g.trained?' · Trainingstag':''}</p>`}
 /* Farbverlaufs-Balken: kind 'eat' = Grün→Rot (Kalorien, Limit), 'goal' = Rot→Grün (Protein, Ziel erreichen) */
 function rbar(v,goal,kind,big){const r=goal?v/goal:0,pc=Math.min(r,1)*100,over=kind==='eat'&&r>1.05;
- return `<div class="rb ${kind}${big?' big':''}${over?' over':''}" role="meter" aria-valuemin="0" aria-valuemax="${goal}" aria-valuenow="${Math.round(v)}"><i style="--p:${pc.toFixed(1)}%"></i><b style="left:${pc.toFixed(1)}%"></b></div>`}
+ return `<div class="rb ${kind}${big?' big':''}${over?' over':''}" role="meter" aria-label="${Math.round(v)} von ${goal}" aria-valuemin="0" aria-valuemax="${goal}" aria-valuenow="${Math.round(v)}"><i style="--p:${pc.toFixed(1)}%"></i><b style="left:${pc.toFixed(1)}%"></b></div>`}
 const bar=(l,v,goal,u)=>{const kind=l==='Protein'?'up':'eat',left=goal-v;return `<div class="nb"><div class="nbh"><span>${l}</span><span><b>${fmt(Math.round(v))}</b> / ${fmt(goal)} ${u}</span></div>${rbar(v,goal,kind)}<div class="nbf">${kind==='goal'?(left>0?`noch ${fmt(Math.round(left))} ${u}`:'Ziel erreicht'):(left>=0?`noch ${fmt(Math.round(left))} ${u} frei`:`${fmt(Math.round(-left))} ${u} drüber`)}</div></div>`};
 function renderNut(){if(!nDate)nDate=today();const d=nDate,g=goals(d),t=totals(d),day=S.nut.days[d]||{items:[]},isT=d===today();
  const left=g.kcal-t.kcal,dl=new Date(d+'T12:00').toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'});
@@ -101,7 +101,7 @@ function renderSheet(){const sh=sheet,ml=MEALS.find(m=>m[0]===sh.meal)[1];let b=
   <div class="srch"><input id="fq" data-n="q" placeholder="Lebensmittel suchen …" value="${esc(sh.q||'')}" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="search"><button data-n="scan" aria-label="Barcode scannen">▦ Scan</button><button data-say="open" aria-label="Per Sprache eintragen" class="saybtn"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button><label class="filebtn">Foto<input type="file" accept="image/*" capture="environment" data-ai="file" hidden></label></div>
   <div id="fres">${sheetList(sh)}</div>
   <div class="actions"><button class="ghost" data-n="custom">+ Eigenes Produkt anlegen</button></div>`}
- return `<div class="sheet" role="dialog" aria-modal="true"><div class="sheetin" data-step="${sh.step||'search'}">${b}</div></div>`}
+ return `<div class="sheet" role="dialog" aria-modal="true" aria-label="Essen eintragen"><div class="sheetin" data-step="${sh.step||'search'}">${b}</div></div>`}
 /* Der Suchindex hat seit Ende Nov. 2026 keine „nutriments“ mehr, aber im Nutri-Score Energie (kJ), Eiweiß, Zucker:
    daraus ein Teil-Eintrag (part), Kohlenhydrate/Fett lädt die App beim Antippen nach. */
 function offNs(p){const ns=p.nutriscore_data&&p.nutriscore_data.components;if(!ns)return null;const all=[...(ns.positive||[]),...(ns.negative||[])],v=id=>{const x=all.find(c=>c.id===id);return x&&x.value!=null?+x.value:null};

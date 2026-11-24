@@ -1,7 +1,7 @@
 /* Sport Cockpit – Gym Mode: eine Übung im Vollbild, große Knöpfe, wischen */
 'use strict';
 let gym={open:false,i:0,last:null};
-const gymEl=(()=>{const d=document.createElement('div');d.id='gym';d.className='gym';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');document.body.appendChild(d);return d})();
+const gymEl=(()=>{const d=document.createElement('div');d.id='gym';d.className='gym';d.setAttribute('role','dialog');d.setAttribute('aria-label','Gym Mode');d.setAttribute('aria-modal','true');document.body.appendChild(d);return d})();
 function gymRow(e,dr){const rows=dr.ex[e.id];let k=rows.findIndex(r=>!r.done);return{rows,k}}
 function gymDefaults(e,rows,k){const sg=sugg(e),r=rows[k]||{},prev=rows.slice(0,k).filter(x=>x.done).pop();
  const kg=r.kg!==''&&r.kg!=null?num(r.kg):(prev?num(prev.kg):(sg?sg.kg:startKg(e))),reps=r.reps!==''&&r.reps!=null?num(r.reps):(sg?(sg.reps[k]??sg.reps[sg.reps.length-1]):e.max);return{kg,reps,sg}}
@@ -43,9 +43,9 @@ function renderGym0(){if(!gym.open){gymEl.innerHTML='';gymEl.classList.remove('o
  ${resting?`<div class="grest"><span>Pause</span><b id="grest">${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}</b><button data-g="skip">Weiter</button></div>`:''}
  ${done?`<div class="gdone"><b>Alle ${rows.length} Sätze geschafft</b><div class="gnav">${nx!=null?`<button class="primary" data-g="go" data-i="${nx}">Nächste Übung ›</button>`:''}<button data-g="more">+ Noch ein Satz</button></div></div>`
  :`<p class="gset">Satz <b>${k+1}</b> von ${rows.length}</p>
- <div class="gstep"><label>${A?'kg Hilfe':'Gewicht'}</label><div><button data-g="kg" data-d="-1" aria-label="weniger">−</button><input id="gkg" inputmode="decimal" value="${kg!=null?fmt(kg):''}" placeholder="kg"><button data-g="kg" data-d="1" aria-label="mehr">+</button></div></div>
+ <div class="gstep"><label>${A?'kg Hilfe':'Gewicht'}</label><div><button data-g="kg" data-d="-1" aria-label="weniger">−</button><input id="gkg" aria-label="Gewicht in kg" inputmode="decimal" value="${kg!=null?fmt(kg):''}" placeholder="kg"><button data-g="kg" data-d="1" aria-label="mehr">+</button></div></div>
  <p class="gplate" id="gplate">${plateTxt(e,kg)}</p>
- <div class="gstep"><label>Wiederholungen</label><div><button data-g="rp" data-d="-1" aria-label="weniger">−</button><input id="grp" inputmode="numeric" value="${reps!=null?reps:''}"><button data-g="rp" data-d="1" aria-label="mehr">+</button></div></div>
+ <div class="gstep"><label>Wiederholungen</label><div><button data-g="rp" data-d="-1" aria-label="weniger">−</button><input id="grp" aria-label="Wiederholungen" inputmode="numeric" value="${reps!=null?reps:''}"><button data-g="rp" data-d="1" aria-label="mehr">+</button></div></div>
  <div class="glast"><span>Wie war der Satz?</span>${rpeBtns(e,k,rows[k])}</div>
  ${k===rows.length-1?`<p class="gch"><b>Letzter Satz – Challenge:</b> Halte die letzte Wiederholung 3 Sekunden in der angespannten Position.</p>`:''}
  <button class="primary gok" data-g="set">Satz ${k+1} fertig ✓</button>`}

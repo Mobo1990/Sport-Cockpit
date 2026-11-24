@@ -7,7 +7,7 @@ const WO={
  mobil:{n:'Mobility',min:5,steps:[['Schulterkreisen',40,'Große Kreise, vor und zurück.'],['Katze-Kuh',40,'Im Vierfüßler, Rücken rund und hohl.'],['Hüftbeuger links',40,'Ausfallschritt, Hüfte nach vorn schieben.'],['Hüftbeuger rechts',40,'Ausfallschritt, Hüfte nach vorn schieben.'],['Weltbeste Dehnung',40,'Ausfallschritt, Arm zur Decke drehen, Seiten wechseln.'],['Brustdehnung',40,'Unterarm an Wand oder Türrahmen.'],['Vorbeuge',40,'Knie leicht gebeugt, locker hängen lassen.']]}};
 const PREP=5;
 let wo=null,woTick=null,woLock=null;
-const woEl=(()=>{const d=document.createElement('div');d.id='wo';d.className='gym wo';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');document.body.appendChild(d);return d})();
+const woEl=(()=>{const d=document.createElement('div');d.id='wo';d.className='gym wo';d.setAttribute('role','dialog');d.setAttribute('aria-label','Kurz-Workout');d.setAttribute('aria-modal','true');document.body.appendChild(d);return d})();
 /* Knieschonende Varianten für die Timer-Workouts (Profil „knieschonend“ oder Schalter vor dem Start) */
 const KNEE_WO={'Kniebeugen':['Stuhl-Kniebeugen','Nur bis zum Stuhl absetzen, Knie hinter den Zehen.'],'Ausfallschritte':['Glute Bridges','Rückenlage, Hüfte hoch und kurz halten – ohne Druck aufs Knie.'],
  'Hampelmänner':['Step-Jacks','Ohne Sprung: abwechselnd seitlich raustippen, Arme hoch.'],'Burpees':['Burpees ohne Sprung','Beine nacheinander zurücksetzen, aufrichten ohne Sprung.']};

@@ -839,8 +839,8 @@ html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 @keyframes chdrop{0%{transform:translate(-50%,-140%);opacity:0}100%{transform:translate(-50%,0);opacity:1}}
 @media (prefers-reduced-motion:reduce){.cheer .chc{animation:none!important}}
 /* ===== Duo-Design (Farben und Schriften wie im Pitchdeck). Klassisch = ohne Klasse th-duo, umschaltbar unter Mehr → Ansicht ===== */
-:root.th-duo{--fh:Outfit,'DM Sans',sans-serif;--fb:'DM Sans',system-ui,sans-serif;--bg:#F6F1EA;--s1:#FFFCF8;--s2:#F3ECE3;--line:#E2D6CC;--ink:#221C1A;--mute:#8C7F78;
- --acc:#E2725B;--acc2:#FBE7E1;--onacc:#ffffff;--dark:#3E5A4C;--eq:#cbbdb2;--sh:0 1px 2px rgba(70,45,30,.04),0 10px 30px rgba(70,45,30,.08);--r:18px;
+:root.th-duo{--fh:Outfit,'DM Sans',sans-serif;--fb:'DM Sans',system-ui,sans-serif;--bg:#F6F1EA;--s1:#FFFCF8;--s2:#F3ECE3;--line:#E2D6CC;--ink:#221C1A;--mute:#6A5E57;
+ --acc:#BF4F36;--acc2:#FBE7E1;--onacc:#ffffff;--dark:#3E5A4C;--eq:#cbbdb2;--sh:0 1px 2px rgba(70,45,30,.04),0 10px 30px rgba(70,45,30,.08);--r:18px;
  --d-rose:#C4917F;--d-rosed:#9A5F4E;--d-sage:#6F8F7E;--d-saged:#3E5A4C;--d-sagel:#E3ECE6;--d-blush:#F1E4DC}
 .th-duo body{background:var(--bg)}
 .th-duo h1,.th-duo h2,.th-duo h3,.th-duo .cond{letter-spacing:-.01em}
@@ -895,3 +895,10 @@ html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 .advcount b{flex:0 0 auto;min-width:max-content}
 @media (max-width:389px){.dg .tl{font-size:12px;gap:4px}.dg .tl b{font-size:18px}}
 .th-duo .tile.big b{color:var(--ink)}
+
+/* Prüfung (axe/WCAG): größere Tipp-Flächen im Duo-Design */
+.th-duo .vars button{min-height:40px}
+.dh .wx button{padding:10px 2px;min-height:40px}
+.dh .wg{padding:0 2px;width:38px;height:48px}
+.th-duo .nav button,.th-duo .board small,.th-duo .bmid .bk,.th-duo .bhint,.th-duo .grest span{color:var(--mute)}
+.th-duo .nav button[aria-current="page"],.th-duo .nav button.on{color:var(--ink)}
