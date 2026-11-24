@@ -19,7 +19,7 @@ function health(m){if(!m||!m.success||!S.prof.name)return;const me='input_text.s
   sonst überschreibt ein Gerät mit leerem Tag die Einträge der anderen (Datenverlust 22.11.) */
  if(JSON.stringify(day.h)!==old)partnersCh=true;S.hT=Math.max(...(m.result||[]).filter(e=>e.entity_id.startsWith(pre)).map(e=>Date.parse(e.last_updated)||0),0)}
 function syncLater(){clearTimeout(syncT);if(HA.url&&HA.token)syncT=setTimeout(syncNow,1500)}
-function metaOf(){return{t:S.metaT,prof:S.prof,plan:S.plan,goal:S.goal,rest:S.rest,cgoal:S.cgoal,nut:{goal:S.nut.goal,maint:S.nut.maint,gkg:S.nut.gkg,foods:S.nut.foods,meals:S.nut.meals,recent:S.nut.recent},drafts,draftT}}
+function metaOf(){return{t:S.metaT,prof:S.prof,plan:S.plan,goal:S.goal,rest:S.rest,cgoal:S.cgoal,nut:{goal:S.nut.goal,gh:S.nut.gh||[],maint:S.nut.maint,gkg:S.nut.gkg,foods:S.nut.foods,meals:S.nut.meals,recent:S.nut.recent},drafts,draftT}}
 function merge(R){let changed=false;const m=R.sc_meta;
  if(m&&(m.t||0)>(S.metaT||0)){if(m.prof)S.prof=m.prof;Object.assign(S,{plan:m.plan||S.plan,goal:m.goal||S.goal,rest:m.rest||S.rest,cgoal:m.cgoal||S.cgoal,metaT:m.t});if(m.nut)Object.assign(S.nut,m.nut);changed=true}
  if(m&&(m.draftT||0)>draftT){drafts=m.drafts||{};draftT=m.draftT;changed=true}

@@ -9,7 +9,15 @@ const ND=d=>{const N=S.nut;if(!N.days[d])N.days[d]={items:[],t:0};return N.days[
 const r1=x=>Math.round(x*10)/10;
 function lastWeight(before){const ks=Object.keys(S.nut.days).filter(k=>S.nut.days[k].w&&(!before||k<=before)).sort();return ks.length?S.nut.days[ks[ks.length-1]].w:null}
 function bmr(w){const P=S.prof,a=P.year?new Date().getFullYear()-P.year:null;if(!P.height||!a)return null;return 10*w+6.25*P.height-5*a+(P.sex==='w'?-161:5)}
-function goals(d){const N=S.nut,w=lastWeight(d)||S.prof.weight||80,b=bmr(w),maint=N.maint||(b?Math.round(b*S.prof.act/50)*50:Math.round(w*32/50)*50),add={aufbau:300,halten:0,defi:-450}[N.goal]||0;
+/* Ziele: Kalorien-Zuschlag zum Erhaltungsbedarf. „Fitter werden“ = leichtes Defizit.
+   Das Ziel gilt ab dem Tag, an dem es gewählt wurde (S.nut.gh) – frühere Tage behalten ihr altes Ziel und ihre Punkte. */
+const GOAL_ADD={aufbau:300,halten:0,fit:-250,defi:-450},GOAL_N={aufbau:'Aufbau',halten:'Halten',fit:'Fitter werden',defi:'Definieren'};
+function goalAt(d){let g=null;for(const x of S.nut.gh||[])if(x.d<=d)g=x.g;return g||S.nut.goal}
+function setGoal(v){const N=S.nut,t=today();if(N.goal===v)return;N.gh=(N.gh||[]).filter(x=>x.d!==t);if(!N.gh.length)N.gh.push({d:'0000-00-00',g:N.goal});N.gh.push({d:t,g:v});N.goal=v;S.metaT=Date.now();persist()}
+/* Bereich für volle Kalorien-Punkte als Hinweis im Essen-Tab */
+function kbandHtml(d,g){if(typeof KCAL_BANDS==='undefined'||d<KCAL_NEW_AB)return '';const b=(KCAL_BANDS[goalAt(d)]||KCAL_BANDS.halten)[0],m=g.kcal-(GOAL_ADD[goalAt(d)]||0);
+ return `<p class="kband">Volle Punkte (+${b[2]}): ${fmt(Math.round((m+b[0])/10)*10)}–${fmt(Math.round((m+b[1])/10)*10)} kcal · ab 2 Mahlzeiten</p>`}
+function goals(d){const N=S.nut,w=lastWeight(d)||S.prof.weight||80,b=bmr(w),maint=N.maint||(b?Math.round(b*S.prof.act/50)*50:Math.round(w*32/50)*50),G=goalAt(d),add=GOAL_ADD[G]||0;
  const trained=S.sessions.some(s=>iso(s.date)===d&&s.ex.length)||(d===today()&&Object.values(drafts).some(dr=>dr&&dr.ex&&Object.values(dr.ex).some(r=>r.some(x=>x.done))));
  const hh=(S.nut.days[d]||{}).h||{},bonus=(!N.maint&&b&&hh.ak)?Math.max(0,Math.round(((b+hh.ak)*1.1-b*S.prof.act)/10)*10):0,cx=S.sessions.filter(s=>iso(s.date)===d).reduce((a,s)=>a+(s.cardio||[]).reduce((b,c)=>b+(c.eat||0),0),0),kcal=maint+add+bonus+cx,p=Math.round(w*N.gkg*(trained?1.05:1)),f=Math.round(kcal*0.27/9),c=Math.max(0,Math.round((kcal-p*4-f*9)/4));const z=Math.min(50,Math.round(kcal*0.1/4));return{kcal,p,c,f,z,w,trained,maint,bmr:b,bonus,cx,h:hh}}
 function totals(d){const t={kcal:0,p:0,c:0,f:0,z:0};for(const it of (S.nut.days[d]||{items:[]}).items){t.kcal+=it.kcal;t.p+=it.p;t.c+=it.c;t.f+=it.f;t.z+=it.z||0}return t}
@@ -43,7 +51,7 @@ const bar=(l,v,goal,u)=>{const kind=l==='Protein'?'up':'eat',left=goal-v;return 
 function renderNut(){if(!nDate)nDate=today();const d=nDate,g=goals(d),t=totals(d),day=S.nut.days[d]||{items:[]},isT=d===today();
  const left=g.kcal-t.kcal,dl=new Date(d+'T12:00').toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'});
  let h=healthLink()+`<button class="primary eatnow" data-eatnow="1">+ Essen eintragen <small>· ${mealName(mealNow())}</small></button><div class="ndate"><button data-n="prev" aria-label="Vortag">‹</button><b>${isT?'Heute':dl}</b><button data-n="next" aria-label="Nächster Tag"${isT?' disabled':''}>›</button></div>${shareInboxHtml()}${sayInboxHtml()}
- <section class="nsum"><div class="nbig"><b class="cond">${fmt(Math.abs(left))}</b><span>${left>=0?'kcal übrig':'kcal drüber'}</span><small>${{aufbau:'Aufbau',halten:'Halten',defi:'Definieren'}[S.nut.goal]}${g.trained?' · Trainingstag, Protein +5 %':''}${g.cx?` · Walking Pad +${fmt(g.cx)} kcal`:''}</small>${g.h&&(g.h.st||g.h.ak)?`<p class="hl">Apple Health: ${g.h.st?fmt(g.h.st)+' Schritte':''}${g.h.ak?' · '+fmt(g.h.ak)+' aktive kcal':''}${g.h.tm?' · '+fmt(g.h.tm)+' min Training':''}${g.bonus?` · <b>+${fmt(g.bonus)} kcal</b> extra (mehr bewegt als dein Alltag-Faktor annimmt)`:''}</p>`:''}</div>
+ <section class="nsum"><div class="nbig"><b class="cond">${fmt(Math.abs(left))}</b><span>${left>=0?'kcal übrig':'kcal drüber'}</span><small>${GOAL_N[goalAt(today())]||''}${g.trained?' · Trainingstag, Protein +5 %':''}${g.cx?` · Walking Pad +${fmt(g.cx)} kcal`:''}</small>${kbandHtml(nDate||today(),g)}${g.h&&(g.h.st||g.h.ak)?`<p class="hl">Apple Health: ${g.h.st?fmt(g.h.st)+' Schritte':''}${g.h.ak?' · '+fmt(g.h.ak)+' aktive kcal':''}${g.h.tm?' · '+fmt(g.h.tm)+' min Training':''}${g.bonus?` · <b>+${fmt(g.bonus)} kcal</b> extra (mehr bewegt als dein Alltag-Faktor annimmt)`:''}</p>`:''}</div>
  <div class="nbars">${bar('Kalorien',t.kcal,g.kcal,'kcal')}${bar('Protein',t.p,g.p,'g')}${bar('Kohlenhydrate',t.c,g.c,'g')}${bar('Zucker',t.z,g.z,'g')}${bar('Fett',t.f,g.f,'g')}</div></section>`;
  h+=MEALS.map(([m,l])=>{const its=day.items.filter(i=>i.meal===m),mk=its.reduce((a,i)=>a+i.kcal,0);
   return `<section class="meal"><header><h3>${l}</h3><span>${mk?fmt(mk)+' kcal':''}</span></header>${its.map(i=>`<div class="it"><div><b>${esc(i.name)}</b><small>${fmt(i.g)} g · ${fmt(i.p)} g Protein</small></div><span>${fmt(i.kcal)}</span><button data-n="rm" data-id="${i.id}" aria-label="Entfernen">✕</button></div>`).join('')}
@@ -54,7 +62,7 @@ function renderNut(){if(!nDate)nDate=today();const d=nDate,g=goals(d),t=totals(d
  <div class="wrow"><span class="water">${fmt((day.water||0)/1000)} l Wasser</span><button data-n="water" data-v="250">+ 250 ml</button><button data-n="water" data-v="750">+ 0,75 l</button><button class="ghost" data-n="water" data-v="-250">−</button></div>
  ${ws.length>1?`<div class="fig" style="min-height:200px"><svg id="wchart" role="img" aria-label="Gewichtsverlauf"></svg></div>`:''}</section>
  <details class="meal nset"><summary><h3>Ziele einstellen</h3><span>${fmt(g.kcal)} kcal · ${g.p} g Protein</span></summary>
- <div class="vars" style="margin:8px 0">${[['aufbau','Aufbau (+300)'],['halten','Halten'],['defi','Definieren (−450)']].map(([k,l])=>`<button data-n="goal" data-v="${k}" aria-pressed="${S.nut.goal===k}">${l}</button>`).join('')}</div>
+ <div class="vars" style="margin:8px 0">${[['aufbau','Aufbau (+300)'],['halten','Halten'],['fit','Fitter werden (−250)'],['defi','Definieren (−450)']].map(([k,l])=>`<button data-n="goal" data-v="${k}" aria-pressed="${S.nut.goal===k}">${l}</button>`).join('')}</div>
  <div class="settings" style="margin:8px 0"><div><label for="maint">Erhaltungsbedarf (kcal)</label><input id="maint" inputmode="numeric" data-n="maint" placeholder="${g.maint} (geschätzt)" value="${S.nut.maint||''}"></div><div><label for="gkg">Protein pro kg Körpergewicht</label><input id="gkg" inputmode="decimal" data-n="gkg" value="${fmt(S.nut.gkg)}"></div></div>
  <p class="tip" style="padding:0">${g.bmr?`Aus deinem Profil berechnet (Grundumsatz ${fmt(Math.round(g.bmr))} kcal × Aktivität ${fmt(S.prof.act)}). Eigene Angabe überschreibt das.`:'Profil unter „Mehr“ ausfüllen für eine genaue Berechnung – sonst grob 32 kcal pro kg.'} Fett 27 % der Kalorien, Rest Kohlenhydrate.</p></details>`;
  if(sheet)h+=renderSheet();
@@ -224,7 +232,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-n]');if(
  else if(a==='usetpl'){const t=S.nut.meals.find(x=>x.id===b.dataset.id);if(t){for(const r of t.items)ND(d).items.push({...r,id:'i'+Math.random().toString(36).slice(2,9),meal:sheet.meal});touch(d);sheet=null}}
  else if(a==='w'){const w=num($('wIn').value);if(w&&w>30&&w<300){ND(d).w=w;touch(d)}else{note('Gewicht in kg eingeben');return}}
  else if(a==='water'){const dd=ND(d);dd.water=Math.max(0,(dd.water||0)+(+b.dataset.v));touch(d)}
- else if(a==='goal'){S.nut.goal=b.dataset.v;S.metaT=Date.now();persist()}
+ else if(a==='goal'){setGoal(b.dataset.v)}
  else return;
  const op=document.querySelector('details.nset');const wasOpen=op&&op.open;render();if(wasOpen){const n=document.querySelector('details.nset');if(n)n.open=true}});
 document.addEventListener('input',ev=>{const t=ev.target,a=t.dataset.n;if(!a)return;

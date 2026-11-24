@@ -114,6 +114,12 @@ try:
         check(pg.text_content(".afn b") == "3", "Serie zählt nur bis zum letzten Alkohol-Tag")
         check(pg.evaluate("(()=>{lastPub='';const t=publish.toString();return /af:/.test(t)})()"), "Alkoholfrei-Status geht an Home Assistant (22-Uhr-Erinnerung)")
         pg.click(".afbtn"); pg.wait_for_timeout(100)
+        print("Kalorien-Ziel")
+        r = pg.evaluate("""(()=>{const N=S.nut,o={goal:N.goal,gh:N.gh};N.goal='aufbau';N.gh=[];setGoal('fit');
+          const keep=goalAt('2020-01-01'),now=goalAt(today()),day={items:[{meal:'f'},{meal:'m'}]},g={kcal:2000,bmr:1700},P=k=>kcalPts('2026-12-01',g,{kcal:k},day).p;
+          const r=[keep,now,GOAL_ADD.fit,P(2000),P(1800),P(2300),P(2400),P(1650),kcalPts('2026-12-01',g,{kcal:2000},{items:[{meal:'f'}]}).p];
+          N.goal=o.goal;N.gh=o.gh;return r.join('/')})()""")
+        check(r == "aufbau/fit/-250/20/10/10/0/0/0", "Fitter werden: leichtes Defizit +20, Überschuss 0, Hungern 0, erst ab 2 Mahlzeiten; alte Tage behalten ihr Ziel")
         print("Knieschonend")
         tst = "(()=>{const o=dayCh;dayCh=()=>['squat20','burpee10','veg'].map(i=>CH.find(c=>c.id===i));const r=chHtml();dayCh=o;return r})()"
         h0 = pg.evaluate(tst)

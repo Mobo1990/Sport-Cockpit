@@ -75,12 +75,20 @@ function afSet(d,val){const dd=ND(d);if(val)dd.af=val;else delete dd.af;touch(d)
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-af],[data-afc]');if(!b)return;
  if(b.dataset.afc){const d=b.dataset.afc,x=(S.nut.days[d]||{}).af;afSet(d,!x?1:x===1?-1:0);return}
  const d=b.dataset.af,val=+b.dataset.v||1;afSet(d,(S.nut.days[d]||{}).af===val?0:val)});
+/* Kalorien-Punkte ab 25.11.2026: gemessen am Bedarf des Tages (Erhaltung + Aktivität), je Ziel ein bester Bereich.
+   Kein Punkt für Hungern (unter Grundumsatz) und erst ab 2 eingetragenen Mahlzeiten (vergessen ≠ Defizit). Ältere Tage: alte Wertung. */
+const KCAL_NEW_AB='2026-11-25',KCAL_BANDS={fit:[[-400,-100,20,'Leichtes Defizit'],[-600,-400,10,'Defizit etwas groß'],[-100,50,10,'Fast leichtes Defizit']],
+ defi:[[-600,-300,20,'Defizit im Ziel'],[-300,-100,10,'Kleines Defizit'],[-800,-600,10,'Defizit etwas groß']],
+ halten:[[-100,100,20,'Kalorien gehalten'],[-250,250,10,'Fast gehalten']],aufbau:[[150,450,20,'Überschuss im Ziel'],[0,150,10,'Kleiner Überschuss'],[450,600,10,'Überschuss etwas groß']]};
+function kcalPts(d,g,t,day){const meals=new Set(((day||{}).items||[]).map(i=>i.meal)).size;if(meals<2)return{p:0};if(g.bmr&&t.kcal<g.bmr)return{p:0,t:'Zu wenig gegessen'};
+ const diff=t.kcal-(g.kcal-(GOAL_ADD[goalAt(d)]||0));for(const [lo,hi,p,tx] of KCAL_BANDS[goalAt(d)]||KCAL_BANDS.halten)if(diff>=lo&&diff<=hi)return{p,t:tx};return{p:0}}
 function dayScore(d){const g=goals(d),t=totals(d),day=S.nut.days[d]||{},ss=S.sessions.filter(s=>iso(s.date)===d);let pt=0;const why=[];
  const tr=ss.find(s=>s.ex.length);if(tr){pt+=30;why.push('Training +30')}
  const c=ss.reduce((a,s)=>a+(s.cardio||[]).reduce((b,x)=>b+x.min,0),0),hh=day.h||{};if(c>=20){pt+=15;why.push('Cardio +15')}else if((hh.tm||0)>=30){pt+=15;why.push('Bewegung (Watch) +15')}
  if(daySteps(d)>=stepGoal()){pt+=10;why.push('Schrittziel +10')}
  if(t.kcal>0){if(t.p>=g.p){pt+=20;why.push('Protein +20')}else if(t.p>=g.p*.9){pt+=10;why.push('Protein fast +10')}
-  const dev=Math.abs(t.kcal-g.kcal)/g.kcal;if(dev<=.1){pt+=20;why.push('Kalorien im Ziel +20')}else if(dev<=.2){pt+=10;why.push('Kalorien nah dran +10')}}
+  if(d>=KCAL_NEW_AB){const k=kcalPts(d,g,t,day);if(k.p){pt+=k.p;why.push(k.t+' +'+k.p)}}
+  else{const dev=Math.abs(t.kcal-g.kcal)/g.kcal;if(dev<=.1){pt+=20;why.push('Kalorien im Ziel +20')}else if(dev<=.2){pt+=10;why.push('Kalorien nah dran +10')}}}
  if(day.af===1){const n=afStreak(d),p=afDay(d,n);pt+=p;why.push(`Alkoholfrei Tag ${n} +${p}`)}
  const chp=chPoints(d);if(chp){pt+=chp;why.push((chDone(d).length===3?'Alle Challenges +':'Challenges +')+chp)}
  /* Kurz-Workout ohne Challenge: das erste am Tag gibt +10, weitere nichts (Gym-Training bleibt mit +30 klar vorn) */
