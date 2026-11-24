@@ -26,7 +26,8 @@ function renderHome(){weeklyCheck();const d=today(),sc=dayScore(d),g=sc.g,t=sc.t
  ${afHtml()}
  ${chHtml()}
  </section>
- ${(()=>{const w=weeklyHtml();return `<section class="weekbox">${w}${rwLineHtml()}</section>${w.includes('wopick')?'':woQuickHtml()}`})()}`}
+ ${woQuickHtml()}
+ <section class="weekbox">${weeklyHtml()}${rwLineHtml()}</section>`}
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-h]');if(!b)return;const a=b.dataset.h,d=today();
  if(a==='train'){day=b.dataset.d;view='train'}
  else if(a==='meal'){view='nut';nDate=d;sheet={meal:b.dataset.m,step:'search',q:'',focus:true}}

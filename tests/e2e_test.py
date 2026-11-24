@@ -109,7 +109,7 @@ try:
         pg.click(".afbtn"); pg.wait_for_timeout(100)
         print("Kurz-Workout")
         pg.evaluate("window.__wk=weekly;weekly=()=>({...__wk(),k:'s'});render()")
-        check(pg.locator("#view .woq .wopick [data-wo]").count() == 3, "Kurz-Workouts immer auf der Startseite, auch ohne Workout-Challenge")
+        check(pg.locator("#view .woq .wopick [data-wo]").count() == 3 and pg.evaluate("!!(document.querySelector('.woq').compareDocumentPosition(document.querySelector('.weekbox'))&4)"), "Kurz-Workouts immer auf der Startseite, über den Challenges der Woche")
         pg.evaluate("weekly=__wk;render()")
         pg.evaluate("woStart('core','wo_core')"); pg.wait_for_timeout(200)
         check(pg.is_visible("#wo.on") and "Gleich" in pg.text_content(".won"), "Workout-Timer startet mit Vorbereitung")

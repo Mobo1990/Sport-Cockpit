@@ -48,7 +48,7 @@ function daysLeft(){const n=7-weekDaysIso().length;return n===0?'letzter Tag':n=
 const fmtV=(k,v)=>fmt(k==='st'?Math.round(v):v);
 function weeklyHtml(){weeklyCheck();const me=myWeekStats(),w=weekly(),c=couple(),pw=partnerWeek(),wd=weekFlag('wkc'),cd=weekFlag('cpc'),pc=Math.min(me[w.k]/w.g,1)*100;
  let h=`<h3 class="sh">Challenges der Woche <small class="chn">${daysLeft()}</small></h3><section class="wkc${wd?' done':''}"><div class="wkh"><span>Wochen-Challenge</span><em>+${WK_PTS}</em></div><b>${esc(w.t)}</b><small>${esc(w.s)}</small>
- <div class="wkbar"><i style="width:${pc.toFixed(1)}%"></i></div><div class="wkf"><span>${fmtV(w.k,Math.min(me[w.k],w.g))} / ${fmtV(w.k,w.g)} ${w.u}</span><span>${wd?'Geschafft':Math.round(pc)+' %'}</span></div>${w.k==='o'?woPickHtml():''}</section>`;
+ <div class="wkbar"><i style="width:${pc.toFixed(1)}%"></i></div><div class="wkf"><span>${fmtV(w.k,Math.min(me[w.k],w.g))} / ${fmtV(w.k,w.g)} ${w.u}</span><span>${wd?'Geschafft':Math.round(pc)+' %'}</span></div></section>`;
  if(pw){const v=+(pw.w[c.k]||0),both=c.m==='both',a=both?Math.min(me[c.k],c.g):Math.min(me[c.k],c.g),b=both?Math.min(v,c.g):Math.min(v,Math.max(0,c.g-a)),
   sum=me[c.k]+v,pa=both?a/c.g*50:a/c.g*100,pb=both?b/c.g*50:b/c.g*100;
   h+=`<section class="wkc cp${cd?' done':''}"><div class="wkh"><span>Paar-Challenge</span><em>+${CP_PTS} für beide</em></div><b>${esc(c.t)}</b>
