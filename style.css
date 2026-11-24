@@ -839,8 +839,8 @@ html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 @keyframes chdrop{0%{transform:translate(-50%,-140%);opacity:0}100%{transform:translate(-50%,0);opacity:1}}
 @media (prefers-reduced-motion:reduce){.cheer .chc{animation:none!important}}
 /* ===== Duo-Design (Farben und Schriften wie im Pitchdeck). Klassisch = ohne Klasse th-duo, umschaltbar unter Mehr → Ansicht ===== */
-:root.th-duo{--fh:Fraunces,Georgia,serif;--fb:'DM Sans',system-ui,sans-serif;--bg:#F6F1EA;--s1:#FFFCF8;--s2:#F3ECE3;--line:#E2D6CC;--ink:#221C1A;--mute:#8C7F78;
- --acc:#9A5F4E;--acc2:#F7E6E0;--onacc:#ffffff;--dark:#3E5A4C;--eq:#cbbdb2;--sh:0 1px 2px rgba(70,45,30,.04),0 10px 30px rgba(70,45,30,.08);--r:18px;
+:root.th-duo{--fh:Outfit,'DM Sans',sans-serif;--fb:'DM Sans',system-ui,sans-serif;--bg:#F6F1EA;--s1:#FFFCF8;--s2:#F3ECE3;--line:#E2D6CC;--ink:#221C1A;--mute:#8C7F78;
+ --acc:#E2725B;--acc2:#FBE7E1;--onacc:#ffffff;--dark:#3E5A4C;--eq:#cbbdb2;--sh:0 1px 2px rgba(70,45,30,.04),0 10px 30px rgba(70,45,30,.08);--r:18px;
  --d-rose:#C4917F;--d-rosed:#9A5F4E;--d-sage:#6F8F7E;--d-saged:#3E5A4C;--d-sagel:#E3ECE6;--d-blush:#F1E4DC}
 .th-duo body{background:var(--bg)}
 .th-duo h1,.th-duo h2,.th-duo h3,.th-duo .cond{letter-spacing:-.01em}
@@ -857,8 +857,8 @@ html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 .dh .mi{display:flex;flex-direction:column;align-items:center;text-align:center;background:none;border:0;box-shadow:none;padding:0;min-height:0;color:var(--ink)}
 .dh .mi svg{width:76px;height:76px}.dh .mi b{font:600 14px var(--fb);margin-top:2px}.dh .mi small{font-size:11.5px;color:var(--mute)}
 .dh .stin{display:flex;gap:8px;margin-top:10px}.dh .stin input{flex:1}
-.dh .wa{margin-top:14px;background:#EEF2F4;border-radius:18px;padding:12px}
-.dh .wh{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.dh .wh b{font:600 15px var(--fb)}.dh .wh span{font-size:13px;color:#4A4340}.dh .wh span.ok{color:#4F7896;font-weight:600}
+.dh .wa{margin-top:14px;background:#EAF3FC;border-radius:18px;padding:12px}
+.dh .wh{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.dh .wh b{font:600 15px var(--fb)}.dh .wh span{font-size:13px;color:#4A4340}.dh .wh span.ok{color:#2F74B5;font-weight:600}
 .dh .gl{display:flex;justify-content:space-between;gap:2px;margin-top:8px}
 .dh .wg{background:none;border:0;box-shadow:none;padding:0;min-height:0;width:34px;height:44px;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .dh .wg svg{width:34px;height:44px;display:block}
@@ -885,3 +885,13 @@ html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 .dh .zh{flex-wrap:nowrap}.dh .zh i{flex:0 0 14px}
 .cheer.big b{white-space:normal;overflow-wrap:break-word;font-size:clamp(36px,11vw,68px);line-height:1.05}
 .th-duo .calc b{font-size:clamp(17px,5vw,24px);white-space:nowrap}
+
+/* Duo-Design heller: „Als Nächstes“ als helle Salbei-Kachel statt dunkler Fläche, Zahlen etwas leichter */
+.th-duo .tile.big{background:#E3ECE6;border-color:#E3ECE6;color:var(--ink);box-shadow:var(--sh)}
+.th-duo .tile.big small,.th-duo .tile.big span{color:#55625B}
+.th-duo .tile.big::after{border-color:#6F8F7E;opacity:.35}.th-duo .tile.big::before{background:#6F8F7E;opacity:.5}
+.th-duo h1,.th-duo h2,.th-duo h3,.th-duo .cond{letter-spacing:0;font-weight:700}
+.th-duo .dh .wx button{color:#2F5E8A}
+.advcount b{flex:0 0 auto;min-width:max-content}
+@media (max-width:389px){.dg .tl{font-size:12px;gap:4px}.dg .tl b{font-size:18px}}
+.th-duo .tile.big b{color:var(--ink)}
