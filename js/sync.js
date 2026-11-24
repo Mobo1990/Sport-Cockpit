@@ -52,6 +52,7 @@ function renderProfile(){const P=S.prof,g=goals(today());const f=(k,l,ph,mode='d
  <div class="full"><label>Knie</label><div class="vars">${[['','normal'],['1','knieschonend']].map(([k,l])=>`<button data-ps="knee" data-v="${k}" aria-pressed="${(P.knee||'')===k}">${l}</button>`).join('')}</div><small class="pknee">Knieschonend: Challenges und Kurz-Workouts zeigen statt Kniebeugen, Ausfallschritten und Sprüngen schonende Varianten – gleiche Punkte.</small></div>
  <div class="full"><label>Alltag (ohne Training eingerechnet)</label><div class="vars">${[[1.4,'Büro, wenig Bewegung'],[1.55,'Büro + Training 3–4×'],[1.7,'Aktiv / Training 5–6×'],[1.85,'Körperlich harte Arbeit']].map(([v,l])=>`<button data-ps="act" data-v="${v}" aria-pressed="${S.prof.act==v}">${l}</button>`).join('')}</div></div></div>
  <div class="calc" id="pcalc">${pcalc()}</div>
+ <div class="full uiset"><label>Ansicht</label><div class="vars">${[['duo','Duo (neu)'],['classic','Klassisch']].map(([k,l])=>`<button data-ui="${k}" aria-pressed="${(isDuo()?'duo':'classic')===k}">${l}</button>`).join('')}</div><small class="pknee">Gilt nur auf diesem Gerät.</small></div>
  <p class="tip" style="padding:0">Gewicht: wird automatisch durch dein zuletzt eingetragenes Gewicht (Essen-Tab) ersetzt. Ziel (Aufbau/Halten/Definieren) stellst du im Essen-Tab ein.</p></section>`}
 /* Verbindung übertragen (z. B. nach Neuinstallation): Adresse + Token als Code in die Zwischenablage */
 let hxState='';
@@ -86,4 +87,5 @@ document.addEventListener('click',async ev=>{const b=ev.target.closest('[data-s]
  else if(a==='imp'){try{const j=JSON.parse($('imp').value);const src=j.S||j;let n=0;const ids=new Set(S.sessions.map(s=>s.id));for(const s of (src.sessions||[]))if(!ids.has(s.id)){s.t=s.t||Date.now();S.sessions.push(s);n++}
   if(src.plan&&!S.metaT){S.plan=src.plan;S.goal=src.goal||S.goal;S.rest=src.rest||S.rest;S.cgoal=src.cgoal||S.cgoal;S.metaT=Date.now()}
   if(src.nut&&src.nut.days)for(const k in src.nut.days)if(!S.nut.days[k])S.nut.days[k]=src.nut.days[k];migrate();persist();render();note(n+' Einheiten übernommen')}catch(e){note('Daten nicht lesbar')}}});
-
+/* Ansicht umschalten: Duo-Design (Farben/Schriften wie im Pitchdeck, neue Karte „Heute“) oder klassisch */
+document.addEventListener('click',ev=>{const b=ev.target.closest('[data-ui]');if(!b)return;const v=b.dataset.ui;try{localStorage.setItem('sc.ui',v)}catch(e){}document.documentElement.classList.toggle('th-duo',v==='duo');render()});
