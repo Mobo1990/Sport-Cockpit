@@ -119,7 +119,7 @@ try:
           const keep=goalAt('2020-01-01'),now=goalAt(today()),day={items:[{meal:'f'},{meal:'m'}]},g={kcal:2000,bmr:1700},P=k=>kcalPts('2026-12-01',g,{kcal:k},day).p;
           const r=[keep,now,GOAL_ADD.fit,P(2000),P(1800),P(2300),P(2400),P(1650),kcalPts('2026-12-01',g,{kcal:2000},{items:[{meal:'f'}]}).p];
           N.goal=o.goal;N.gh=o.gh;return r.join('/')})()""")
-        check(r == "aufbau/fit/-250/20/10/10/0/0/0", "Fitter werden: leichtes Defizit +20, Überschuss 0, Hungern 0, erst ab 2 Mahlzeiten; alte Tage behalten ihr Ziel")
+        check(r == "aufbau/fit/-250/10/5/5/0/0/0", "Fitter werden: leichtes Defizit +10, Überschuss 0, Hungern 0, erst ab 2 Mahlzeiten; alte Tage behalten ihr Ziel")
         print("Knieschonend")
         tst = "(()=>{const o=dayCh;dayCh=()=>['squat20','burpee10','veg'].map(i=>CH.find(c=>c.id===i));const r=chHtml();dayCh=o;return r})()"
         h0 = pg.evaluate(tst)

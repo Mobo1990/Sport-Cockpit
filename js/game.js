@@ -77,9 +77,9 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-af],[dat
  const d=b.dataset.af,val=+b.dataset.v||1;afSet(d,(S.nut.days[d]||{}).af===val?0:val)});
 /* Kalorien-Punkte ab 25.11.2026: gemessen am Bedarf des Tages (Erhaltung + Aktivität), je Ziel ein bester Bereich.
    Kein Punkt für Hungern (unter Grundumsatz) und erst ab 2 eingetragenen Mahlzeiten (vergessen ≠ Defizit). Ältere Tage: alte Wertung. */
-const KCAL_NEW_AB='2026-11-25',KCAL_BANDS={fit:[[-400,-100,20,'Leichtes Defizit'],[-600,-400,10,'Defizit etwas groß'],[-100,50,10,'Fast leichtes Defizit']],
- defi:[[-600,-300,20,'Defizit im Ziel'],[-300,-100,10,'Kleines Defizit'],[-800,-600,10,'Defizit etwas groß']],
- halten:[[-100,100,20,'Kalorien gehalten'],[-250,250,10,'Fast gehalten']],aufbau:[[150,450,20,'Überschuss im Ziel'],[0,150,10,'Kleiner Überschuss'],[450,600,10,'Überschuss etwas groß']]};
+const KCAL_NEW_AB='2026-11-25',KCAL_BANDS={fit:[[-400,-100,10,'Leichtes Defizit'],[-600,-400,5,'Defizit etwas groß'],[-100,50,5,'Fast leichtes Defizit']],
+ defi:[[-600,-300,10,'Defizit im Ziel'],[-300,-100,5,'Kleines Defizit'],[-800,-600,5,'Defizit etwas groß']],
+ halten:[[-100,100,10,'Kalorien gehalten'],[-250,250,5,'Fast gehalten']],aufbau:[[150,450,10,'Überschuss im Ziel'],[0,150,5,'Kleiner Überschuss'],[450,600,5,'Überschuss etwas groß']]};
 function kcalPts(d,g,t,day){const meals=new Set(((day||{}).items||[]).map(i=>i.meal)).size;if(meals<2)return{p:0};if(g.bmr&&t.kcal<g.bmr)return{p:0,t:'Zu wenig gegessen'};
  const diff=t.kcal-(g.kcal-(GOAL_ADD[goalAt(d)]||0));for(const [lo,hi,p,tx] of KCAL_BANDS[goalAt(d)]||KCAL_BANDS.halten)if(diff>=lo&&diff<=hi)return{p,t:tx};return{p:0}}
 function dayScore(d){const g=goals(d),t=totals(d),day=S.nut.days[d]||{},ss=S.sessions.filter(s=>iso(s.date)===d);let pt=0;const why=[];
