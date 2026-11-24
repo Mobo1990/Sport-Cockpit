@@ -31,21 +31,21 @@ const GUIDE={
   v:{Kabelzug:'Rolle ganz unten, Aufsatz: gerade Stange oder SZ-Griff.','SZ-Stange':'Die gewellte Stange schont die Handgelenke.',Kurzhantel:'Beim Hochbeugen die Handfläche nach oben drehen.'}},
  hammer:{m:'Bizeps, Oberarmmuskel (Brachialis), Unterarm',s:['Handflächen zeigen zueinander, Daumen nach oben.','Ellbogen bleiben am Körper.','Hochbeugen, langsam ablassen.'],
   v:{'Kabelzug Seil':'Rolle ganz unten, Aufsatz: Seil.'}},
- squat:{m:'Oberschenkel vorne, Po, Beinbeuger, Rumpf',s:['Füße schulterbreit, Zehen leicht nach außen.','Tief einatmen, Bauch fest anspannen.','Hüfte nach hinten und unten, Knie zeigen in Richtung Zehen.','Mindestens bis Oberschenkel parallel, Fersen bleiben am Boden, kräftig hochdrücken.'],
+ squat:{m:'Oberschenkel vorne, Po, Beinbeuger, Rumpf',k:'Box-Kniebeuge: nur bis zur Bank oder einem Kasten absetzen, Knie bleiben hinter den Zehen. Oder Beinpresse mit den Füßen weit oben.',s:['Füße schulterbreit, Zehen leicht nach außen.','Tief einatmen, Bauch fest anspannen.','Hüfte nach hinten und unten, Knie zeigen in Richtung Zehen.','Mindestens bis Oberschenkel parallel, Fersen bleiben am Boden, kräftig hochdrücken.'],
   v:{Langhantel:'Ablage auf Brusthöhe, Stange auf den oberen Rücken – nicht auf den Nacken.',Multipresse:'Füße etwas vor die Stange stellen, Sicherungen einhängen.','Goblet Kurzhantel':'Hantel senkrecht vor der Brust, Ellbogen zwischen den Knien.'}},
  rdl:{m:'Beinbeuger (hinten), Po, unterer Rücken',s:['Hüftbreit stehen, Knie leicht gebeugt – sie bleiben so.','Hüfte nach hinten schieben, das Gewicht gleitet an den Beinen entlang.','Rücken gerade, Bauch fest, Schultern zurück.','Runter bis zur Dehnung hinten im Oberschenkel (etwa Kniehöhe), dann Hüfte nach vorn.']},
- kreuz:{m:'Po, Beinbeuger, Rückenstrecker, Oberschenkel',s:['Füße hüftbreit, Stange über der Fußmitte.','Hände direkt neben den Beinen, Schienbeine an die Stange.','Brust raus, Rücken gerade, Bauch fest.','Aus den Beinen drücken, Stange nah am Körper, oben aufrichten ohne Hohlkreuz.'],
+ kreuz:{m:'Po, Beinbeuger, Rückenstrecker, Oberschenkel',k:'Trap Bar nehmen, sie entlastet Knie und Rücken.',s:['Füße hüftbreit, Stange über der Fußmitte.','Hände direkt neben den Beinen, Schienbeine an die Stange.','Brust raus, Rücken gerade, Bauch fest.','Aus den Beinen drücken, Stange nah am Körper, oben aufrichten ohne Hohlkreuz.'],
   v:{'Trap Bar':'In die Mitte stellen, Griffe seitlich – schont den Rücken.'}},
- presse:{m:'Oberschenkel vorne, Po',s:['Rücken ganz an die Lehne, Po bleibt unten.','Füße schulterbreit mittig – höher = mehr Po, tiefer = mehr Oberschenkel.','Sicherung lösen, ablassen bis die Knie etwa 90° gebeugt sind.','Wegdrücken, Knie nicht ganz durchstrecken.']},
+ presse:{m:'Oberschenkel vorne, Po',k:'Füße höher auf die Platte stellen und nur bis etwa 90° beugen, langsam ablassen.',s:['Rücken ganz an die Lehne, Po bleibt unten.','Füße schulterbreit mittig – höher = mehr Po, tiefer = mehr Oberschenkel.','Sicherung lösen, ablassen bis die Knie etwa 90° gebeugt sind.','Wegdrücken, Knie nicht ganz durchstrecken.']},
  beuger:{m:'Beinbeuger (Rückseite Oberschenkel)',s:['Drehpunkt der Maschine auf Höhe des Kniegelenks.','Polster knapp über der Ferse.','Fersen Richtung Po, kurz halten, in 2–3 Sek. zurück.'],
   v:{Liegend:'Hüfte bleibt am Polster.',Sitzend:'Oberschenkelpolster fest über den Knien.'}},
- strecker:{m:'Oberschenkel vorne (Quadrizeps)',s:['Rückenlehne so, dass die Knie am Drehpunkt sind.','Polster vorn am Schienbein, knapp über dem Fuß.','Hochstrecken, oben 1 Sek. halten, langsam ablassen.']},
- ausfall:{m:'Oberschenkel vorne, Po, Beinbeuger',s:['Aufrecht, großer Schritt nach vorn.','Hinteres Knie bis knapp über den Boden, vorderes Knie über dem Fuß.','Über die vordere Ferse zurückdrücken, Seiten wechseln.'],
+ strecker:{m:'Oberschenkel vorne (Quadrizeps)',k:'Leichtes Gewicht und nur die obere Hälfte der Bewegung – oder stattdessen Beinpresse mit Füßen oben.',s:['Rückenlehne so, dass die Knie am Drehpunkt sind.','Polster vorn am Schienbein, knapp über dem Fuß.','Hochstrecken, oben 1 Sek. halten, langsam ablassen.']},
+ ausfall:{m:'Oberschenkel vorne, Po, Beinbeuger',k:'Rückwärts-Ausfallschritte mit kurzem Schritt – oder stattdessen Hip Thrusts bzw. Glute Bridges.',s:['Aufrecht, großer Schritt nach vorn.','Hinteres Knie bis knapp über den Boden, vorderes Knie über dem Fuß.','Über die vordere Ferse zurückdrücken, Seiten wechseln.'],
   v:{Kurzhantel:'Hanteln seitlich halten.',Langhantel:'Stange auf dem oberen Rücken wie bei Kniebeugen.',Multipresse:'Schrittstellung unter der Stange, die Füße bleiben stehen.'}},
- waden:{m:'Waden',s:['Fußballen auf die Kante, Fersen frei.','Ganz runter in die Dehnung.','Auf die Zehenspitzen hoch, oben 1–2 Sek. halten.','Knie bleiben fast gestreckt.'],
+ waden:{m:'Waden',k:'Sitzend an der Maschine statt stehend, wenn die Knie zwicken.',s:['Fußballen auf die Kante, Fersen frei.','Ganz runter in die Dehnung.','Auf die Zehenspitzen hoch, oben 1–2 Sek. halten.','Knie bleiben fast gestreckt.'],
   v:{Sitzend:'Polster auf die Oberschenkel – trifft mehr die tiefe Wadenmuskulatur.','An der Beinpresse':'Nur die Fußballen an die untere Kante der Platte.'}}
 };
-const guideOf=e=>{const g=GUIDE[e.id];if(!g)return null;return{m:g.m,s:[...(g.v&&g.v[e.v]?[g.v[e.v]]:[]),...g.s]}};
+const guideOf=e=>{const g=GUIDE[e.id];if(!g)return null;return{m:g.m,k:g.k,s:[...(g.v&&g.v[e.v]?[g.v[e.v]]:[]),...g.s]}};
 
 /* Gym-Strichmännchen (Seitenansicht nach rechts, außer Front-Übungen mit L/R) */
 const GSTAND={head:[100,20],neck:[100,34],hip:[98,72],knee:[100,97],foot:[100,MV_FLOOR]};
@@ -177,3 +177,17 @@ Object.assign(WO,{
  });
  M['gym:ausfall|Multipresse']={...M['gym:ausfall|Langhantel'],props:[RAIL]};
 }
+
+/* Knieschonende Varianten für Challenges und Kurz-Workouts */
+Object.assign(MOVES,{
+ 'Stuhl-Kniebeugen':{dur:2.4,props:['62,92 88,92','64,92 64,121','86,92 86,121','62,92 60,58'],poses:[
+  {head:[100,20],neck:[100,34],hip:[96,72],knee:[102,97],foot:[102,MV_FLOOR],elbow:[112,42],hand:[126,44]},
+  {head:[108,40],neck:[102,52],hip:[84,88],knee:[108,94],foot:[102,MV_FLOOR],elbow:[114,58],hand:[128,58]}]},
+ 'Step-Jacks':{dur:1.6,poses:[
+  {head:[100,22],neck:[100,36],hip:[100,74],elbowL:[92,54],handL:[89,72],elbowR:[108,54],handR:[111,72],kneeL:[97,98],footL:[96,MV_FLOOR],kneeR:[103,98],footR:[104,MV_FLOOR]},
+  {head:[100,22],neck:[100,36],hip:[100,74],elbowL:[84,24],handL:[78,8],elbowR:[116,24],handR:[122,8],kneeL:[97,98],footL:[96,MV_FLOOR],kneeR:[112,98],footR:[124,MV_FLOOR]},
+  {head:[100,22],neck:[100,36],hip:[100,74],elbowL:[92,54],handL:[89,72],elbowR:[108,54],handR:[111,72],kneeL:[97,98],footL:[96,MV_FLOOR],kneeR:[103,98],footR:[104,MV_FLOOR]},
+  {head:[100,22],neck:[100,36],hip:[100,74],elbowL:[84,24],handL:[78,8],elbowR:[116,24],handR:[122,8],kneeL:[88,98],footL:[76,MV_FLOOR],kneeR:[103,98],footR:[104,MV_FLOOR]}]}
+});
+MOVES['Burpees ohne Sprung']={dur:3.6,poses:[{...MOVES['Burpees'].poses[0],handL:[89,72],elbowL:[92,54],handR:[111,72],elbowR:[108,54],footL:[98,MV_FLOOR],footR:[102,MV_FLOOR],kneeL:[98,98],kneeR:[102,98],head:[100,22],neck:[100,36],hip:[100,74]},...MOVES['Burpees'].poses.slice(1)]};
+

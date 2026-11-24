@@ -36,7 +36,7 @@ function renderGym0(){if(!gym.open){gymEl.innerHTML='';gymEl.classList.remove('o
  <div class="gtools">${mv?`<button data-g="anim" aria-pressed="${!!gym.anim}">${gym.anim?'Bild zeigen':'▶ Bewegungsablauf'}</button>`:''}${!done&&nx!=null?`<button data-g="busy">Gerät besetzt</button>`:''}</div>
  <h2>${esc(e.n)}</h2>
  ${e.vars.length>1?`<div class="vars gv">${e.vars.map(v=>`<button data-a="var" data-e="${e.id}" data-v="${esc(v)}" aria-pressed="${v===e.v}">${esc(v)}</button>`).join('')}</div>`:''}
- <div class="ghow">${g?`<p class="gmu"><b>Trainiert:</b> ${esc(g.m)}</p>`:''}${e.t?`<p class="gtip">${esc(e.t)}</p>`:''}
+ <div class="ghow">${g?`<p class="gmu"><b>Trainiert:</b> ${esc(g.m)}</p>`:''}${e.t?`<p class="gtip">${esc(e.t)}</p>`:''}${g&&g.k?`<p class="gknee"><b>Knie schonen:</b> ${esc(g.k)}</p>`:''}
  ${g?`<button class="glink" data-g="how" aria-expanded="${!!gym.how}">${gym.how?'Anleitung ausblenden':'Einstellung und Ausführung'} ›</button>${gym.how?`<ol class="gsteps">${g.s.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}`:''}</div>
  <p class="gsg">${sg?esc(sg.txt):`Ziel: ${e.sets} × ${e.min}–${e.max} Wdh.`}</p>${!sg&&first&&startKg(e)?`<p class="gstart">Erstes Mal: Startvorschlag ${fmt(startKg(e))} kg${/Kurzhantel/.test(e.v)?' pro Hand':''}${isA(e.v)?' Hilfe':''} – lieber leicht anfangen und steigern.</p>`:''}
  ${warm?`<p class="gwarm"><b>Erst aufwärmen:</b> 1 Satz mit 10–12 Wdh. ${isBar(e)?'nur mit der leeren Stange (20 kg)':`mit etwa ${fmt(r25(kg/2))} kg`}. Zählt nicht mit.</p>`:''}

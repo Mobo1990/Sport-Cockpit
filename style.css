@@ -814,3 +814,7 @@ html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 .woq{margin:4px 0 14px}.woq .sh{margin:6px 0 0}
 .scanpic{display:flex;align-items:center;justify-content:center;min-height:46px;margin:0 0 10px;border-radius:14px;background:#fff;box-shadow:var(--sh);font-weight:700;cursor:pointer}
 .sugg{display:block;width:100%;text-align:left;margin:4px 0 8px;padding:10px 12px;border-radius:12px;background:#fff4ef;border:1px solid #ffd2c4;color:var(--ink);font-size:15px}.sugg b{color:var(--acc)}
+.chkn{display:block;font-size:12px;color:var(--mute);margin-top:2px}
+.gknee{margin:6px 0 0;font-size:13px;color:var(--mute)}.gknee b{color:var(--ink)}
+.woknee{margin:10px auto 0;display:block;min-height:40px;padding:6px 16px;border-radius:999px;font-size:14px}.woknee[aria-pressed="true"]{background:var(--dark);color:#fff}
+.pknee{display:block;margin-top:6px;font-size:12px;color:var(--mute)}

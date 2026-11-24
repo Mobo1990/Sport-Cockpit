@@ -49,6 +49,7 @@ function renderProfile(){const P=S.prof,g=goals(today());const f=(k,l,ph,mode='d
  ${picProfileHtml()}
  <div class="cform">${f('name','Name','z. B. Michell','text')}<div><label>Geschlecht</label><div class="vars">${[['m','Mann'],['w','Frau']].map(([k,l])=>`<button data-ps="sex" data-v="${k}" aria-pressed="${P.sex===k}">${l}</button>`).join('')}</div></div>
  ${f('year','Geburtsjahr','z. B. 1990','numeric')}${f('height','Größe (cm)','z. B. 182','numeric')}${f('weight','Startgewicht (kg)','z. B. 85')}${f('wgoal','Wasser-Ziel (l/Tag)','2')}${f('sgoal','Schritt-Ziel pro Tag','10000','numeric')}
+ <div class="full"><label>Knie</label><div class="vars">${[['','normal'],['1','knieschonend']].map(([k,l])=>`<button data-ps="knee" data-v="${k}" aria-pressed="${(P.knee||'')===k}">${l}</button>`).join('')}</div><small class="pknee">Knieschonend: Challenges und Kurz-Workouts zeigen statt Kniebeugen, Ausfallschritten und Sprüngen schonende Varianten – gleiche Punkte.</small></div>
  <div class="full"><label>Alltag (ohne Training eingerechnet)</label><div class="vars">${[[1.4,'Büro, wenig Bewegung'],[1.55,'Büro + Training 3–4×'],[1.7,'Aktiv / Training 5–6×'],[1.85,'Körperlich harte Arbeit']].map(([v,l])=>`<button data-ps="act" data-v="${v}" aria-pressed="${S.prof.act==v}">${l}</button>`).join('')}</div></div></div>
  <div class="calc" id="pcalc">${pcalc()}</div>
  <p class="tip" style="padding:0">Gewicht: wird automatisch durch dein zuletzt eingetragenes Gewicht (Essen-Tab) ersetzt. Ziel (Aufbau/Halten/Definieren) stellst du im Essen-Tab ein.</p></section>`}

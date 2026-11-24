@@ -5,13 +5,13 @@ const slugN=n=>String(n||'').toLowerCase().replace(/ä/g,'ae').replace(/ö/g,'oe
 /* Coach-Challenges: 3 kleine Aufgaben pro Tag (für alle gleich, aus dem Datum gewählt) */
 const CH=[
  {id:'push10',k:'k',t:'10 Liegestütze',s:'Sauber, Brust bis knapp über den Boden. Knie am Boden ist okay.',pt:5},
- {id:'squat20',k:'k',t:'20 Kniebeugen',s:'Ohne Gewicht, Fersen bleiben am Boden.',pt:5},
+ {id:'squat20',k:'k',t:'20 Kniebeugen',s:'Ohne Gewicht, Fersen bleiben am Boden.',pt:5,kn:{t:'20 Stuhl-Kniebeugen',s:'Nur bis zum Stuhl absetzen, Knie hinter den Zehen, langsam hoch.'}},
  {id:'plank30',k:'k',t:'30 s Unterarmstütz',s:'Bauch und Po fest, Körper eine Linie.',pt:5},
  {id:'plank60',k:'k',t:'60 s Unterarmstütz',s:'Am Stück. Pausen zählen nicht.',pt:10},
- {id:'lunge15',k:'k',t:'15 Ausfallschritte je Bein',s:'Hinteres Knie kurz über den Boden.',pt:5},
- {id:'jack30',k:'k',t:'30 Hampelmänner',s:'Zügig am Stück.',pt:5},
- {id:'burpee10',k:'k',t:'10 Burpees',s:'Runter, Liegestütz-Position, hoch, Sprung.',pt:10},
- {id:'wall45',k:'k',t:'45 s Wandsitzen',s:'Oberschenkel waagerecht, Rücken an der Wand.',pt:5},
+ {id:'lunge15',k:'k',t:'15 Ausfallschritte je Bein',s:'Hinteres Knie kurz über den Boden.',pt:5,kn:{t:'15 Glute Bridges je Bein',s:'Einbeinig in Rückenlage, Hüfte oben 1 Sekunde halten.'}},
+ {id:'jack30',k:'k',t:'30 Hampelmänner',s:'Zügig am Stück.',pt:5,kn:{t:'30 Step-Jacks',s:'Ohne Sprung: abwechselnd seitlich raustippen, Arme hoch.'}},
+ {id:'burpee10',k:'k',t:'10 Burpees',s:'Runter, Liegestütz-Position, hoch, Sprung.',pt:10,kn:{t:'10 Burpees ohne Sprung',s:'Beine nacheinander nach hinten setzen und zurück, aufrichten ohne Sprung.'}},
+ {id:'wall45',k:'k',t:'45 s Wandsitzen',s:'Oberschenkel waagerecht, Rücken an der Wand.',pt:5,kn:{t:'45 s Wandsitzen hoch',s:'Nur leicht in die Knie (etwa 45°), Rücken an der Wand.'}},
  {id:'bridge15',k:'k',t:'15 Glute Bridges',s:'Oben 1 Sekunde halten, Po fest.',pt:5},
  {id:'dips10',k:'k',t:'10 Dips am Stuhl',s:'Hände an der Kante, Ellbogen nach hinten.',pt:5},
  {id:'calf25',k:'k',t:'25 Wadenheben',s:'Auf einer Stufe, ganz hoch und tief.',pt:5},
@@ -26,13 +26,15 @@ const CH=[
  {id:'wo_mobil',k:'a',t:'Mobility · 5 min',s:'Geführt mit Timer: Schultern, Rücken, Hüfte.',pt:10,w:'mobil'},
  {id:'mob10',k:'a',t:'10 Minuten Mobility',s:'Hüfte und Schultern locker machen.',pt:5}];
 const CH_BONUS=10;
+/* Knieschonend (Profil): Challenges/Workouts mit Knie-Belastung zeigen ihre schonende Variante, gleiche Punkte */
+const kneeOn=()=>S.prof.knee==='1';
 function dayCh(d){let h=2166136261;for(const c of 'ch'+d)h=Math.imul(h^c.charCodeAt(0),16777619)>>>0;
  const pick=(arr,n)=>{const a=[...arr],o=[];while(o.length<n&&a.length){h=Math.imul(h^(h>>>15),2246822507)>>>0;o.push(a.splice(h%a.length,1)[0])}return o};
  return [...pick(CH.filter(c=>c.k==='k'),2),...pick(CH.filter(c=>c.k==='a'),1)]}
 function chDone(d){const list=dayCh(d),done=(S.nut.days[d]||{}).ch||[];return list.filter(c=>done.includes(c.id))}
 function chPoints(d){const dn=chDone(d);return dn.reduce((a,c)=>a+c.pt,0)+(dn.length===3?CH_BONUS:0)}
 function chHtml(){const d=today(),list=dayCh(d),done=chDone(d).map(c=>c.id),n=done.length;
- return `<h3 class="sh">Challenges heute <small class="chn">${n} / 3${n===3?' · Bonus +'+CH_BONUS+' geholt':' · alle 3 = +'+CH_BONUS+' Bonus'}</small></h3><div class="chl">${list.map(c=>{const ok=done.includes(c.id);return `<div class="chi${ok?' ok':''}" data-ch="${c.id}" role="button" tabindex="0" aria-pressed="${ok}"><i aria-hidden="true"></i><div><b>${esc(c.t)}</b><span>${esc(c.s)}</span>${c.w&&!ok?`<button class="wogo" data-wo="${c.w}" data-woc="${c.id}">Jetzt starten ›</button>`:''}</div><em>+${c.pt}</em></div>`}).join('')}</div>`}
+ return `<h3 class="sh">Challenges heute <small class="chn">${n} / 3${n===3?' · Bonus +'+CH_BONUS+' geholt':' · alle 3 = +'+CH_BONUS+' Bonus'}</small></h3><div class="chl">${list.map(c=>{const ok=done.includes(c.id);return `<div class="chi${ok?' ok':''}" data-ch="${c.id}" role="button" tabindex="0" aria-pressed="${ok}"><i aria-hidden="true"></i><div>${c.kn&&kneeOn()?`<b>${esc(c.kn.t)}</b><span>${esc(c.kn.s)}</span><small class="chkn">knieschonende Variante</small>`:`<b>${esc(c.t)}</b><span>${esc(c.s)}</span>${c.kn?`<small class="chkn">Knie schonen: ${esc(c.kn.t)}</small>`:''}`}${c.w&&!ok?`<button class="wogo" data-wo="${c.w}" data-woc="${c.id}">Jetzt starten ›</button>`:''}</div><em>+${c.pt}</em></div>`}).join('')}</div>`}
 document.addEventListener('keydown',ev=>{if((ev.key==='Enter'||ev.key===' ')&&ev.target.matches&&ev.target.matches('.chi[data-ch]')){ev.preventDefault();ev.target.click()}});
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-ch]');if(!b)return;const d=today(),dd=ND(d),id=b.dataset.ch;
  const before=chDone(d).length;dd.ch=(dd.ch||[]).includes(id)?dd.ch.filter(x=>x!==id):[...(dd.ch||[]),id];touch(d);
