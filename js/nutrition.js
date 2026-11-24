@@ -28,6 +28,12 @@ function findFoods(q,max=25){const t=normQ(q).split(/\s+/).filter(Boolean);if(!t
  for(let i=0;i<m.all.length;i++){const h=m.norm[i];if(!t.every(w=>h.includes(w)))continue;const sc=h.startsWith(t[0])?0:(' '+h).includes(' '+t[0])?1:2;out.push([sc,i])}
  if(!out.length){const q=t.join('');for(let i=0;i<m.all.length;i++){const ws=m.norm[i].split(/[^a-z0-9]+/).filter(w=>w.length>=4);if(ws.some(w=>q.includes(w)))out.push([3,i])}}
  return out.sort((a,b)=>a[0]-b[0]||a[1]-b[1]).slice(0,max).map(x=>m.all[x[1]])}
+/* „Meintest du …?“ – Tippfehler-tolerant (Levenshtein): bis 1 Fehler bei kurzen, 2 bei langen Wörtern */
+function lev(a,b,max){if(Math.abs(a.length-b.length)>max)return max+1;let p=Array.from({length:b.length+1},(_,i)=>i);for(let i=1;i<=a.length;i++){const c=[i];let lo=i;for(let j=1;j<=b.length;j++){c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));if(c[j]<lo)lo=c[j]}if(lo>max)return max+1;p=c}return p[b.length]}
+const fzTol=w=>w.length>=7?2:w.length>=4?1:0;
+function fuzzyFoods(q,max=6){const t=normQ(q).split(/\s+/).filter(w=>w.length>=3);if(!t.length)return[];const m=fm(),out=[];
+ for(let i=0;i<m.all.length;i++){const ws=m.norm[i].split(/[^a-z0-9]+/).filter(Boolean);let d=0,ok=true;for(const w of t){const tol=fzTol(w);let best=99;for(const x of ws){const v=x.startsWith(w)?0:lev(w,x.length>w.length+2?x.slice(0,w.length+1):x,tol);if(v<best)best=v;if(!best)break}if(best>tol){ok=false;break}d+=best}if(ok)out.push([d,i])}
+ return out.sort((a,b)=>a[0]-b[0]||a[1]-b[1]).slice(0,max).map(x=>m.all[x[1]])}
 function remember(food){const N=S.nut;if(food.src==='off'||food.src==='own'){if(!N.foods.some(x=>x.id===food.id))N.foods.unshift(food)}N.recent=[food.id,...N.recent.filter(x=>x!==food.id)].slice(0,30)}
 function nutLine(){const d=today(),g=goals(d),t=totals(d);if(!t.kcal&&!lastWeight())return '';return `<p class="nline" data-a="view" data-v="nut">Ernährung heute: <b>${fmt(t.kcal)}</b> / ${fmt(g.kcal)} kcal · <b>${fmt(Math.round(t.p))}</b> / ${g.p} g Protein${g.trained?' · Trainingstag':''}</p>`}
 /* Farbverlaufs-Balken: kind 'eat' = Grün→Rot (Kalorien, Limit), 'goal' = Rot→Grün (Protein, Ziel erreichen) */
@@ -65,8 +71,8 @@ function foodRow(f){return `<button class="frow" data-n="pick" data-id="${esc(f.
 function bareHtml(res){const b=res.bare||[];return b.length?`<h4>Gefunden, aber ohne Nährwerte</h4>${b.map(n=>`<button class="frow" data-n="custom" data-name="${esc(n)}"><div><b>${esc(n)}</b><small>Werte von der Packung eintragen</small></div><span>+</span></button>`).join('')}`:''}
 function sheetList(sh){const q=(sh.q||'').trim(),N=S.nut;
  if(!q){const tpls=N.meals.length?`<h4>Vorlagen</h4>${N.meals.map(t=>`<button class="frow" data-n="usetpl" data-id="${t.id}"><div><b>${esc(t.name)}</b><small>${t.items.length} Lebensmittel · ${fmt(t.items.reduce((a,i)=>a+i.kcal,0))} kcal</small></div><span>+</span></button>`).join('')}`:'';return tpls+smartLists(sh.meal)}
- const hits=findFoods(q);
- return `${hits.length?`<h4>Gefunden</h4>${hits.map(f=>foodRow2(f)).join('')}`:''}<h4>Open Food Facts</h4>${sh.busy?'<p class="tip" style="padding:0">Suche …</p>':sh.results?(sh.results.length?sh.results.map(f=>foodRow2(f)).join('')+bareHtml(sh.results):(sh.results.bare||[]).length?bareHtml(sh.results):`<p class="tip" style="padding:0">${esc(sh.offErr||'Nichts gefunden.')}${sh.offErr?' Packungen findest du per <b>Barcode-Scan</b>, sonst leg das Produkt selbst an.':''}</p>${sh.offErr?`<div class="offerr"><button data-n="scan">▦ Barcode scannen</button><button class="ghost" data-n="off">Nochmal</button></div>`:''}`):`<button data-n="off" style="width:100%">„${esc(q)}“ in Open Food Facts suchen</button>`}`}
+ const hits=findFoods(q),fz=hits.length?[]:fuzzyFoods(q),sug=sh.results&&sh.results.sug;
+ return `${hits.length?`<h4>Gefunden</h4>${hits.map(f=>foodRow2(f)).join('')}`:''}${fz.length?`<h4>Meintest du …?</h4>${fz.map(f=>foodRow2(f)).join('')}`:''}<h4>Open Food Facts</h4>${sug&&!sh.busy?`<button class="sugg" data-n="sug" data-q="${esc(sug)}">Meintest du: <b>${esc(sug)}</b>?</button>`:''}${sh.busy?'<p class="tip" style="padding:0">Suche …</p>':sh.results?(sh.results.length?sh.results.map(f=>foodRow2(f)).join('')+bareHtml(sh.results):(sh.results.bare||[]).length?bareHtml(sh.results):`<p class="tip" style="padding:0">${esc(sh.offErr||'Nichts gefunden.')}${sh.offErr?' Packungen findest du per <b>Barcode-Scan</b>, sonst leg das Produkt selbst an.':''}</p>${sh.offErr?`<div class="offerr"><button data-n="scan">▦ Barcode scannen</button><button class="ghost" data-n="off">Nochmal</button></div>`:''}`):`<button data-n="off" style="width:100%">„${esc(q)}“ in Open Food Facts suchen</button>`}`}
 /* Nur die Ergebnisliste neu zeichnen – das Suchfeld (und die iPhone-Tastatur) bleibt unberührt */
 function updRes(){const box=$('fres');if(box&&sheet&&sheet.step==='search')box.innerHTML=sheetList(sheet);else render()}
 function renderSheet(){const sh=sheet,ml=MEALS.find(m=>m[0]===sh.meal)[1];let b='';
@@ -125,14 +131,39 @@ async function offFill(hits){const miss=hits.filter(h=>!mapOFF(h)&&h.code).slice
  const got=await Promise.all(miss.map(h=>Promise.race([offFetch(h.code).then(j=>j&&j.product?{...h,...j.product,code:h.code}:null).catch(()=>null),new Promise(r=>setTimeout(()=>r(null),6000))])));
  const m=new Map();miss.forEach((h,i)=>{if(got[i])m.set(h.code,got[i])});return hits.map(h=>m.get(h.code)||h)}
 const offRank=(q,hits)=>{const w=offFlat(q),ws=q.toLowerCase().split(/\s+/).map(offFlat).filter(Boolean),sc=h=>{const n=offFlat(h.product_name_de||h.product_name);return(n.includes(w)?2:0)+(ws.every(x=>n.includes(x))?1:0)+(h.product_name_de?0.5:0)};return hits.map((h,i)=>[sc(h),i,h]).sort((a,b)=>b[0]-a[0]||a[1]-b[1]).map(x=>x[2])};
+/* Unscharfe Abfrage (Lucene „~“): jedes Wort mit Tippfehler-Toleranz, ein langes Einzelwort zusätzlich getrennt */
+function offFuzzyQ(q){const ws=q.trim().toLowerCase().split(/\s+/).filter(Boolean);if(!ws.length||ws.every(w=>w.length<4))return null;const f=w=>w.length>=4?w+'~':w;
+ const base=ws.map(f).join(' AND ');if(ws.length>1||ws[0].length<7)return base;const w=ws[0],o=[`(${base})`];for(let i=3;i<=w.length-3;i++)o.push(`(${f(w.slice(0,i))} AND ${f(w.slice(i))})`);return o.join(' OR ')}
+/* Wörterbuch für „Meintest du“: Wörter der eingebauten und eigenen Lebensmittel plus gängige Produkte und Marken.
+   Die Namen in Open Food Facts sind oft unsauber oder fremdsprachig – sie dienen nur als Rückfall. */
+const SUG_EXTRA=['Kinderriegel','Kinder Bueno','Kinder Schokolade','Snickers','Twix','Mars','Bounty','Milka','Ritter Sport','Duplo','Hanuta','Nutella','Haribo','Pringles','Oreo','Leibniz','Milchschnitte',
+ 'Milchreis','Skyr','Alpro','Coca-Cola','Cola Zero','Fanta','Red Bull','Monster','Haferdrink','Pizza','Döner','Lasagne','Spaghetti','Bolognese','Brötchen','Croissant','Brezel','Toast','Müsli','Cornflakes',
+ 'Joghurt','Quark','Magerquark','Hüttenkäse','Frischkäse','Mozzarella','Gouda','Leberwurst','Salami','Schinken','Thunfisch','Lachs','Avocado','Erdnussbutter','Proteinpulver','Proteinriegel','Proteinshake',
+ 'Haferflocken','Hähnchenbrust','Putenbrust','Rinderhack','Vollkornbrot','Eiweißbrot','Müsliriegel','Reiswaffeln','Banane','Apfel','Kartoffeln','Nudeln','Reis','Eier','Butter','Milch','Käse','Wurst'];
+const sfl=t=>offFlat(t).replace(/ä/g,'a').replace(/ö/g,'o').replace(/ü/g,'u').replace(/ß/g,'ss');
+let sugVoc=null;function sugVocab(){if(sugVoc)return sugVoc;const m=new Map(),add=w=>{w=String(w).trim();const k=sfl(w);if(k.length>=4&&!/\d/.test(k)&&!m.has(k))m.set(k,w)};
+ SUG_EXTRA.forEach(add);for(const f of [...FOODS,...S.nut.foods])for(const w of String(f.name).split(/[\s,()\/-]+/))if(/^[A-Za-zÄÖÜäöüß]{4,}$/.test(w))add(w.charAt(0).toUpperCase()+w.slice(1));return sugVoc=m}
+function sugFix(q){const V=sugVocab(),near=w=>{const k=sfl(w);if(V.has(k))return null;const tol=k.length>=7?2:k.length>=4?1:0;if(!tol)return null;let best=null,bd=tol+1;for(const [vk,vw] of V){if(Math.abs(vk.length-k.length)>tol)continue;const d=lev(k,vk,tol);if(d<bd){bd=d;best=vw}}return best};
+ const whole=near(q);if(whole)return whole;const ws=q.trim().split(/\s+/);if(ws.length<2)return null;let ch=false;const out=ws.map(w=>{const n=near(w);if(n){ch=true;return n}return w});return ch?out.join(' '):null}
+/* Rückfall-Vorschlag aus den Online-Treffern: der ähnlichste Produktname (ganz oder sein Anfang) */
+function offSug(q,hits){const qf=sfl(q),tol=fzTol(qf)+1,cnt=new Map();
+ for(const h of hits){const n=String(h.product_name_de||h.product_name||'').trim();if(!n||n.length>40)continue;const k=sfl(n);if(!k||k===qf)continue;
+  const d=Math.min(lev(qf,k,tol),lev(qf,k.slice(0,qf.length),tol),lev(qf,k.slice(0,qf.length+1),tol));if(d>tol)continue;const c=cnt.get(k)||{n,c:0,d};c.c++;cnt.set(k,c)}
+ const top=[...cnt.values()].sort((a,b)=>a.d-b.d||b.c-a.c)[0];return top?top.n.replace(/^./,c=>c.toUpperCase()):null}
 async function offHits(q,signal){let raw=await offQuery(q,signal);
  const sq=!raw.length&&offSplitQ(q);if(sq){const w=offFlat(q),h2=await offQuery(sq,signal).catch(()=>[]);const has=h=>offFlat(h.product_name_de||h.product_name).includes(w);raw=[...h2.filter(has),...h2.filter(h=>!has(h))]}
- return offFill(offRank(q,raw))}
+ /* Tippfehler laut Wörterbuch und kein Treffer enthält das Eingegebene: mit dem korrigierten Begriff suchen, diese Treffer zuerst */
+ const qf=sfl(q),hasQ=raw.some(h=>sfl(h.product_name_de||h.product_name).includes(qf));let sug=hasQ?null:sugFix(q);
+ if(sug){const sub=await offHits0(sug,signal).catch(()=>[]),seen=new Set(sub.map(h=>h.code));raw=[...sub,...raw.filter(h=>!seen.has(h.code))]}
+ else if(raw.filter(h=>mapOFF(h)).length<3){const fq=offFuzzyQ(q);if(fq){const h3=await offQuery(fq,signal).catch(()=>[]),seen=new Set(raw.map(h=>h.code));sug=sugFix(q)||offSug(q,h3);raw=[...raw,...h3.filter(h=>!seen.has(h.code))]}}
+ const res=await offFill(offRank(sug||q,raw));res.sug=sug;return res}
+/* Treffer für den korrigierten Begriff (mit Wort-Trennung, ohne erneute Korrektur) */
+async function offHits0(q,signal){let raw=await offQuery(q,signal);const sq=!raw.length&&offSplitQ(q);if(sq){const w=offFlat(q),h2=await offQuery(sq,signal).catch(()=>[]);const has=h=>offFlat(h.product_name_de||h.product_name).includes(w);raw=[...h2.filter(has),...h2.filter(h=>!has(h))]}return raw}
 const offDone=new WeakMap();function offComplete(f){if(!offDone.has(f))offDone.set(f,offComplete0(f));return offDone.get(f)}
 async function offComplete0(f){try{const j=await offFetch(f.code),x=j&&j.product&&mapOFF({...j.product,code:f.code});if(!x||x.part)return;delete f.part;delete f.np;Object.assign(f,{kcal:x.kcal,p:x.p,c:x.c,z:x.z,f:x.f,por:f.por||x.por});offStore();if(sheet&&sheet.food===f&&sheet.step==='amount')render()}catch(e){}finally{f.tried=1}}
 async function offSearch(q){const key=normQ(q);if(offCache.has(key)){sheet.results=offCache.get(key);sheet.busy=false;updRes();return}
  if(offAbort)offAbort.abort();const ac=new AbortController();offAbort=ac;sheet.busy=true;updRes();offLast=Date.now();
- try{const hits=await offHits(q,ac.signal);if(offAbort!==ac)return;const res=hits.map(mapOFF).filter(Boolean);res.bare=offBare(hits);
+ try{const hits=await offHits(q,ac.signal);if(offAbort!==ac)return;const res=hits.map(mapOFF).filter(Boolean);res.bare=offBare(hits);res.sug=hits.sug;
   offCache.delete(key);if(res.length){offCache.set(key,res);offStore()}if(sheet&&normQ(sheet.q.trim())===key)sheet.results=res}
  catch(e){if(offAbort!==ac)return;if(sheet){sheet.results=[];sheet.offErr=!navigator.onLine?'Kein Internet – Online-Suche nicht möglich.':ac.signal.aborted?'Open Food Facts antwortet gerade nicht.':'Die Online-Suche von Open Food Facts ist gerade gestört.';offDown=Date.now()}}
  offAbort=null;if(sheet){sheet.busy=false;updRes()}}
@@ -182,6 +213,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-n]');if(
  else if(a==='setmeal'){sheet.meal=b.dataset.m}
  else if(a==='gq'){sheet.g=b.dataset.v}
  else if(a==='addit'){if(sheet.food.part&&sheet.food.code&&!sheet.food.tried){offComplete(sheet.food).then(()=>b.click());return}const g=num(sheet.g);if(!g||g<=0){note('Menge eingeben');return}const it=itemFrom(sheet.food,g,sheet.meal);ND(d).items.push(it);remember(sheet.food);touch(d);shareOnAdd(sheet,it,d);sheet=null}
+ else if(a==='sug'){const q=b.dataset.q;sheet.q=q;const i=$('fq');if(i)i.value=q;clearTimeout(offT);sheet.results=offCache.get(normQ(q))||null;sheet.offErr='';if(!sheet.results)offSearch(q);else updRes();return}
  else if(a==='off'){clearTimeout(offT);offCache.delete(normQ(sheet.q.trim()));sheet.offErr='';offSearch(sheet.q.trim());return}
  else if(a==='scan'){sheet.step='scan';sheet.msg='';render();startScan();return}
  else if(a==='code'){const c=($('codeIn').value||'').replace(/\D/g,'');if(c)offCode(c);return}

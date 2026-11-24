@@ -47,6 +47,11 @@ try:
         def off_search(r):
             u = r.request.url
             if "proxy" in u or "kinder" in u: r.abort(); return
+            if "snickers" in u.lower():
+                n = {"energy-kcal_100g": 488, "proteins_100g": 8.6, "carbohydrates_100g": 60, "fat_100g": 23}
+                r.fulfill(status=200, content_type="application/json", body=json.dumps({"hits": [{"code": "5000159461122", "product_name": "Snickers", "nutriments": n}]})); return
+            if "snikers" in u.lower():
+                r.fulfill(status=200, content_type="application/json", body=json.dumps({"hits": []})); return
             if "quarkteil" in u:
                 r.fulfill(status=200, content_type="application/json", body=json.dumps({"hits": [{"code": "4201", "product_name_de": "Quarkteil Mager", "brands": ["xx:Aldi"], "nutriscore_data": {"components": {"positive": [{"id": "proteins", "value": 12}], "negative": [{"id": "energy", "value": 281.1}, {"id": "sugars", "value": 4.1}]}}}]})); return
             off_calls.append(u)
@@ -238,7 +243,7 @@ try:
         pg.evaluate("void(window.__offFetch0 = offFetch, offFetch = async c => c === '4005' ? {status: 1, product: {code: c, product_name: 'Proxyhafer', nutriments: {'energy-kcal_100g': 370, proteins_100g: 13, carbohydrates_100g: 60, fat_100g: 7}}} : {status: 0})")
         pg.fill("#fq", "proxyriegel"); pg.wait_for_timeout(1500)
         check("Proxyhafer" in pg.text_content("#fres") and "370" in pg.text_content("#fres") and pg.evaluate("sheet.results.find(r=>r.name==='Proxyhafer').brand") == "Mühle", "Fehlende Nährwerte werden pro Produkt nachgeladen (Suchindex ohne Nährwerte)")
-        check("Proxyriegel Erdnuss" in pg.text_content("#fres") and len(off_calls) == 0 and "sport_cockpit_food_search" in open("/tmp/calls.log").read(), "Ist die schnelle Suche nicht erreichbar: Suche über Home Assistant")
+        check("Proxyriegel Erdnuss" in pg.text_content("#fres") and "sport_cockpit_food_search" in open("/tmp/calls.log").read(), "Ist die schnelle Suche nicht erreichbar: Suche über Home Assistant")
         pg.evaluate("offCache.set(normQ('kinderriegel'),[])"); pg.evaluate("offCache.delete(normQ('kinderriegel'))")
         pg.fill("#fq", "kinderriegel"); pg.wait_for_timeout(5000)
         t = pg.text_content("#fres")
@@ -255,13 +260,20 @@ try:
         pg.click("#fres [data-n=pick] >> text=Quarkteil Mager"); pg.wait_for_timeout(500)
         check(pg.evaluate("sheet.food.c") == 4.1 and not pg.evaluate("!!sheet.food.part"), "Beim Antippen werden Kohlenhydrate und Fett nachgeladen")
         pg.click("[data-n=back]"); pg.wait_for_timeout(150)
+        check(pg.evaluate("[sugFix('magerkwark'),sugFix('skir'),sugFix('kinderiegel'),sugFix('nutela'),sugFix('magerquark')].join('|')") == "Magerquark|Skyr|Kinderriegel|Nutella|", "Meintest du: Tippfehler werden über das Wörterbuch korrigiert")
+        pg.fill("#fq", "bananne"); pg.wait_for_timeout(100)
+        check("Meintest du" in pg.text_content("#fres") and "Banane" in pg.text_content("#fres"), "Tippfehler in eigenen/eingebauten Lebensmitteln: 'Meintest du …?'")
+        pg.wait_for_timeout(4200); pg.fill("#fq", "snikers"); pg.wait_for_timeout(6000)
+        check(pg.is_visible("[data-n=sug]") and "Snickers" in pg.text_content("[data-n=sug]") and "488 kcal" in pg.text_content("#fres"), "Online: 'Meintest du: Snickers?' und passende Treffer")
         pg.fill("#fq", "snackgurke"); pg.wait_for_timeout(100)
         check("Gurke" in pg.text_content("#fres"), "'snackgurke' findet die eingebaute 'Gurke'")
         pg.wait_for_timeout(3000)
+        off_calls.clear()
         pg.fill("#fq", "testriegel"); pg.wait_for_timeout(1500)
-        check("Testriegel Kakao" in pg.text_content("#fres") and len(off_calls) == 1 and "search.openfoodfacts.org" in off_calls[0], "Ohne HA-Suchdienst: direkte schnelle Suche (search.openfoodfacts.org) als Rückfall")
+        n_off = len(off_calls)
+        check("Testriegel Kakao" in pg.text_content("#fres") and n_off >= 1 and "search.openfoodfacts.org" in off_calls[0], "Ohne HA-Suchdienst: direkte schnelle Suche (search.openfoodfacts.org) als Rückfall")
         pg.fill("#fq", "testriege"); pg.fill("#fq", "testriegel"); pg.wait_for_timeout(1000)
-        check("Testriegel Kakao" in pg.text_content("#fres") and len(off_calls) == 1, "Gleiche Online-Suche kommt aus dem Zwischenspeicher")
+        check("Testriegel Kakao" in pg.text_content("#fres") and len(off_calls) == n_off, "Gleiche Online-Suche kommt aus dem Zwischenspeicher")
         check(pg.evaluate("'testriegel' in JSON.parse(localStorage.getItem('sc.offcache2')||'{}')"), "Online-Treffer werden auf dem Gerät gemerkt")
         OFF["busy"] = True; pg.fill("#fq", "kakaoriegel"); pg.wait_for_timeout(4500)
         check("gestört" in pg.text_content("#fres") and pg.is_visible("#fres [data-n=off]") and pg.is_visible("#fres [data-n=scan]"), "Störung von Open Food Facts wird erkannt, mit Scan- und Nochmal-Knopf")

@@ -36,6 +36,8 @@ async def h(ws):
                 bare={"code":"4004","product_name":"Proxysnack Gurke","brands":["Aldi"]}
                 fill={"code":"4005","product_name":"Proxyhafer","brands":["xx:Mühle"]}
                 await ws.send(json.dumps({"id":m["id"],"type":"result","success":True,"result":{"context":{},"response":{"status":200,"content":{"hits":[hit,bare,fill]}}}}))
+            elif q.startswith("("):
+                await ws.send(json.dumps({"id":m["id"],"type":"result","success":True,"result":{"context":{},"response":{"status":200,"content":{"hits":[]}}}}))
             else:
                 await ws.send(json.dumps({"id":m["id"],"type":"result","success":False,"error":{"code":"not_found","message":"Service not found."}}))
         elif m["type"]=="call_service" and m.get("domain")=="todo":
