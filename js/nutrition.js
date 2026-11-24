@@ -96,8 +96,8 @@ const offCache=new Map();let offAbort=null;
    Browser-Anfragen (keine CORS-Freigabe), daher die klassische. Sie ist auf wenige Anfragen pro Minute begrenzt:
    Ergebnisse werden 7 Tage auf dem Gerät gemerkt, automatische Suchen höchstens alle 4 s. */
 const OFF_OLD=q=>`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}&search_simple=1&action=process&json=1&page_size=20&lc=de&cc=de&fields=${OFF_FIELDS}`;
-const OFF_LS='sc.offcache',OFF_TTL=7*864e5;let offLast=0,offDown=0;
-(()=>{try{const j=JSON.parse(localStorage.getItem(OFF_LS)||'{}');for(const k in j)if(Date.now()-j[k].t<OFF_TTL)offCache.set(k,j[k].r)}catch(e){}})();
+const OFF_LS='sc.offcache2',OFF_TTL=7*864e5;let offLast=0,offDown=0;
+(()=>{try{const j=JSON.parse(localStorage.getItem(OFF_LS)||'{}');for(const k in j)if(Date.now()-j[k].t<OFF_TTL&&(j[k].r||[]).length)offCache.set(k,j[k].r)}catch(e){}try{localStorage.removeItem('sc.offcache')}catch(e){}})();
 function offStore(){try{const o={},ks=[...offCache.keys()].slice(-40),now=Date.now();for(const k of ks)o[k]={t:now,r:offCache.get(k)};localStorage.setItem(OFF_LS,JSON.stringify(o))}catch(e){}}
 async function offGet(url,signal,ms){const ac=new AbortController(),to=setTimeout(()=>ac.abort(),ms),stop=()=>ac.abort();signal.addEventListener('abort',stop);
  try{const r=await fetch(url,{signal:ac.signal});if(!r.ok)throw new Error('HTTP '+r.status);const t=await r.text();try{return JSON.parse(t)}catch(e){throw new Error('busy')}}finally{clearTimeout(to);signal.removeEventListener('abort',stop)}}
@@ -125,7 +125,7 @@ async function offSearch(q){const key=normQ(q);if(offCache.has(key)){sheet.resul
  if(offAbort)offAbort.abort();const ac=new AbortController();offAbort=ac;sheet.busy=true;updRes();offLast=Date.now();
  const viaHA=await haFoodSearch(q);if(offAbort!==ac)return;
  try{const res=viaHA||(await offGet(OFF_OLD(q),ac.signal,12000).then(j=>(j.products||[]).map(mapOFF).filter(Boolean)));if(offAbort!==ac)return;
-  offCache.delete(key);offCache.set(key,res);offStore();if(sheet&&normQ(sheet.q.trim())===key)sheet.results=res}
+  offCache.delete(key);if(res.length){offCache.set(key,res);offStore()}if(sheet&&normQ(sheet.q.trim())===key)sheet.results=res}
  catch(e){if(offAbort!==ac)return;if(sheet){sheet.results=[];sheet.offErr=!navigator.onLine?'Kein Internet – Online-Suche nicht möglich.':ac.signal.aborted?'Open Food Facts antwortet gerade nicht.':'Die Online-Suche von Open Food Facts ist gerade gestört.';offDown=Date.now()}}
  offAbort=null;if(sheet){sheet.busy=false;updRes()}}
 /* Meldung im Scanner setzen, ohne die Seite neu aufzubauen (sonst verschwindet das Kamerabild) */
