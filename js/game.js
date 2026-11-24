@@ -77,6 +77,8 @@ function dayScore(d){const g=goals(d),t=totals(d),day=S.nut.days[d]||{},ss=S.ses
   const dev=Math.abs(t.kcal-g.kcal)/g.kcal;if(dev<=.1){pt+=20;why.push('Kalorien im Ziel +20')}else if(dev<=.2){pt+=10;why.push('Kalorien nah dran +10')}}
  if(day.af===1){const n=afStreak(d),p=afPts(n)+(AF_MS[n]||0);pt+=p;why.push(`Alkoholfrei Tag ${n} +${p}`)}
  const chp=chPoints(d);if(chp){pt+=chp;why.push((chDone(d).length===3?'Alle Challenges +':'Challenges +')+chp)}
+ /* Kurz-Workouts geben auch Punkte, wenn sie heute keine Challenge sind (einmal pro Tag je Workout) */
+ {const ids=dayCh(d).map(c=>c.id);for(const id of new Set(day.ch||[]))if(/^wo_/.test(id)&&!ids.includes(id)){const c=CH.find(x=>x.id===id);if(c){pt+=c.pt;why.push(c.t.split(' ·')[0]+' +'+c.pt)}}}
  if(day.w){pt+=5;why.push('Gewogen +5')}if((day.water||0)>=waterGoal()){pt+=10;why.push('Wasserziel +10')}
  if(day.wkc){pt+=WK_PTS;why.push('Wochen-Challenge +'+WK_PTS)}if(day.cpc){pt+=CP_PTS;why.push('Paar-Challenge +'+CP_PTS)}
  {const ap=advPoints(d);if(ap){pt+=ap;why.push('Adventstürchen +'+ap)}}

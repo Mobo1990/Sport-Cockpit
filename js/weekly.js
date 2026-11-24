@@ -41,9 +41,10 @@ function weeklyCheck(){const me=myWeekStats(),w=weekly(),c=couple(),pw=partnerWe
 /* Kurz-Workouts direkt starten (für die Wochen-Challenge „3 Kurz-Workouts“) */
 /* Kurz-Workouts immer auf der Startseite – auch wenn sie gerade keine Challenge sind */
 const woQuickHtml=()=>`<section class="woq"><h3 class="sh">Kurz-Workouts <small class="chn">ohne Geräte, mit Timer</small></h3>${woPickHtml()}</section>`;
+const woPt=id=>(CH.find(x=>x.id===id)||{}).pt||0;
 function woPickHtml(){const dn=(S.nut.days[today()]||{}).ch||[];
  return `<div class="wopick">${[['core','wo_core','Core','6 min'],['zirkel','wo_zirkel','Zirkel','7 min'],['mobil','wo_mobil','Mobility','5 min']].map(([k,id,n,m])=>{const ok=dn.includes(id);
-  return `<button class="${ok?'ok':''}" data-wo="${k}" data-woc="${id}"${ok?' aria-pressed="true"':''}><b>${n}</b><small>${ok?'heute erledigt':m+' · Start ›'}</small></button>`}).join('')}</div><p class="wohint">Jedes Workout zählt einmal pro Tag.</p>`}
+  return `<button class="${ok?'ok':''}" data-wo="${k}" data-woc="${id}"${ok?' aria-pressed="true"':''}><b>${n}</b><small>${ok?'heute erledigt · +'+woPt(id):m+' · +'+woPt(id)+' · Start ›'}</small></button>`}).join('')}</div><p class="wohint">Jedes Workout gibt einmal pro Tag Punkte.</p>`}
 function daysLeft(){const n=7-weekDaysIso().length;return n===0?'letzter Tag':n===1?'noch 1 Tag':`noch ${n} Tage`}
 const fmtV=(k,v)=>fmt(k==='st'?Math.round(v):v);
 function weeklyHtml(){weeklyCheck();const me=myWeekStats(),w=weekly(),c=couple(),pw=partnerWeek(),wd=weekFlag('wkc'),cd=weekFlag('cpc'),pc=Math.min(me[w.k]/w.g,1)*100;

@@ -119,6 +119,8 @@ try:
         while pg.is_visible("[data-wo-a=skip]"): pg.click("[data-wo-a=skip]")
         check("Geschafft" in pg.text_content("#wo"), "Workout beendet")
         check("wo_core" in pg.evaluate("JSON.stringify(S.nut.days[today()].ch)"), "Workout-Challenge automatisch abgehakt")
+        check(pg.evaluate("dayCh(today()).some(c=>c.id==='wo_core') || dayScore(today()).why.includes('Core-Workout +15')"), "Kurz-Workout gibt Punkte, auch ohne Challenge (+15)")
+        check(pg.evaluate("(()=>{const d=today(),dd=ND(d),o=dd.ch;dd.ch=[...(o||[]),'wo_core','wo_core'];const n=dayScore(d).why.filter(x=>x==='Core-Workout +15').length;dd.ch=o;return n<=1})()"), "Kurz-Workout zählt nur einmal pro Tag")
         pg.click("#wo [data-wo-a=close]"); check(not pg.is_visible("#wo.on"), "Workout-Ansicht schließt")
 
         print("Home Assistant")
