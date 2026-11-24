@@ -23,6 +23,14 @@ async def h(ws):
         elif m["type"]=="call_service" and m.get("domain")=="rest_command":
             open("/tmp/calls.log","a").write(json.dumps(m)+"\n")
             q=(m.get("service_data") or {}).get("q","")
+            if q.lower() == "kinderriegel":
+                await ws.send(json.dumps({"id":m["id"],"type":"result","success":True,"result":{"context":{},"response":{"status":200,"content":{"hits":[]}}}}))
+                continue
+            if "(kinder AND riegel)" in q:
+                n={"energy-kcal_100g":560,"proteins_100g":9,"carbohydrates_100g":53,"fat_100g":35}
+                hs=[{"code":"4101","product_name":"Fruchtriegel Apfel","brands":["xx:dmbio"],"nutriments":n},{"code":"4102","product_name":"Kinder Riegel","brands":["xx:kinder"],"nutriments":n}]
+                await ws.send(json.dumps({"id":m["id"],"type":"result","success":True,"result":{"context":{},"response":{"status":200,"content":{"hits":hs}}}}))
+                continue
             if q.lower().startswith("proxy"):
                 hit={"code":"4003","product_name":"Proxyriegel Erdnuss","brands":["Marke"],"nutriments":{"energy-kcal_100g":390,"proteins_100g":31,"carbohydrates_100g":30,"sugars_100g":2,"fat_100g":14}}
                 bare={"code":"4004","product_name":"Proxysnack Gurke","brands":["Aldi"]}

@@ -105,10 +105,17 @@ async function offGet(url,signal,ms){const ac=new AbortController(),to=setTimeou
    Fehlt der Dienst, 10 min lang direkt suchen. */
 let haFoodOff=0;
 const offBare=hits=>[...new Set(hits.filter(p=>!mapOFF(p)).map(p=>String(p.product_name_de||p.product_name||'').trim()+((Array.isArray(p.brands)?p.brands[0]:String(p.brands||'').split(',')[0])?' ('+String(Array.isArray(p.brands)?p.brands[0]:String(p.brands||'').split(',')[0]).trim()+')':'')).filter(Boolean))].slice(0,5);
+/* Der Suchindex trennt zusammengesetzte Wörter nicht („kinderriegel“ findet nichts, „kinder riegel“ schon):
+   ohne Treffer alle Trennungen eines langen Wortes in einer Abfrage probieren und Treffer mit dem ganzen Wort nach vorn holen. */
+const offSplitQ=q=>{const w=q.trim().toLowerCase();if(!/^[a-zäöüß]{7,}$/.test(w))return null;const o=[];for(let i=3;i<=w.length-3;i++)o.push(`(${w.slice(0,i)} AND ${w.slice(i)})`);return o.join(' OR ')};
+const offFlat=t=>String(t||'').toLowerCase().replace(/[^a-z0-9äöüß]/g,'');
+async function haFoodQuery(q){const r=await haCall([{type:'call_service',domain:'rest_command',service:'sport_cockpit_food_search',service_data:{q},return_response:true}]);const m=r[0]||{};
+ if(!m.success){haFoodOff=Date.now();return null}const resp=(m.result||{}).response||{};if(resp.status!==200||!resp.content)return null;
+ const c=typeof resp.content==='string'?JSON.parse(resp.content):resp.content;return c.hits||[]}
 async function haFoodSearch(q){if(!HA.url||!HA.token||Date.now()-haFoodOff<600000)return null;
- try{const r=await haCall([{type:'call_service',domain:'rest_command',service:'sport_cockpit_food_search',service_data:{q},return_response:true}]);const m=r[0]||{};
-  if(!m.success){haFoodOff=Date.now();return null}const resp=(m.result||{}).response||{};if(resp.status!==200||!resp.content)return null;
-  const c=typeof resp.content==='string'?JSON.parse(resp.content):resp.content,hits=await offFill(c.hits||[]),res=hits.map(mapOFF).filter(Boolean);res.bare=offBare(hits);return res}catch(e){return null}}
+ try{let raw=await haFoodQuery(q);if(raw==null)return null;
+  const sq=!raw.length&&offSplitQ(q);if(sq){const w=offFlat(q),h2=await haFoodQuery(sq)||[];raw=[...h2.filter(h=>offFlat(h.product_name_de||h.product_name).includes(w)),...h2.filter(h=>!offFlat(h.product_name_de||h.product_name).includes(w))]}
+  const hits=await offFill(raw),res=hits.map(mapOFF).filter(Boolean);res.bare=offBare(hits);return res}catch(e){return null}}
 /* Der Such-Index liefert seit Ende Nov. 2026 bei vielen Produkten keine Nährwerte mehr mit – die fehlenden für die
    ersten Treffer einzeln über die Produkt-Schnittstelle nachladen (parallel, je max. 6 s). */
 async function offFill(hits){const miss=hits.filter(h=>!mapOFF(h)&&h.code).slice(0,10);if(!miss.length)return hits;
