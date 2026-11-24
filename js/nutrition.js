@@ -89,7 +89,7 @@ function renderSheet(){const sh=sheet,ml=MEALS.find(m=>m[0]===sh.meal)[1];let b=
   <div class="actions"><button class="ghost" data-n="custom">+ Eigenes Produkt anlegen</button></div>`}
  return `<div class="sheet" role="dialog" aria-modal="true"><div class="sheetin" data-step="${sh.step||'search'}">${b}</div></div>`}
 function mapOFF(p){const n=p.nutriments||{};const kcal=n['energy-kcal_100g']??(n['energy_100g']?n['energy_100g']/4.184:null);if(kcal==null)return null;
- const sq=parseFloat(p.serving_quantity);return{id:'off'+(p.code||p._id),name:String(p.product_name_de||(typeof p.product_name==='object'&&p.product_name?(p.product_name.de||Object.values(p.product_name)[0]):p.product_name)||'Unbekannt').trim(),brand:(Array.isArray(p.brands)?p.brands.join(','):String(p.brands||'')).split(',')[0].trim(),kcal:Math.round(kcal),p:r1(+n.proteins_100g||0),c:r1(+n.carbohydrates_100g||0),z:r1(+n.sugars_100g||0),f:r1(+n.fat_100g||0),por:sq>0?{l:'Portion '+fmt(sq)+' g',g:sq}:null,src:'off',code:p.code}}
+ const sq=parseFloat(p.serving_quantity);return{id:'off'+(p.code||p._id),name:String(p.product_name_de||(typeof p.product_name==='object'&&p.product_name?(p.product_name.de||Object.values(p.product_name)[0]):p.product_name)||'Unbekannt').trim(),brand:(Array.isArray(p.brands)?p.brands.join(','):String(p.brands||'')).split(',')[0].trim().replace(/^[a-z]{2}:/,''),kcal:Math.round(kcal),p:r1(+n.proteins_100g||0),c:r1(+n.carbohydrates_100g||0),z:r1(+n.sugars_100g||0),f:r1(+n.fat_100g||0),por:sq>0?{l:'Portion '+fmt(sq)+' g',g:sq}:null,src:'off',code:p.code}}
 const OFF_FIELDS='code,product_name,product_name_de,brands,nutriments,serving_quantity';
 const offCache=new Map();let offAbort=null;
 /* Online-Suche (Open Food Facts). Die schnelle Such-Schnittstelle (search.openfoodfacts.org) erlaubt keine
@@ -108,7 +108,12 @@ const offBare=hits=>[...new Set(hits.filter(p=>!mapOFF(p)).map(p=>String(p.produ
 async function haFoodSearch(q){if(!HA.url||!HA.token||Date.now()-haFoodOff<600000)return null;
  try{const r=await haCall([{type:'call_service',domain:'rest_command',service:'sport_cockpit_food_search',service_data:{q},return_response:true}]);const m=r[0]||{};
   if(!m.success){haFoodOff=Date.now();return null}const resp=(m.result||{}).response||{};if(resp.status!==200||!resp.content)return null;
-  const c=typeof resp.content==='string'?JSON.parse(resp.content):resp.content,hits=c.hits||[],res=hits.map(mapOFF).filter(Boolean);res.bare=offBare(hits);return res}catch(e){return null}}
+  const c=typeof resp.content==='string'?JSON.parse(resp.content):resp.content,hits=await offFill(c.hits||[]),res=hits.map(mapOFF).filter(Boolean);res.bare=offBare(hits);return res}catch(e){return null}}
+/* Der Such-Index liefert seit Ende Nov. 2026 bei vielen Produkten keine Nährwerte mehr mit – die fehlenden für die
+   ersten Treffer einzeln über die Produkt-Schnittstelle nachladen (parallel, je max. 6 s). */
+async function offFill(hits){const miss=hits.filter(h=>!mapOFF(h)&&h.code).slice(0,10);if(!miss.length)return hits;
+ const got=await Promise.all(miss.map(h=>Promise.race([offFetch(h.code).then(j=>j&&j.product?{...h,...j.product,code:h.code}:null).catch(()=>null),new Promise(r=>setTimeout(()=>r(null),6000))])));
+ const m=new Map();miss.forEach((h,i)=>{if(got[i])m.set(h.code,got[i])});return hits.map(h=>m.get(h.code)||h)}
 async function offSearch(q){const key=normQ(q);if(offCache.has(key)){sheet.results=offCache.get(key);sheet.busy=false;updRes();return}
  if(offAbort)offAbort.abort();const ac=new AbortController();offAbort=ac;sheet.busy=true;updRes();offLast=Date.now();
  const viaHA=await haFoodSearch(q);if(offAbort!==ac)return;
