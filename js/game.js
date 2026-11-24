@@ -48,6 +48,7 @@ function goalsHtml(){const d=today(),w=(S.nut.days[d]||{}).water||0,wg=waterGoal
  <div class="dg"><div class="tl"><span>Schritte</span><span><b>${fmt(st)}</b> / ${fmt(sg)}</span></div>${rbar(st,sg,'up')}
   <div class="dgb">${hs?`<span class="src">aus Apple Health</span>`:`<input id="hSt" inputmode="numeric" placeholder="Schritte" aria-label="Schritte heute" value="${(S.nut.days[d]||{}).stm||''}"><button data-h="steps">OK</button>`}</div>${st>=sg?'<small class="ok">Ziel geschafft · +10</small>':`<small>noch ${fmt(sg-st)} · +10</small>`}</div></section>`}
 /* Alkoholfreie Tage: Punkte steigen mit der Serie, Bonus an Meilensteinen */
+const WO_FREE=10,WO_FREE_AB='2026-11-24';/* gilt ab diesem Tag – frühere Tage behalten ihre Punkte */
 const AF_MS={7:20,14:30,30:50,60:75,100:100};
 const afPts=n=>Math.min(4+n,15);
 const dayShift=(d,k)=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+k);return iso(x)};
@@ -77,8 +78,8 @@ function dayScore(d){const g=goals(d),t=totals(d),day=S.nut.days[d]||{},ss=S.ses
   const dev=Math.abs(t.kcal-g.kcal)/g.kcal;if(dev<=.1){pt+=20;why.push('Kalorien im Ziel +20')}else if(dev<=.2){pt+=10;why.push('Kalorien nah dran +10')}}
  if(day.af===1){const n=afStreak(d),p=afPts(n)+(AF_MS[n]||0);pt+=p;why.push(`Alkoholfrei Tag ${n} +${p}`)}
  const chp=chPoints(d);if(chp){pt+=chp;why.push((chDone(d).length===3?'Alle Challenges +':'Challenges +')+chp)}
- /* Kurz-Workouts geben auch Punkte, wenn sie heute keine Challenge sind (einmal pro Tag je Workout) */
- {const ids=dayCh(d).map(c=>c.id);for(const id of new Set(day.ch||[]))if(/^wo_/.test(id)&&!ids.includes(id)){const c=CH.find(x=>x.id===id);if(c){pt+=c.pt;why.push(c.t.split(' ·')[0]+' +'+c.pt)}}}
+ /* Kurz-Workout ohne Challenge: das erste am Tag gibt +10, weitere nichts (Gym-Training bleibt mit +30 klar vorn) */
+ {const ids=dayCh(d).map(c=>c.id);if(d>=WO_FREE_AB&&(day.ch||[]).some(id=>/^wo_/.test(id)&&!ids.includes(id))){pt+=WO_FREE;why.push('Kurz-Workout +'+WO_FREE)}}
  if(day.w){pt+=5;why.push('Gewogen +5')}if((day.water||0)>=waterGoal()){pt+=10;why.push('Wasserziel +10')}
  if(day.wkc){pt+=WK_PTS;why.push('Wochen-Challenge +'+WK_PTS)}if(day.cpc){pt+=CP_PTS;why.push('Paar-Challenge +'+CP_PTS)}
  {const ap=advPoints(d);if(ap){pt+=ap;why.push('Adventstürchen +'+ap)}}
