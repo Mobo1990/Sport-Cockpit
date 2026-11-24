@@ -189,7 +189,14 @@ try:
         check(pg.is_visible(".board") and "Pauline" in pg.text_content(".board") and "Woche" in pg.text_content(".board"), "Anzeigetafel oben: du und Pauline mit Wochenpunkten")
         import base64
         open("/tmp/sc_face.png", "wb").write(base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAFklEQVR4nGNkYGBgYGBgYGBgYGBgAAAABQABkJ8yHQAAAABJRU5ErkJggg=="))
-        pg.set_input_files(".board input[data-pic=file]", "/tmp/sc_face.png"); pg.wait_for_timeout(1500)
+        from PIL import Image as _Im
+        _i = _Im.new("RGB", (400, 200), (220, 40, 40)); _i.paste((40, 60, 220), (200, 0, 400, 200)); _i.save("/tmp/sc_face2.png")
+        pg.set_input_files(".board input[data-pic=file]", "/tmp/sc_face2.png"); pg.wait_for_timeout(600)
+        check(pg.is_visible("#crop.on #cstage") and pg.is_visible("#czoom"), "Foto gewählt: Ausschnitt wählen (verschieben, zoomen)")
+        bx = pg.locator("#cstage").bounding_box(); pg.mouse.move(bx["x"]+200, bx["y"]+140); pg.mouse.down(); pg.mouse.move(bx["x"]+20, bx["y"]+140, steps=8); pg.mouse.up()
+        pg.evaluate("void(cropZoom(1.5))"); pg.click("[data-crop=ok]"); pg.wait_for_timeout(400)
+        px = pg.evaluate("""new Promise(r=>{const i=new Image();i.onload=()=>{const c=document.createElement('canvas');c.width=c.height=160;const x=c.getContext('2d');x.drawImage(i,0,0);r([...x.getImageData(80,80,1,1).data].slice(0,3))};i.src=S.prof.pic})""")
+        check(px[2] > 150 and px[0] < 120 and not pg.is_visible("#crop.on"), "Gewählter Ausschnitt wird übernommen (rechte, blaue Bildhälfte)")
         check(pg.evaluate("(S.prof.pic||'').startsWith('data:image/jpeg') && S.prof.pic.length < 40000") and pg.is_visible(".board .ava.me img"), "Profilbild gewählt, klein gerechnet, auf der Tafel")
         td = json.load(open("/tmp/todo.json"))
         check(any(json.loads(t["description"]).get("kind") == "avatar" and json.loads(t["description"]).get("from") == "michell" for t in td), "Profilbild für Pauline in Home Assistant abgelegt")

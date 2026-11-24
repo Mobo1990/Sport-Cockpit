@@ -857,8 +857,8 @@ html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 .dh .mi{display:flex;flex-direction:column;align-items:center;text-align:center;background:none;border:0;box-shadow:none;padding:0;min-height:0;color:var(--ink)}
 .dh .mi svg{width:76px;height:76px}.dh .mi b{font:600 14px var(--fb);margin-top:2px}.dh .mi small{font-size:11.5px;color:var(--mute)}
 .dh .stin{display:flex;gap:8px;margin-top:10px}.dh .stin input{flex:1}
-.dh .wa{margin-top:14px;background:var(--d-blush);border-radius:18px;padding:12px}
-.dh .wh{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.dh .wh b{font:600 15px var(--fb)}.dh .wh span{font-size:13px;color:#4A4340}.dh .wh span.ok{color:var(--d-saged);font-weight:600}
+.dh .wa{margin-top:14px;background:#EEF2F4;border-radius:18px;padding:12px}
+.dh .wh{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.dh .wh b{font:600 15px var(--fb)}.dh .wh span{font-size:13px;color:#4A4340}.dh .wh span.ok{color:#4F7896;font-weight:600}
 .dh .gl{display:flex;justify-content:space-between;gap:2px;margin-top:8px}
 .dh .wg{background:none;border:0;box-shadow:none;padding:0;min-height:0;width:34px;height:44px;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .dh .wg svg{width:34px;height:44px;display:block}
@@ -867,3 +867,21 @@ html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 .dh .wml{display:flex;gap:8px;margin-top:8px}.dh .wml input{flex:1}
 .uiset{margin-top:14px}
 .th-duo .calc b{font-size:clamp(20px,6.2vw,26px)}.uiset{margin-bottom:12px}
+/* Profilbild-Ausschnitt */
+.crop{position:fixed;inset:0;z-index:55;display:none;align-items:center;justify-content:center;background:rgba(17,18,20,.55);padding:16px}
+.crop.on{display:flex}
+.crop .cbox{background:var(--s1);border-radius:20px;padding:18px;width:100%;max-width:340px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:var(--sh)}
+.crop .cbox b{font:700 22px var(--fh)}.crop .cbox small{color:var(--mute);font-size:13px;text-align:center}
+.cstage{position:relative;width:280px;height:280px;overflow:hidden;border-radius:14px;background:#000;touch-action:none;margin-top:8px;cursor:grab}
+.cstage img{position:absolute;left:0;top:0;max-width:none;user-select:none;-webkit-user-drag:none;transform-origin:0 0}
+.cmask{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at center,transparent 0 139px,rgba(0,0,0,.55) 140px);box-shadow:inset 0 0 0 2px rgba(255,255,255,.0)}
+.cmask:after{content:'';position:absolute;inset:0;border-radius:50%;box-shadow:0 0 0 2px rgba(255,255,255,.85)}
+.crop input[type=range]{width:100%;margin-top:10px;accent-color:var(--acc)}
+.cbtn{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-top:8px}
+/* Duo-Design: saubere Umbrüche (Prüfung bei 375/390/430 px) */
+.th-duo h3.sh{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:8px;row-gap:0}.th-duo .chn{white-space:nowrap}
+.th-duo .wopick button small{white-space:nowrap}
+.th-duo h2,.th-duo h3,.th-duo .pl b,.th-duo .card h3{overflow-wrap:break-word;-webkit-hyphens:auto;hyphens:auto}
+.dh .zh{flex-wrap:nowrap}.dh .zh i{flex:0 0 14px}
+.cheer.big b{white-space:normal;overflow-wrap:break-word;font-size:clamp(36px,11vw,68px);line-height:1.05}
+.th-duo .calc b{font-size:clamp(17px,5vw,24px);white-space:nowrap}

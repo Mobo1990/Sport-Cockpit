@@ -34,5 +34,26 @@ function picsFrom(items){const me=slugN(S.prof.name||'');let ch=false;
  if(ch){try{localStorage.setItem('sc.pics',JSON.stringify(PICS))}catch(e){}}return ch}
 function picProfileHtml(){return `<div class="picrow">${avaHtml(S.prof.name||'Ich',true,'big')}<div><b>Profilbild</b><small>Sieht auch ${esc((boardPartner()||{}).name||'dein Partner')} auf der Startseite.</small><div class="picb"><label class="filebtn">Foto wählen<input type="file" accept="image/*" data-pic="file" hidden></label>${S.prof.pic?'<button class="ghost" data-pic="rm">Entfernen</button>':''}</div></div></div>`}
 document.addEventListener('change',async ev=>{const t=ev.target;if(t.dataset.pic!=='file'||!t.files||!t.files[0])return;
- try{S.prof.pic=await picShrink(t.files[0]);S.metaT=Date.now();persist();note('Profilbild gespeichert');render();picPublish()}catch(e){note(e.message)}});
+ const f=t.files[0];t.value='';cropOpen(f)});
+/* Bildausschnitt wählen: Foto verschieben (ziehen) und zoomen (Regler oder zwei Finger), Kreis zeigt das spätere Profilbild */
+const CROP=280;let crop=null;
+const cropEl=(()=>{const d=document.createElement('div');d.id='crop';d.className='crop';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');d.setAttribute('aria-label','Bildausschnitt wählen');
+ d.innerHTML=`<div class="cbox"><b>Ausschnitt wählen</b><small>Foto verschieben und zoomen – der Kreis wird dein Profilbild.</small><div class="cstage" id="cstage"><img id="cimg" alt="" draggable="false"><i class="cmask"></i></div>
+ <input type="range" id="czoom" min="1" max="4" step="0.01" value="1" aria-label="Zoom"><div class="cbtn"><button data-crop="no">Abbrechen</button><button class="primary" data-crop="ok">Übernehmen</button></div></div>`;document.body.appendChild(d);return d})();
+function cropOpen(file){const u=URL.createObjectURL(file),img=new Image();img.onload=()=>{const s0=CROP/Math.min(img.width,img.height);crop={img,u,s0,k:1,x:(CROP-img.width*s0)/2,y:(CROP-img.height*s0)/2};
+ $('cimg').src=u;$('czoom').value=1;cropDraw();cropEl.classList.add('on');document.documentElement.classList.add('sheet-open')};img.onerror=()=>{URL.revokeObjectURL(u);note('Bild nicht lesbar')};img.src=u}
+function cropClamp(){const c=crop,w=c.img.width*c.s0*c.k,h=c.img.height*c.s0*c.k;c.x=Math.min(0,Math.max(CROP-w,c.x));c.y=Math.min(0,Math.max(CROP-h,c.y))}
+function cropDraw(){if(!crop)return;cropClamp();const c=crop,im=$('cimg');im.style.width=(c.img.width*c.s0*c.k)+'px';im.style.height=(c.img.height*c.s0*c.k)+'px';im.style.transform=`translate(${c.x}px,${c.y}px)`}
+function cropZoom(k,cx=CROP/2,cy=CROP/2){const c=crop;if(!c)return;k=Math.min(4,Math.max(1,k));const r=k/c.k;c.x=cx-(cx-c.x)*r;c.y=cy-(cy-c.y)*r;c.k=k;$('czoom').value=k;cropDraw()}
+function cropClose(){if(crop)URL.revokeObjectURL(crop.u);crop=null;cropEl.classList.remove('on');document.documentElement.classList.remove('sheet-open')}
+function cropResult(size=160){const c=crop,sc=c.s0*c.k,cv=document.createElement('canvas');cv.width=cv.height=size;cv.getContext('2d').drawImage(c.img,-c.x/sc,-c.y/sc,CROP/sc,CROP/sc,0,0,size,size);return cv.toDataURL('image/jpeg',.8)}
+cropEl.addEventListener('input',ev=>{if(ev.target.id==='czoom')cropZoom(+ev.target.value)});
+cropEl.addEventListener('click',ev=>{const b=ev.target.closest('[data-crop]');if(!b||!crop)return;if(b.dataset.crop==='ok'){S.prof.pic=cropResult();S.metaT=Date.now();persist();note('Profilbild gespeichert');cropClose();render();picPublish()}else cropClose()});
+{const pts=new Map();let last=null,dist=0;const st=()=>$('cstage');
+ cropEl.addEventListener('pointerdown',ev=>{if(!ev.target.closest('#cstage')||!crop)return;ev.preventDefault();pts.set(ev.pointerId,[ev.clientX,ev.clientY]);try{st().setPointerCapture(ev.pointerId)}catch(e){}
+  if(pts.size===2){const [a,b]=[...pts.values()];dist=Math.hypot(a[0]-b[0],a[1]-b[1])}last=[ev.clientX,ev.clientY]});
+ cropEl.addEventListener('pointermove',ev=>{if(!pts.has(ev.pointerId)||!crop)return;pts.set(ev.pointerId,[ev.clientX,ev.clientY]);
+  if(pts.size===2){const [a,b]=[...pts.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]),r=st().getBoundingClientRect();if(dist)cropZoom(crop.k*d/dist,(a[0]+b[0])/2-r.left,(a[1]+b[1])/2-r.top);dist=d;return}
+  crop.x+=ev.clientX-last[0];crop.y+=ev.clientY-last[1];last=[ev.clientX,ev.clientY];cropDraw()});
+ const up=ev=>{pts.delete(ev.pointerId);dist=0;const v=[...pts.values()][0];if(v)last=v};cropEl.addEventListener('pointerup',up);cropEl.addEventListener('pointercancel',up)}
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-pic="rm"]');if(!b)return;delete S.prof.pic;S.metaT=Date.now();persist();render();picPublish()});

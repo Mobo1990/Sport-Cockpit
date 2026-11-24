@@ -45,7 +45,7 @@ const woQuickHtml=()=>`<section class="woq"><h3 class="sh">Kurz-Workouts <small 
 function woPt(id){const d=today(),ch=dayCh(d).find(c=>c.id===id);if(ch)return ch.pt;const ids=dayCh(d).map(c=>c.id),dn=(S.nut.days[d]||{}).ch||[],free=dn.filter(x=>/^wo_/.test(x)&&!ids.includes(x));return !free.length||free[0]===id?WO_FREE:0}
 function woPickHtml(){const dn=(S.nut.days[today()]||{}).ch||[];
  return `<div class="wopick">${[['core','wo_core','Core','6 min'],['zirkel','wo_zirkel','Zirkel','7 min'],['mobil','wo_mobil','Mobility','5 min']].map(([k,id,n,m])=>{const ok=dn.includes(id);
-  return `<button class="${ok?'ok':''}" data-wo="${k}" data-woc="${id}"${ok?' aria-pressed="true"':''}><b>${n}</b><small>${(p=>ok?'heute erledigt'+(p?' · +'+p:''):m+' · '+(p?'+'+p:'ohne Punkte')+' · Start ›')(woPt(id))}</small></button>`}).join('')}</div><p class="wohint">Das erste Kurz-Workout am Tag gibt +${WO_FREE}, als Tages-Challenge zählen seine Challenge-Punkte.</p>`}
+  return `<button class="${ok?'ok':''}" data-wo="${k}" data-woc="${id}"${ok?' aria-pressed="true"':''}><b>${n}</b><small>${(p=>ok?'heute erledigt'+(p?' · +'+p:''):m+' · '+(p?'+'+p:'ohne Punkte'))(woPt(id))}</small></button>`}).join('')}</div><p class="wohint">Das erste Kurz-Workout am Tag gibt +${WO_FREE}, als Tages-Challenge zählen seine Challenge-Punkte.</p>`}
 function daysLeft(){const n=7-weekDaysIso().length;return n===0?'letzter Tag':n===1?'noch 1 Tag':`noch ${n} Tage`}
 const fmtV=(k,v)=>fmt(k==='st'?Math.round(v):v);
 function weeklyHtml(){weeklyCheck();const me=myWeekStats(),w=weekly(),c=couple(),pw=partnerWeek(),wd=weekFlag('wkc'),cd=weekFlag('cpc'),pc=Math.min(me[w.k]/w.g,1)*100;
