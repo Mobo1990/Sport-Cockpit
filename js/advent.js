@@ -45,6 +45,7 @@ const advIdx=k=>ADV_ORDER.indexOf(k);
 /* Startseite: nur das heutige Geschenk; der ganze Kalender öffnet auf Wunsch */
 function advHtml(){const n=advNow(),m=n.getMonth(),dd=n.getDate();
  if(m===10){const left=Math.ceil((new Date(n.getFullYear(),11,1)-n)/864e5);
+  if(typeof isDuo==='function'&&isDuo())return `<section class="advslim">${ADV_STAR}<b>Adventskalender</b><span>noch <em class="cond">${left}</em> ${left===1?'Tag':'Tage'} bis Türchen 1</span></section>`;
   return `<section class="adv xmas tease">${advLights()}<div class="snow" aria-hidden="true"></div><div class="advh">${ADV_STAR}<b>Adventskalender</b></div>
   <div class="advone"><span class="advd big g0 locked" aria-hidden="true"><span class="leaf">?</span></span><div><div class="advcount"><b class="cond">${left}</b><span>${left===1?'Tag':'Tage'} bis zum ersten Türchen</span></div>
   <p>Ab 1. Dezember wartet jeden Tag ein Geschenk mit einer kleinen Aufgabe – manche nur zu zweit.</p></div></div></section>`}

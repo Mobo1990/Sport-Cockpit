@@ -902,3 +902,26 @@ html.gym-open,html.gym-open body{overflow:hidden;overscroll-behavior:none}
 .dh .wg{padding:0 2px;width:38px;height:48px}
 .th-duo .nav button,.th-duo .board small,.th-duo .bmid .bk,.th-duo .bhint,.th-duo .grest span{color:var(--mute)}
 .th-duo .nav button[aria-current="page"],.th-duo .nav button.on{color:var(--ink)}
+/* Paket 1: Feinschliff Duo-Design */
+.dh .wx{gap:8px;flex-wrap:wrap}
+.dh .wx button{text-decoration:none;background:#fff;border:1px solid #D3E3F2;border-radius:999px;padding:0 14px;min-height:40px;color:#2F5E8A;font:600 13px var(--fb)}
+.gfpts{display:inline-block;margin:4px auto 14px;background:var(--acc2);color:var(--acc);font:700 18px var(--fh);border-radius:999px;padding:4px 16px}
+.gfin{text-align:center}
+.th-duo .board .bp .pts b,.th-duo .board .bpt{font-size:20px;line-height:1.1}
+.th-duo .board .bp .pts b::before,.th-duo .board .bpt::before{content:'+'}
+.th-duo .board .bmid b{font-size:44px}
+.th-duo .bbar{height:8px;border-radius:999px}
+.advslim{display:flex;align-items:center;gap:8px;background:var(--s1);border-radius:var(--r);box-shadow:var(--sh);padding:12px 14px;margin:8px 0}
+.advslim svg{width:18px;height:18px;flex:0 0 18px;fill:#E2B34A}.advslim b{font:700 15px var(--fh)}.advslim span{margin-left:auto;font-size:13px;color:var(--mute)}.advslim em{font-style:normal;font-weight:700;color:var(--acc);font-size:16px}
+.th-duo .gpic{width:104px}
+/* Eigener Schalter statt iPhone-Haken */
+input.sw{appearance:none;-webkit-appearance:none;width:44px;height:26px;border-radius:999px;background:var(--line);position:relative;flex:0 0 44px;margin:0;cursor:pointer;transition:background .2s}
+input.sw::after{content:'';position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s}
+input.sw:checked{background:var(--d-sage,#2f9e6e)}input.sw:checked::after{transform:translateX(18px)}
+/* Duo-Design: eingeklappte Übungen im Training */
+.ex.exc{padding:0}
+.exbtn{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;text-align:left;background:none;border:0;box-shadow:none;padding:12px;min-height:0;color:var(--ink)}
+.exbtn .pic{width:64px;height:52px}.exbtn h3{margin:0;font-size:19px}.exbtn .tgt{margin:2px 0 0}
+.exst{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--s2);font:700 14px var(--fh);color:var(--mute)}
+.exst.ok{background:var(--d-sage);color:#fff}
+.ex{position:relative}.excl{position:absolute;right:10px;top:10px;width:34px;height:34px;min-height:0;padding:0;border-radius:50%;background:var(--s2);border:0;box-shadow:none;font-size:16px;color:var(--mute);z-index:1}

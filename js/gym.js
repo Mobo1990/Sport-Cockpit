@@ -13,13 +13,13 @@ function gymNextOpen(list,dr,i){for(let s=1;s<list.length;s++){const j=(i+s)%lis
 const isBar=e=>/^Langhantel/.test(e.v||'');
 function plateTxt(e,kg){if(!isBar(e)||!(kg>20))return '';const p=plates(kg);return p?`Stange 20 kg + pro Seite ${p} kg`:''}
 function gymFinHtml(f){const up=f.ups||[];return `<header class="gh"><button class="gx" data-g="close" aria-label="Schließen">✕</button><div><b>${DAYS[f.day].n}</b><span>Geschafft</span></div></header>
- <section class="gbody gfin" id="gbody"><p class="gfbig cond">Sauber!</p><p class="gfsub">${DAYS[f.day].n}-Training geschafft – Glückwunsch.</p>
+ <section class="gbody gfin" id="gbody"><p class="gfbig cond">Sauber!</p><p class="gfsub">${DAYS[f.day].n}-Training geschafft – Glückwunsch.</p>${f.pts?`<p class="gfpts">+${f.pts} Punkte</p>`:''}
  <div class="gfstats">${f.dur?`<div><b class="cond">${f.dur}</b><span>Minuten</span></div>`:''}<div><b class="cond">${f.sets}</b><span>Sätze</span></div><div><b class="cond">${fmt(Math.round(f.vol))}</b><span>kg bewegt</span></div></div>
  ${f.prevVol?`<p class="gfline">${f.vol>=f.prevVol?`<b class="hot">+${fmt(Math.round((f.vol/f.prevVol-1)*100))} %</b> mehr bewegt als beim letzten ${DAYS[f.day].n}-Tag`:`${fmt(Math.round((1-f.vol/f.prevVol)*100))} % weniger als beim letzten ${DAYS[f.day].n}-Tag – passiert, nächstes Mal wieder mehr.`}</p>`:''}
  ${up.length?`<p class="gfh">Gesteigert</p><ul class="gful">${up.map(u=>`<li><span>${esc(u.n)}</span><b>+${fmt(u.d)} kg</b></li>`).join('')}</ul>`:''}
  ${f.prs.length?`<p class="gfh">Neue Bestwerte</p><ul class="gful">${f.prs.map(p=>`<li><span>${esc(p)}</span></li>`).join('')}</ul>`:''}
- <div class="gflex"><b>Noch 5 Minuten dehnen?</b><span>Optional – macht beweglicher und hilft der Erholung. Zählt nicht für die Wochen-Challenge.</span><button class="primary" data-g="flex">Dehnen starten (5 min)</button></div></section>
- <footer class="gf"><button data-g="close">Fertig</button></footer>`}
+ <div class="gflex"><b>Noch 5 Minuten dehnen?</b><span>Optional – macht beweglicher und hilft der Erholung. Zählt nicht für die Wochen-Challenge.</span><button data-g="flex">Dehnen starten (5 min)</button></div></section>
+ <footer class="gf"><button class="primary" data-g="close">Fertig</button></footer>`}
 function renderGym0(){if(!gym.open){gymEl.innerHTML='';gymEl.classList.remove('on');return}
  if(gym.fin){gymEl.classList.add('on');gymEl.innerHTML=gymFinHtml(gym.fin);return}
  const dr=draftFor(day),list=dayEx(day);if(!list.length){gym.open=false;return renderGym0()}
@@ -36,10 +36,10 @@ function renderGym0(){if(!gym.open){gymEl.innerHTML='';gymEl.classList.remove('o
  <div class="gtools">${mv?`<button data-g="anim" aria-pressed="${!!gym.anim}">${gym.anim?'Bild zeigen':'▶ Bewegungsablauf'}</button>`:''}${!done&&nx!=null?`<button data-g="busy">Gerät besetzt</button>`:''}</div>
  <h2>${esc(e.n)}</h2>
  ${e.vars.length>1?`<div class="vars gv">${e.vars.map(v=>`<button data-a="var" data-e="${e.id}" data-v="${esc(v)}" aria-pressed="${v===e.v}">${esc(v)}</button>`).join('')}</div>`:''}
- <div class="ghow">${g?`<p class="gmu"><b>Trainiert:</b> ${esc(g.m)}</p>`:''}${e.t?`<p class="gtip">${esc(e.t)}</p>`:''}${g&&g.k?`<p class="gknee"><b>Knie schonen:</b> ${esc(g.k)}</p>`:''}
- ${g?`<button class="glink" data-g="how" aria-expanded="${!!gym.how}">${gym.how?'Anleitung ausblenden':'Einstellung und Ausführung'} ›</button>${gym.how?`<ol class="gsteps">${g.s.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}`:''}</div>
- <p class="gsg">${sg?esc(sg.txt):`Ziel: ${e.sets} × ${e.min}–${e.max} Wdh.`}</p>${!sg&&first&&startKg(e)?`<p class="gstart">Erstes Mal: Startvorschlag ${fmt(startKg(e))} kg${/Kurzhantel/.test(e.v)?' pro Hand':''}${isA(e.v)?' Hilfe':''} – lieber leicht anfangen und steigern.</p>`:''}
- ${warm?`<p class="gwarm"><b>Erst aufwärmen:</b> 1 Satz mit 10–12 Wdh. ${isBar(e)?'nur mit der leeren Stange (20 kg)':`mit etwa ${fmt(r25(kg/2))} kg`}. Zählt nicht mit.</p>`:''}
+ <div class="ghow">${g?`<p class="gmu"><b>Trainiert:</b> ${esc(g.m)}</p>`:''}${gym.how&&e.t?`<p class="gtip">${esc(e.t)}</p>`:''}${gym.how&&g&&g.k?`<p class="gknee"><b>Knie schonen:</b> ${esc(g.k)}</p>`:''}
+ ${g?`<button class="glink" data-g="how" aria-expanded="${!!gym.how}">${gym.how?'Anleitung ausblenden':'Anleitung und Tipps'} ›</button>${gym.how?`<ol class="gsteps">${g.s.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}`:''}</div>
+ <p class="gsg">${sg?esc(sg.txt):`Ziel: ${e.sets} × ${e.min}–${e.max} Wdh.`}${!sg&&first&&startKg(e)?` · Start ${fmt(startKg(e))} kg${/Kurzhantel/.test(e.v)?' je Hand':''}${isA(e.v)?' Hilfe':''}`:''}</p>
+ ${warm?`<p class="gwarm"><b>Erst aufwärmen:</b> 10–12 Wdh. ${isBar(e)?'mit leerer Stange (20 kg)':`mit ${fmt(r25(kg/2))} kg`}, zählt nicht.</p>`:''}
  ${resting?`<div class="grest"><span>Pause</span><b id="grest">${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}</b><button data-g="skip">Weiter</button></div>`:''}
  ${done?`<div class="gdone"><b>Alle ${rows.length} Sätze geschafft</b><div class="gnav">${nx!=null?`<button class="primary" data-g="go" data-i="${nx}">Nächste Übung ›</button>`:''}<button data-g="more">+ Noch ein Satz</button></div></div>`
  :`<p class="gset">Satz <b>${k+1}</b> von ${rows.length}</p>
@@ -53,7 +53,7 @@ function renderGym0(){if(!gym.open){gymEl.innerHTML='';gymEl.classList.remove('o
  ${ed!=null?(rows[ed].done?`<div class="gedit"><b>Satz ${ed+1} ändern</b><div class="gerow"><label>${A?'kg Hilfe':'kg'}<input id="gekg" inputmode="decimal" value="${fmt(num(rows[ed].kg)||0)}"></label><label>Wdh.<input id="gerp" inputmode="numeric" value="${esc(rows[ed].reps)}"></label></div>
   <div class="gnav"><button class="primary" data-g="esave">Speichern</button><button data-g="edel">Satz löschen</button><button data-g="ecancel">Abbrechen</button></div></div>`
   :`<div class="gedit"><b>Satz ${ed+1} ist noch offen</b><div class="gnav"><button data-g="edel">Satz entfernen</button><button data-g="ecancel">Abbrechen</button></div></div>`):`<p class="gtap">Tipp: Auf einen Satz tippen, um ihn zu ändern oder zu löschen.</p>`}</section>
- <footer class="gf"><button data-g="prev"${gym.i===0?' disabled':''}>‹ Zurück</button>${allDone?`<button class="primary" data-g="finish">Training abschließen</button>`:`<button data-g="next"${gym.i>=list.length-1?' disabled':''}>Weiter ›</button>`}</footer>`}
+ <footer class="gf"><button data-g="prev"${gym.i===0?' disabled':''}>‹ Zurück</button>${allDone?`<button class="primary" data-g="finish">Training abschließen</button>`:`<button class="primary" data-g="next"${gym.i>=list.length-1?' disabled':''}>Weiter ›</button>`}</footer>`}
 const rpeBtns=(e,i,r)=>`<div class="vars grpe">${[['l','leicht'],['m','passt'],['h','hart']].map(([k,l])=>`<button data-g="rpe" data-e="${e.id}" data-i="${i}" data-r="${k}" aria-pressed="${!!r&&r.rpe===k}">${l}</button>`).join('')}</div>`;
 function openGym(){gym.open=true;gym.last=null;gym.edit=null;gym.fin=null;const dr=draftFor(day),list=dayEx(day);const j=list.findIndex(x=>dr.ex[x.id].some(r=>!r.done));gym.i=j<0?0:j;renderGym()}
 /* Eingaben sofort in den Entwurf schreiben – sonst setzt ein Neuaufbau (Pausenende, „hart“, Sync) sie zurück */

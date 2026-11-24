@@ -55,9 +55,12 @@ function renderHead(){document.body.className='v-'+view;document.documentElement
  $('stats').innerHTML=`<div><b>${cnt[mon]||0} / ${S.goal}</b><small>Krafteinheiten diese Woche</small></div><div><b>${st}</b><small>Wochen in Folge im Ziel</small></div><div><b>${fmt(wv/1000)} t</b><small>bewegt diese Woche</small></div><div><b>${cmin} / ${S.cgoal} min</b><small>Cardio diese Woche</small></div>`;
  document.querySelectorAll('[data-a=view]').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===view));{const nb=$('rwBadge');if(nb&&typeof rwOpen==='function')nb.hidden=!rwOpen()}
 }
+let exOpen=new Set();
 function card(e,dr){const sg=sugg(e),h0=hist(vkey(e)),rows=dr.ex[e.id],tmp=!S.plan[day].some(x=>x.id===e.id);
+ /* Duo-Design: Übungen eingeklappt, bis man sie antippt – laufende Übung bleibt offen */
+ const nDone=rows.filter(r=>r.done).length;if(isDuo()&&!exOpen.has(e.id)&&!(nDone&&nDone<rows.length))return `<article class="ex exc"><button class="exhead exbtn" data-a="exopen" data-e="${e.id}" aria-expanded="false"><div class="pic">${svg(picOf(e))}</div><div><h3>${esc(e.n)}</h3><p class="tgt">${tmp?'<span class="tagtmp">Nur heute · </span>':''}${e.sets} Sätze · ${e.min}–${e.max} Wdh.${e.vars.length>1?' · '+esc(e.v):''}</p></div><span class="exst${nDone===rows.length?' ok':''}">${nDone===rows.length?'✓':nDone?nDone+'/'+rows.length:'›'}</span></button></article>`;
  const last=h0.length?h0[h0.length-1].sets.map(t=>`${fmt(t.kg)}×${t.reps}`).join('  '):null;
- return `<article class="ex"><div class="exhead"><div class="pic">${svg(picOf(e))}</div><div><h3>${esc(e.n)}</h3><p class="tgt">${tmp?'<span class="tagtmp">Nur heute · </span>':''}${e.sets} Sätze · ${e.min}–${e.max} Wdh.</p>
+ return `<article class="ex">${isDuo()?`<button class="excl" data-a="exopen" data-e="${e.id}" aria-label="Einklappen">⌃</button>`:''}<div class="exhead"><div class="pic">${svg(picOf(e))}</div><div><h3>${esc(e.n)}</h3><p class="tgt">${tmp?'<span class="tagtmp">Nur heute · </span>':''}${e.sets} Sätze · ${e.min}–${e.max} Wdh.</p>
  ${e.vars.length>1?`<div class="vars">${e.vars.map(v=>`<button data-a="var" data-e="${e.id}" data-v="${esc(v)}" aria-pressed="${v===e.v}">${esc(v)}</button>`).join('')}</div>`:''}</div></div>
  ${e.t?`<p class="tip">${esc(e.t)}</p>`:''}
  <div class="goal${sg&&sg.up?' up':''}">${sg?`<b>Heute: ${sg.txt}</b><span>${sg.why}${last?' · zuletzt '+last:''}</span>`:`<b>Erstes Mal${e.vars.length>1?' mit '+esc(e.v):''}</b><span>${isA(e.v)?`Trag die Unterstützung in kg ein (Gegengewicht an der Maschine). Ziel: ${e.max} saubere Wdh., dann Hilfe reduzieren.${startKg(e)?` Startvorschlag: ${fmt(startKg(e))} kg Hilfe.`:''}`:`Wähle ein Gewicht, mit dem du ${e.max} saubere Wdh. schaffst.${startKg(e)?` Startvorschlag: ${fmt(startKg(e))} kg${/Kurzhantel/.test(e.v)?' pro Hand':''}.`:''}`}</span>`}</div>
@@ -101,7 +104,7 @@ function weekSets(){const mon=wk(Date.now()),c={};const add=(id,n)=>{const m=MAP
  for(const s of S.sessions)if(wk(s.date)===mon)for(const x of s.ex)add(x.base||String(x.id).split('@')[0],x.sets.length);
  for(const d in drafts){const dr=drafts[d];if(dr&&dr.ex)for(const id in dr.ex)add(id,dr.ex[id].filter(r=>r.done).length)}return c}
 function muscleMap(){const c=weekSets(),
- lvl=n=>n<=0?0:n<6?1:n<10?2:n<=20?3:4,COL=['#e2dfd8','#ffc9b8','#ff8f6b','#ff4b26','#b9301a'],
+ lvl=n=>n<=0?0:n<6?1:n<10?2:n<=20?3:4,COL=isDuo()?['#E9E2D8','#CFE0D5','#9DBBA8','#6F8F7E','#3E5A4C']:['#e2dfd8','#ffc9b8','#ff8f6b','#ff4b26','#b9301a'],
  f=k=>`fill="${COL[lvl(c[k]||0)]}"`,B='fill="#efede8"',N2='fill="#e7e4dd"',
  r=(x,y,w,h,a,rx)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx||Math.min(w,h)/2}" ${a}/>`,
  el=(x,y,rx,ry,a)=>`<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" ${a}/>`,
@@ -142,7 +145,7 @@ function renderPlan(){
  <div class="plbtn"><button data-a="mv" data-i="${i}" data-s="-1">Nach oben</button><button data-a="mv" data-i="${i}" data-s="1">Nach unten</button><button class="ghost" data-a="rmex" data-i="${i}">${confirmKey==='ex'+i?'Wirklich entfernen?':'Entfernen'}</button></div></div></details>`).join('')}
  <div class="actions"><button data-a="view" data-v="train" data-pick="1">+ Übung hinzufügen</button><button class="ghost" data-a="reset">${confirmKey==='reset'?'Wirklich zurücksetzen?':'Standardplan'}</button></div>
  <div class="settings"><div><label for="goal">Wochenziel (Einheiten)</label><input id="goal" inputmode="numeric" data-a="set" data-f="goal" value="${S.goal}"></div><div><label for="cgoal">Cardio-Ziel (Min./Woche)</label><input id="cgoal" inputmode="numeric" data-a="set" data-f="cgoal" value="${S.cgoal}"></div><div><label for="rest">Satzpause (Sekunden)</label><input id="rest" inputmode="numeric" data-a="set" data-f="rest" value="${S.rest}"></div></div>
- <label class="gnxset"><input type="checkbox" data-a="gnx"${S.prof.gnx===false?'':' checked'}> Gym Mode: „Als Nächstes“ oben rechts anzeigen</label>`}
+ <label class="gnxset"><input type="checkbox" class="sw" data-a="gnx"${S.prof.gnx===false?'':' checked'}> Gym Mode: „Als Nächstes“ oben rechts anzeigen</label>`}
 let ro=null;
 /* Neu zeichnen ohne Springen: offenes Eingabefenster behält Scrollposition und Fokus, keine Einblend-Animation */
 function sheetSnap(){const el=document.querySelector('.sheet:not(.ob) .sheetin');if(!el)return null;const a=document.activeElement,mine=a&&el.contains(a)&&a.id;
@@ -165,7 +168,7 @@ function finish(){const dr=draftFor(day),ex=[],p0=dayScore(today()).pt;
  for(const x of ex){if(x.assist)continue;const ps=[...S.sessions].filter(q=>q.ex.some(y=>y.id===x.id)).sort((a,b)=>b.date-a.date)[0];if(!ps)continue;
   const top=Math.max(...x.sets.map(t=>t.kg)),pt=Math.max(...ps.ex.find(y=>y.id===x.id).sets.map(t=>t.kg));if(top>pt+0.01)ups.push({n:x.name,d:top-pt})}
  s.prn=prs.length;S.sessions.push(s);delete drafts[day];saveDrafts();announce(s,prs);
- summary={day,vol:vol(s),prevVol:prev?vol(prev):0,sets:ex.reduce((a,x)=>a+x.sets.length,0),prs,ups,dur:dur>0&&dur<240?dur:0,cmin:cardio.reduce((a,c)=>a+c.min,0)};
+ summary={day,pts:Math.max(0,dayScore(iso(date)).pt-p0),vol:vol(s),prevVol:prev?vol(prev):0,sets:ex.reduce((a,x)=>a+x.sets.length,0),prs,ups,dur:dur>0&&dur<240?dur:0,cmin:cardio.reduce((a,c)=>a+c.min,0)};
  putSession(s);stopT();render();scrollTo({top:0,behavior:'smooth'});if(ex.length)cheer({big:true,title:cheerWord(),sub:DAYS[day].n+'-Training geschafft'+(prs.length?' · neuer Bestwert':''),pts:dayScore(iso(date)).pt-p0})}
 
 let tEnd=0,tTot=0,tInt=null;
@@ -181,6 +184,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-a]');if(
  else if(a==='var'){const pe=S.plan[day].find(x=>x.id===eid)||(drafts[day]&&drafts[day].extra.find(x=>x.id===eid));if(pe){pe.v=b.dataset.v;if(S.plan[day].includes(pe))savePlan();else saveDrafts()}}
  else if(a==='done'){const dr=draftFor(day),r=dr.ex[eid][i],ins=b.closest('.row').querySelectorAll('input');
   if(!r.done){if(r.kg==='')r.kg=ins[0].placeholder==='–'?'':ins[0].placeholder;if(r.reps==='')r.reps=ins[1].placeholder==='–'?'':ins[1].placeholder;if(r.reps===''){note('Erst Wiederholungen eintragen');return}r.done=true;r.at=Date.now();startT(S.rest);const e=dayEx(day).find(x=>x.id===eid),k=vkey(e),b0=best(k),m=e1(num(r.kg)??0,num(r.reps)??0),prevSets=dr.ex[eid].filter((x,j)=>j!==i&&x.done).map(x=>e1(num(x.kg)??0,num(x.reps)??0));if(!isA(e.v)&&b0>0&&m>b0+0.01&&m>Math.max(0,...prevSets))cheer({title:'Neuer Bestwert!',sub:`${vname(e)}: ${fmt(num(r.kg))} kg × ${r.reps} · Kraftwert ${fmt(m)} kg`})}else r.done=false;saveDrafts()}
+ else if(a==='exopen'){exOpen.has(eid)?exOpen.delete(eid):exOpen.add(eid)}
  else if(a==='rpe'){const r=draftFor(day).ex[eid][i];r.rpe=r.rpe===b.dataset.r?'':b.dataset.r;saveDrafts()}
  else if(a==='cadd'){draftFor(day).cardio.push({type:CT[0],min:'',km:'',lvl:'m'});saveDrafts()}
  else if(a==='crm'){draftFor(day).cardio.splice(i,1);saveDrafts()}
