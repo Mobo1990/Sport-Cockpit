@@ -28,7 +28,7 @@ function renderHome(){weeklyCheck();const d=today(),sc=dayScore(d),g=sc.g,t=sc.t
  </section>
  ${woQuickHtml()}
  <section class="weekbox">${weeklyHtml()}${rwLineHtml()}</section>`}
-document.addEventListener('click',ev=>{const b=ev.target.closest('[data-h]');if(!b)return;const a=b.dataset.h,d=today();
+document.addEventListener('click',ev=>{const b=ev.target.closest('[data-h]');if(!b)return;const a=b.dataset.h,d=today(),wb=/^(water|wmlok|steps)$/.test(a)?cheerFrom(d):null;
  if(a==='train'){day=b.dataset.d;view='train'}
  else if(a==='meal'){view='nut';nDate=d;sheet={meal:b.dataset.m,step:'search',q:'',focus:true}}
  else if(a==='w'){const w=num($('hW').value);if(w&&w>30&&w<300){ND(d).w=w;ND(d).wsrc='';touch(d)}else{note('Gewicht in kg eingeben');return}}
@@ -39,5 +39,5 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-h]');if(
  else if(a==='steps'){const v=num($('hSt').value);if(v==null||v<0||v>100000){note('Schritte als Zahl eingeben');return}ND(d).stm=Math.round(v);touch(d)}
  else if(a==='cardio'){day='cardio';view='train'}
  else if(a==='rec'){view='rec'}
- else return;render();if(!/^(w|water|steps|wmlok|wundo)$/.test(a))scrollTo({top:0})});
+ else return;render();cheerDiff(d,wb);if(!/^(w|water|steps|wmlok|wundo)$/.test(a))scrollTo({top:0})});
 

@@ -35,9 +35,9 @@ function partnerWeek(){const p=(typeof partners!=='undefined'?partners:[]).find(
 const weekFlag=k=>weekDaysIso().some(d=>(S.nut.days[d]||{})[k]);
 /* Erreicht? Dann einmal pro Woche auf den heutigen Tag buchen */
 function weeklyCheck(){const me=myWeekStats(),w=weekly(),c=couple(),pw=partnerWeek();
- if(me[w.k]>=w.g&&!weekFlag('wkc')){ND(today()).wkc=1;touch(today());toast('Wochen-Challenge geschafft!',`${w.t} · +${WK_PTS} Punkte`);tell(`${S.prof.name} hat die Wochen-Challenge geschafft`,`${w.t} – erledigt. Und du?`)}
+ if(me[w.k]>=w.g&&!weekFlag('wkc')){ND(today()).wkc=1;touch(today());cheer({big:true,title:'Wochen-Challenge!',sub:w.t+' geschafft',pts:WK_PTS});tell(`${S.prof.name} hat die Wochen-Challenge geschafft`,`${w.t} – erledigt. Und du?`)}
  if(pw){const v=+(pw.w[c.k]||0),done=c.m==='both'?Math.min(me[c.k],v)>=c.g:me[c.k]+v>=c.g;
-  if(done&&!weekFlag('cpc')){ND(today()).cpc=1;touch(today());toast('Paar-Challenge geschafft!',`${c.t} · +${CP_PTS} Punkte für euch beide`)}}}
+  if(done&&!weekFlag('cpc')){ND(today()).cpc=1;touch(today());cheer({big:true,title:'Paar-Challenge!',sub:c.t+' – für euch beide',pts:CP_PTS})}}}
 /* Kurz-Workouts direkt starten (für die Wochen-Challenge „3 Kurz-Workouts“) */
 /* Kurz-Workouts immer auf der Startseite – auch wenn sie gerade keine Challenge sind */
 const woQuickHtml=()=>`<section class="woq"><h3 class="sh">Kurz-Workouts <small class="chn">ohne Geräte, mit Timer</small></h3>${woPickHtml()}</section>`;

@@ -9,7 +9,7 @@ Live: https://mobo1990.github.io/Sport-Cockpit/ (GitHub Pages, Branch `main`, Or
 
 ## Aufbau
 - Kein Build-Schritt: reines HTML/CSS/JS. `index.html` lädt klassische Skripte aus `js/` in fester Reihenfolge
-  (data → training → nutrition → smart → sync → game → workout → moves → guide → share → weekly → board → rewards → home → onboarding → gym → coach → review → photo → voice → advent → main).
+  (data → training → cheer → nutrition → smart → sync → game → workout → moves → guide → share → weekly → board → rewards → home → onboarding → gym → coach → review → photo → voice → advent → main).
   Sie teilen sich den globalen Gültigkeitsbereich (top-level `const`/`let`/`function`).
 - `js/training.js` enthält Zustand `S`, Speicher (`persist`, `lsSave`) und `render()`; `js/gym.js` überschreibt `render` als Wrapper.
 - Daten: zuerst `localStorage`, dann Sync mit **Home Assistant** per WebSocket (`frontend/get_user_data` / `set_user_data`,

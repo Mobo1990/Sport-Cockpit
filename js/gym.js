@@ -76,7 +76,7 @@ gymEl.addEventListener('click',ev=>{const b=ev.target.closest('[data-g]');if(!b)
  else if(a==='kg'||a==='rp'){const inp=$(a==='kg'?'gkg':'grp'),st=a==='kg'?(e.step||2.5):1;inp.value=fmt(Math.max(0,(num(inp.value)||0)+(+b.dataset.d)*st));gymStore();return}
  else if(a==='set'){const {rows,k}=gymRow(e,dr);if(k<0)return;const kg=num($('gkg').value),rp=Math.round(num($('grp').value)||0);if(!rp){note('Wiederholungen eintragen');return}
   if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();const r=rows[k];r.kg=kg!=null?String(kg).replace('.',','):'0';r.reps=String(rp);r.done=true;r.at=Date.now();gym.last=k;gym.edit=null;startT(S.rest);
-  const key=vkey(e),b0=best(key),m=e1(kg||0,rp);if(!isA(e.v)&&b0>0&&m>b0+0.01&&m>Math.max(0,...rows.filter((x,j)=>j!==k&&x.done).map(x=>e1(num(x.kg)||0,num(x.reps)||0))))toast('Neuer Bestwert!',`${vname(e)}: ${fmt(kg)} kg × ${rp}`);saveDrafts()}
+  const key=vkey(e),b0=best(key),m=e1(kg||0,rp);if(!isA(e.v)&&b0>0&&m>b0+0.01&&m>Math.max(0,...rows.filter((x,j)=>j!==k&&x.done).map(x=>e1(num(x.kg)||0,num(x.reps)||0))))cheer({title:'Neuer Bestwert!',sub:`${vname(e)}: ${fmt(kg)} kg × ${rp}`});saveDrafts()}
  else if(a==='rpe'){gymStore();const r=dr.ex[b.dataset.e][+b.dataset.i];r.rpe=r.rpe===b.dataset.r?'':b.dataset.r;saveDrafts()}
  else if(a==='edit'){gymStore();const j=+b.dataset.i;gym.edit=gym.edit===j?null:j}
  else if(a==='ecancel'){gym.edit=null}

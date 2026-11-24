@@ -154,7 +154,7 @@ function render(){const p=sheetSnap();renderCore();sheetRestore(p)}
 function renderCore(){memoReset();renderHead();const v=$('view');if(!profOK()){v.innerHTML=renderOnboarding();return}v.innerHTML=view==='home'?renderHome():view==='train'?renderTrain():view==='hist'?renderHist():view==='rec'?renderRec():view==='nut'?renderNut():view==='review'?renderReview():view==='rew'?renderRewards():renderPlan()+`<div class="actions"><button data-a="view" data-v="hist">Verlauf aller Einheiten</button><button data-a="view" data-v="review">Rückblick</button><button data-a="view" data-v="rew">Belohnungen</button></div>`+renderSettings()+renderAISettings();if(view==='nut')afterNut();
  if(view==='rec'){const s=$('chart');if(s){if(ro)ro.disconnect();ro=new ResizeObserver(drawChart);ro.observe(s)}}}
 
-function finish(){const dr=draftFor(day),ex=[];
+function finish(){const dr=draftFor(day),ex=[],p0=dayScore(today()).pt;
  for(const e of dayEx(day)){const sets=dr.ex[e.id].map(r=>({kg:num(r.kg)??0,reps:Math.round(num(r.reps)??0),...(r.rpe?{rpe:r.rpe}:{})})).filter(t=>t.reps>0);if(sets.length)ex.push({id:vkey(e),base:e.id,v:e.v||'',name:vname(e)+(isA(e.v)?' (kg = Hilfe)':''),...(isA(e.v)?{assist:true}:{}),sets})}
  const cardio=(dr.cardio||[]).filter(c=>num(c.min)>0).map(c=>({type:c.type,min:num(c.min),...(isWP(c)?(()=>{const k=num(c.kmh)||wpLastKmh(),m=num(c.min);return{kmh:k,km:Math.round(k*m/6)/10,kcal:wpKcal(m,k,wpKg()),...(c.eat?{eat:wpNet(m,k,wpKg())}:{})}})():{}),...(num(c.km)?{km:num(c.km)}:{}),...(num(c.hr)?{hr:Math.round(num(c.hr))}:{}),lvl:c.lvl||'m'}));
  if(!ex.length&&!cardio.length){note('Trag mindestens einen Satz oder Cardio ein');return}
@@ -166,7 +166,7 @@ function finish(){const dr=draftFor(day),ex=[];
   const top=Math.max(...x.sets.map(t=>t.kg)),pt=Math.max(...ps.ex.find(y=>y.id===x.id).sets.map(t=>t.kg));if(top>pt+0.01)ups.push({n:x.name,d:top-pt})}
  s.prn=prs.length;S.sessions.push(s);delete drafts[day];saveDrafts();announce(s,prs);
  summary={day,vol:vol(s),prevVol:prev?vol(prev):0,sets:ex.reduce((a,x)=>a+x.sets.length,0),prs,ups,dur:dur>0&&dur<240?dur:0,cmin:cardio.reduce((a,c)=>a+c.min,0)};
- putSession(s);stopT();render();scrollTo({top:0,behavior:'smooth'})}
+ putSession(s);stopT();render();scrollTo({top:0,behavior:'smooth'});if(ex.length)cheer({big:true,title:cheerWord(),sub:DAYS[day].n+'-Training geschafft'+(prs.length?' · neuer Bestwert':''),pts:dayScore(iso(date)).pt-p0})}
 
 let tEnd=0,tTot=0,tInt=null;
 function startT(sec){tTot=sec;tEnd=Date.now()+sec*1000;$('timer').classList.add('on');clearInterval(tInt);tInt=setInterval(tick,250);tick()}
@@ -180,7 +180,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-a]');if(
  else if(a==='view'){view=b.dataset.v;sheet=null;stopScan();if(b.dataset.pick)picker=true;scrollTo({top:0})}
  else if(a==='var'){const pe=S.plan[day].find(x=>x.id===eid)||(drafts[day]&&drafts[day].extra.find(x=>x.id===eid));if(pe){pe.v=b.dataset.v;if(S.plan[day].includes(pe))savePlan();else saveDrafts()}}
  else if(a==='done'){const dr=draftFor(day),r=dr.ex[eid][i],ins=b.closest('.row').querySelectorAll('input');
-  if(!r.done){if(r.kg==='')r.kg=ins[0].placeholder==='–'?'':ins[0].placeholder;if(r.reps==='')r.reps=ins[1].placeholder==='–'?'':ins[1].placeholder;if(r.reps===''){note('Erst Wiederholungen eintragen');return}r.done=true;r.at=Date.now();startT(S.rest);const e=dayEx(day).find(x=>x.id===eid),k=vkey(e),b0=best(k),m=e1(num(r.kg)??0,num(r.reps)??0),prevSets=dr.ex[eid].filter((x,j)=>j!==i&&x.done).map(x=>e1(num(x.kg)??0,num(x.reps)??0));if(!isA(e.v)&&b0>0&&m>b0+0.01&&m>Math.max(0,...prevSets))toast('Neuer Bestwert!',`${vname(e)}: ${fmt(num(r.kg))} kg × ${r.reps} · Kraftwert ${fmt(m)} kg`)}else r.done=false;saveDrafts()}
+  if(!r.done){if(r.kg==='')r.kg=ins[0].placeholder==='–'?'':ins[0].placeholder;if(r.reps==='')r.reps=ins[1].placeholder==='–'?'':ins[1].placeholder;if(r.reps===''){note('Erst Wiederholungen eintragen');return}r.done=true;r.at=Date.now();startT(S.rest);const e=dayEx(day).find(x=>x.id===eid),k=vkey(e),b0=best(k),m=e1(num(r.kg)??0,num(r.reps)??0),prevSets=dr.ex[eid].filter((x,j)=>j!==i&&x.done).map(x=>e1(num(x.kg)??0,num(x.reps)??0));if(!isA(e.v)&&b0>0&&m>b0+0.01&&m>Math.max(0,...prevSets))cheer({title:'Neuer Bestwert!',sub:`${vname(e)}: ${fmt(num(r.kg))} kg × ${r.reps} · Kraftwert ${fmt(m)} kg`})}else r.done=false;saveDrafts()}
  else if(a==='rpe'){const r=draftFor(day).ex[eid][i];r.rpe=r.rpe===b.dataset.r?'':b.dataset.r;saveDrafts()}
  else if(a==='cadd'){draftFor(day).cardio.push({type:CT[0],min:'',km:'',lvl:'m'});saveDrafts()}
  else if(a==='crm'){draftFor(day).cardio.splice(i,1);saveDrafts()}

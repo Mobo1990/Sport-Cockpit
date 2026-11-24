@@ -220,7 +220,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-n]');if(
  else if(a==='pick'){const f=foodById(b.dataset.id)||(sheet.results||[]).find(x=>x.id===b.dataset.id);if(!f)return;sheet.food=f;if(f.part&&f.code)offComplete(f);const u=usual(f);sheet.g=u?String(u):f.por?String(f.por.g):'100';sheet.step='amount'}
  else if(a==='setmeal'){sheet.meal=b.dataset.m}
  else if(a==='gq'){sheet.g=b.dataset.v}
- else if(a==='addit'){if(sheet.food.part&&sheet.food.code&&!sheet.food.tried){offComplete(sheet.food).then(()=>b.click());return}const g=num(sheet.g);if(!g||g<=0){note('Menge eingeben');return}const it=itemFrom(sheet.food,g,sheet.meal);ND(d).items.push(it);remember(sheet.food);touch(d);shareOnAdd(sheet,it,d);sheet=null}
+ else if(a==='addit'){if(sheet.food.part&&sheet.food.code&&!sheet.food.tried){offComplete(sheet.food).then(()=>b.click());return}const g=num(sheet.g);if(!g||g<=0){note('Menge eingeben');return}const it=itemFrom(sheet.food,g,sheet.meal),wb=d===today()?cheerFrom(d):null;ND(d).items.push(it);setTimeout(()=>cheerDiff(d,wb),0);remember(sheet.food);touch(d);shareOnAdd(sheet,it,d);sheet=null}
  else if(a==='sug'){const q=b.dataset.q;sheet.q=q;const i=$('fq');if(i)i.value=q;clearTimeout(offT);sheet.results=offCache.get(normQ(q))||null;sheet.offErr='';if(!sheet.results)offSearch(q);else updRes();return}
  else if(a==='off'){clearTimeout(offT);offCache.delete(normQ(sheet.q.trim()));sheet.offErr='';offSearch(sheet.q.trim());return}
  else if(a==='scan'){sheet.step='scan';sheet.msg='';render();startScan();return}

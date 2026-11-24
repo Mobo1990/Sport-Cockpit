@@ -23,9 +23,9 @@ function woRun(){clearInterval(woTick);woTick=setInterval(()=>{if(!wo||wo.paused
 function woBuzz(){try{navigator.vibrate&&navigator.vibrate([120,60,120])}catch(e){}}
 function woNext(){const st=woSteps();wo.i++;wo.last=Date.now();if(wo.i>=st.length){woFinish();return}wo.left=st[wo.i][1];woBuzz();woRender()}
 function woFinish(){wo.done=true;clearInterval(woTick);woBuzz();try{woLock&&woLock.release()}catch(e){}woLock=null;
- const d=today(),dd=ND(d);if(wo.ch&&!(dd.ch||[]).includes(wo.ch)){const before=chDone(d).length;dd.ch=[...(dd.ch||[]),wo.ch];touch(d);
+ const d=today(),dd=ND(d),p0=dayScore(d).pt;if(wo.ch&&!(dd.ch||[]).includes(wo.ch)){const before=chDone(d).length;dd.ch=[...(dd.ch||[]),wo.ch];touch(d);
   if(chDone(d).length===3&&before<3)tell(`${S.prof.name||'Jemand'} hat alle Challenges geschafft`,`Heute alle 3 Coach-Challenges erledigt (+${chPoints(d)} Punkte). Und du?`)}
- woRender();render()}
+ woRender();render();cheer({big:true,title:cheerWord(),sub:WO[wo.k].n+' geschafft',pts:dayScore(d).pt-p0})}
 function woClose(){clearInterval(woTick);try{woLock&&woLock.release()}catch(e){}woLock=null;wo=null;woRender()}
 const mmss=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
 function woUpd(){const st=woSteps(),cur=st[wo.i],t=document.getElementById('woT'),r=document.getElementById('woR');if(!t)return;

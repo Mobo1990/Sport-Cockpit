@@ -39,6 +39,7 @@ document.addEventListener('keydown',ev=>{if((ev.key==='Enter'||ev.key===' ')&&ev
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-ch]');if(!b)return;const d=today(),dd=ND(d),id=b.dataset.ch;
  const before=chDone(d).length;dd.ch=(dd.ch||[]).includes(id)?dd.ch.filter(x=>x!==id):[...(dd.ch||[]),id];touch(d);
  const after=chDone(d).length;if(after===3&&before<3)tell(`${S.prof.name||'Jemand'} hat alle Challenges geschafft`,`Heute alle 3 Coach-Challenges erledigt (+${chPoints(d)} Punkte). Und du?`);
+ if(after>before){const c=CH.find(x=>x.id===id);if(after===3)cheer({big:true,title:'Alle 3 geschafft!',sub:'Challenges heute erledigt',pts:(c?c.pt:0)+CH_BONUS});else if(c)cheer({title:cheerWord(),sub:(c.kn&&kneeOn()?c.kn.t:c.t),pts:c.pt})}
  render()});
 /* Persönliche Tagesziele (im Profil einstellbar) */
 let wml=false;
@@ -70,7 +71,7 @@ function afHtml(){const d=today(),yd=dayShift(d,-1),v=(S.nut.days[d]||{}).af,on=
  <div class="afb"><button class="afbtn${on?' ok':''}" data-af="${d}" data-v="1" aria-pressed="${on}">${on?'Heute alkoholfrei ✓':'Heute alkoholfrei'}</button><button class="afno${no?' on':''}" data-af="${d}" data-v="-1" aria-pressed="${no}">${no?'Alkohol getrunken ✓':'Hatte Alkohol'}</button></div>
  <div class="afwk" aria-label="Letzte 7 Tage – antippen zum Ändern">${week.map(k=>{const x=(S.nut.days[k]||{}).af;return `<button class="afd${x===1?' y':x===-1?' n':''}" data-afc="${k}" aria-label="${AF_WD[new Date(k+'T12:00').getDay()]}: ${x===1?'alkoholfrei':x===-1?'Alkohol':'offen'}"><small>${k===d?'Heute':AF_WD[new Date(k+'T12:00').getDay()]}</small><b>${x===1?'✓':x===-1?'✗':'–'}</b></button>`}).join('')}</div>
  ${!yv?`<p class="afhint">Gestern ist noch offen – tippe oben auf den Tag (✓ alkoholfrei, ✗ Alkohol).</p>`:''}</section>`}
-function afSet(d,val){const dd=ND(d);if(val)dd.af=val;else delete dd.af;touch(d);const n=afStreak(today())||afStreak(dayShift(today(),-1));
+function afSet(d,val){const dd=ND(d),wb=cheerFrom(today());if(val)dd.af=val;else delete dd.af;touch(d);if(val===1&&d===today())cheerDiff(d,wb);const n=afStreak(today())||afStreak(dayShift(today(),-1));
  if(val===1&&afMs(d)[n])tell(`${S.prof.name||'Jemand'}: ${n} Tage alkoholfrei`,`${n} Tage am Stück ohne Alkohol – Bonus +${afMs(d)[n]}. Hältst du mit?`);render()}
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-af],[data-afc]');if(!b)return;
  if(b.dataset.afc){const d=b.dataset.afc,x=(S.nut.days[d]||{}).af;afSet(d,!x?1:x===1?-1:0);return}
