@@ -39,6 +39,8 @@ function weeklyCheck(){const me=myWeekStats(),w=weekly(),c=couple(),pw=partnerWe
  if(pw){const v=+(pw.w[c.k]||0),done=c.m==='both'?Math.min(me[c.k],v)>=c.g:me[c.k]+v>=c.g;
   if(done&&!weekFlag('cpc')){ND(today()).cpc=1;touch(today());toast('Paar-Challenge geschafft!',`${c.t} · +${CP_PTS} Punkte für euch beide`)}}}
 /* Kurz-Workouts direkt starten (für die Wochen-Challenge „3 Kurz-Workouts“) */
+/* Kurz-Workouts immer auf der Startseite – auch wenn sie gerade keine Challenge sind */
+const woQuickHtml=()=>`<section class="woq"><h3 class="sh">Kurz-Workouts <small class="chn">ohne Geräte, mit Timer</small></h3>${woPickHtml()}</section>`;
 function woPickHtml(){const dn=(S.nut.days[today()]||{}).ch||[];
  return `<div class="wopick">${[['core','wo_core','Core','6 min'],['zirkel','wo_zirkel','Zirkel','7 min'],['mobil','wo_mobil','Mobility','5 min']].map(([k,id,n,m])=>{const ok=dn.includes(id);
   return `<button class="${ok?'ok':''}" data-wo="${k}" data-woc="${id}"${ok?' aria-pressed="true"':''}><b>${n}</b><small>${ok?'heute erledigt':m+' · Start ›'}</small></button>`}).join('')}</div><p class="wohint">Jedes Workout zählt einmal pro Tag.</p>`}

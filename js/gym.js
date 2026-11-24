@@ -93,7 +93,4 @@ gymEl.addEventListener('touchend',ev=>{if(gx0==null)return;const dx=ev.changedTo
 setInterval(()=>{if(!gym.open)return;const el=$('grest'),l=Math.max(0,Math.round((tEnd-Date.now())/1000));if(el){el.textContent=`${Math.floor(l/60)}:${String(l%60).padStart(2,'0')}`;if(l<=0)renderGym()}},500);
 /* Einstieg: Knopf im Training-Tab und auf der Startseite */
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-gym]');if(!b)return;if(b.dataset.d)day=b.dataset.d;view='train';render();openGym()});
-/* Kurz-Workouts (Core, Zirkel, Mobility) immer im Training-Tab erreichbar – nicht nur, wenn sie gerade Challenge sind */
-const woQuickHtml=()=>`<section class="woq"><h3 class="sh">Kurz-Workouts <small class="chn">ohne Geräte, mit Timer</small></h3>${woPickHtml()}</section>`;
-const _renderBase=render;render=function(){_renderBase();if(view==='train'){const v=$('view');if(v){if(day!=='cardio'&&!v.querySelector('.gymgo'))v.insertAdjacentHTML('afterbegin',`<button class="primary gymgo" data-gym="1">▶ Gym Mode starten</button>`);
- if(!v.querySelector('.woq')){const g=v.querySelector('.gymgo');if(g)g.insertAdjacentHTML('afterend',woQuickHtml());else v.insertAdjacentHTML('afterbegin',woQuickHtml())}}}renderGym()};
+const _renderBase=render;render=function(){_renderBase();if(view==='train'){const v=$('view');if(v){if(day!=='cardio'&&!v.querySelector('.gymgo'))v.insertAdjacentHTML('afterbegin',`<button class="primary gymgo" data-gym="1">▶ Gym Mode starten</button>`);}}renderGym()};
