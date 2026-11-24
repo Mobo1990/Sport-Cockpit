@@ -127,6 +127,7 @@ try:
           const r=[keep,now,GOAL_ADD.fit,P(2000),P(1800),P(2300),P(2400),P(1650),kcalPts('2026-12-01',g,{kcal:2000},{items:[{meal:'f'}]}).p];
           N.goal=o.goal;N.gh=o.gh;return r.join('/')})()""")
         check(r == "aufbau/fit/-250/10/5/5/0/0/0", "Fitter werden: leichtes Defizit +10, Überschuss 0, Hungern 0, erst ab 2 Mahlzeiten; alte Tage behalten ihr Ziel")
+        check(pg.evaluate("(()=>{const old=[],neu=new Set();for(let i=0;i<120;i++){const d=dayShift('2026-11-24',-i),e=dayShift('2026-11-25',i);old.push(dayCh(d).map(c=>c.id).join());dayCh(e).forEach(c=>neu.add(c.id))}return !old.some(x=>/read30|breathe5|phone2230|thanks3|talk20/.test(x))&&['read30','talk20'].every(i=>neu.has(i))})()"), "Kopf-Aufgaben erst ab 25.11. im Challenge-Topf, ältere Tage unverändert")
         print("Knieschonend")
         tst = "(()=>{const o=dayCh;dayCh=()=>['squat20','burpee10','veg'].map(i=>CH.find(c=>c.id===i));const r=chHtml();dayCh=o;return r})()"
         h0 = pg.evaluate(tst)

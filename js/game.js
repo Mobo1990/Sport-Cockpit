@@ -24,13 +24,19 @@ const CH=[
  {id:'nosoda',k:'a',t:'Heute kein Süßgetränk',s:'Wasser, Tee oder Kaffee ohne Zucker.',pt:5},
  {id:'veg',k:'a',t:'Eine Portion Gemüse extra',s:'Zu einer Mahlzeit dazu.',pt:5},
  {id:'wo_mobil',k:'a',t:'Mobility · 5 min',s:'Geführt mit Timer: Schultern, Rücken, Hüfte.',pt:10,w:'mobil'},
- {id:'mob10',k:'a',t:'10 Minuten Mobility',s:'Hüfte und Schultern locker machen.',pt:5}];
+ {id:'mob10',k:'a',t:'10 Minuten Mobility',s:'Hüfte und Schultern locker machen.',pt:5},
+ /* Kopf-Aufgaben (ab 25.11.2026 im Topf – ältere Tage behalten ihre Challenges) */
+ {id:'read30',k:'a',t:'30 Minuten lesen',s:'Ein Buch, kein Bildschirm.',pt:5,ab:'2026-11-25'},
+ {id:'breathe5',k:'a',t:'5 Minuten bewusst atmen',s:'4 Sekunden ein, 4 halten, 6 aus – im Sitzen, Augen zu.',pt:5,ab:'2026-11-25'},
+ {id:'phone2230',k:'a',t:'Handy ab 22:30 weg',s:'Ab ins andere Zimmer oder in die Schublade.',pt:5,ab:'2026-11-25'},
+ {id:'thanks3',k:'a',t:'3 Dinge aufschreiben, für die du dankbar bist',s:'Kurz, auf Papier oder im Handy – Hauptsache ehrlich.',pt:5,ab:'2026-11-25'},
+ {id:'talk20',k:'a',t:'20 Minuten reden – Handys weg',s:'Mit deinem Partner oder einem Freund: Wie war der Tag wirklich?',pt:5,ab:'2026-11-25'}];
 const CH_BONUS=10;
 /* Knieschonend (Profil): Challenges/Workouts mit Knie-Belastung zeigen ihre schonende Variante, gleiche Punkte */
 const kneeOn=()=>S.prof.knee==='1';
 function dayCh(d){let h=2166136261;for(const c of 'ch'+d)h=Math.imul(h^c.charCodeAt(0),16777619)>>>0;
  const pick=(arr,n)=>{const a=[...arr],o=[];while(o.length<n&&a.length){h=Math.imul(h^(h>>>15),2246822507)>>>0;o.push(a.splice(h%a.length,1)[0])}return o};
- return [...pick(CH.filter(c=>c.k==='k'),2),...pick(CH.filter(c=>c.k==='a'),1)]}
+ const ok=c=>!c.ab||d>=c.ab;return [...pick(CH.filter(c=>c.k==='k'&&ok(c)),2),...pick(CH.filter(c=>c.k==='a'&&ok(c)),1)]}
 function chDone(d){const list=dayCh(d),done=(S.nut.days[d]||{}).ch||[];return list.filter(c=>done.includes(c.id))}
 function chPoints(d){const dn=chDone(d);return dn.reduce((a,c)=>a+c.pt,0)+(dn.length===3?CH_BONUS:0)}
 function chHtml(){const d=today(),list=dayCh(d),done=chDone(d).map(c=>c.id),n=done.length;
