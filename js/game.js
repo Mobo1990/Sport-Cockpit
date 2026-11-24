@@ -51,22 +51,31 @@ function goalsHtml(){const d=today(),w=(S.nut.days[d]||{}).water||0,wg=waterGoal
 const AF_MS={7:20,14:30,30:50,60:75,100:100};
 const afPts=n=>Math.min(4+n,15);
 const dayShift=(d,k)=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+k);return iso(x)};
-function afStreak(d){let n=0;while((S.nut.days[d]||{}).af){n++;d=dayShift(d,-1)}return n}
-function afHtml(){const d=today(),yd=dayShift(d,-1),on=!!(S.nut.days[d]||{}).af,yOn=!!(S.nut.days[yd]||{}).af,
- cur=on?afStreak(d):afStreak(yd),nT=on?cur:cur+1,pT=afPts(nT)+(AF_MS[nT]||0),ms=Object.keys(AF_MS).map(Number).find(m=>m>cur);
- return `<section class="afc"><div class="afh"><div class="afn"><b class="cond">${cur}</b><span>${cur===1?'Tag':'Tage'} alkoholfrei<br>am Stück</span></div>
- <small><b>+${pT}</b> heute${on?'':' möglich'}<br>${ms?`+${AF_MS[ms]} Bonus in ${ms-cur} ${ms-cur===1?'Tag':'Tagen'}`:'Alle Meilensteine geschafft'}</small></div>
- <div class="afb"><button class="afbtn${on?' ok':''}" data-af="${d}" aria-pressed="${on}">${on?'Heute alkoholfrei ✓':'Heute alkoholfrei'}</button>${yOn?'':`<button class="ghost" data-af="${yd}">Gestern auch</button>`}</div></section>`}
-document.addEventListener('click',ev=>{const b=ev.target.closest('[data-af]');if(!b)return;const d=b.dataset.af,dd=ND(d);
- if(dd.af)delete dd.af;else dd.af=1;touch(d);const n=afStreak(today())||afStreak(dayShift(today(),-1));
- if(dd.af&&AF_MS[n])tell(`${S.prof.name||'Jemand'}: ${n} Tage alkoholfrei`,`${n} Tage am Stück ohne Alkohol – Bonus +${AF_MS[n]}. Hältst du mit?`);render()});
+/* Alkoholfrei: af 1 = alkoholfrei, -1 = Alkohol getrunken, fehlt = noch nicht beantwortet. Nur 1 zählt für die Serie. */
+const afOk=d=>(S.nut.days[d]||{}).af===1;
+function afStreak(d){let n=0;while(afOk(d)){n++;d=dayShift(d,-1)}return n}
+const AF_WD=['So','Mo','Di','Mi','Do','Fr','Sa'];
+function afHtml(){const d=today(),yd=dayShift(d,-1),v=(S.nut.days[d]||{}).af,on=v===1,no=v===-1,yv=(S.nut.days[yd]||{}).af,
+ cur=on?afStreak(d):no?0:afStreak(yd),nT=on?cur:cur+1,pT=afPts(nT)+(AF_MS[nT]||0),ms=Object.keys(AF_MS).map(Number).find(m=>m>cur),late=new Date().getHours()>=18;
+ const week=Array.from({length:7},(_,i)=>dayShift(d,i-6));
+ return `<section class="afc${!v&&late?' ask':''}"><div class="afh"><div class="afn"><b class="cond">${cur}</b><span>${cur===1?'Tag':'Tage'} alkoholfrei<br>am Stück</span></div>
+ <small>${no?'Serie startet<br>morgen neu':`<b>+${pT}</b> heute${on?'':' möglich'}<br>${ms?`+${AF_MS[ms]} Bonus in ${ms-cur} ${ms-cur===1?'Tag':'Tagen'}`:'Alle Meilensteine geschafft'}`}</small></div>
+ ${!v&&late?`<p class="afq">Heute noch nicht eingetragen – warst du alkoholfrei?</p>`:''}
+ <div class="afb"><button class="afbtn${on?' ok':''}" data-af="${d}" data-v="1" aria-pressed="${on}">${on?'Heute alkoholfrei ✓':'Heute alkoholfrei'}</button><button class="afno${no?' on':''}" data-af="${d}" data-v="-1" aria-pressed="${no}">${no?'Alkohol getrunken ✓':'Hatte Alkohol'}</button></div>
+ <div class="afwk" aria-label="Letzte 7 Tage – antippen zum Ändern">${week.map(k=>{const x=(S.nut.days[k]||{}).af;return `<button class="afd${x===1?' y':x===-1?' n':''}" data-afc="${k}" aria-label="${AF_WD[new Date(k+'T12:00').getDay()]}: ${x===1?'alkoholfrei':x===-1?'Alkohol':'offen'}"><small>${k===d?'Heute':AF_WD[new Date(k+'T12:00').getDay()]}</small><b>${x===1?'✓':x===-1?'✗':'–'}</b></button>`}).join('')}</div>
+ ${!yv?`<p class="afhint">Gestern ist noch offen – tippe oben auf den Tag (✓ alkoholfrei, ✗ Alkohol).</p>`:''}</section>`}
+function afSet(d,val){const dd=ND(d);if(val)dd.af=val;else delete dd.af;touch(d);const n=afStreak(today())||afStreak(dayShift(today(),-1));
+ if(val===1&&AF_MS[n])tell(`${S.prof.name||'Jemand'}: ${n} Tage alkoholfrei`,`${n} Tage am Stück ohne Alkohol – Bonus +${AF_MS[n]}. Hältst du mit?`);render()}
+document.addEventListener('click',ev=>{const b=ev.target.closest('[data-af],[data-afc]');if(!b)return;
+ if(b.dataset.afc){const d=b.dataset.afc,x=(S.nut.days[d]||{}).af;afSet(d,!x?1:x===1?-1:0);return}
+ const d=b.dataset.af,val=+b.dataset.v||1;afSet(d,(S.nut.days[d]||{}).af===val?0:val)});
 function dayScore(d){const g=goals(d),t=totals(d),day=S.nut.days[d]||{},ss=S.sessions.filter(s=>iso(s.date)===d);let pt=0;const why=[];
  const tr=ss.find(s=>s.ex.length);if(tr){pt+=30;why.push('Training +30')}
  const c=ss.reduce((a,s)=>a+(s.cardio||[]).reduce((b,x)=>b+x.min,0),0),hh=day.h||{};if(c>=20){pt+=15;why.push('Cardio +15')}else if((hh.tm||0)>=30){pt+=15;why.push('Bewegung (Watch) +15')}
  if(daySteps(d)>=stepGoal()){pt+=10;why.push('Schrittziel +10')}
  if(t.kcal>0){if(t.p>=g.p){pt+=20;why.push('Protein +20')}else if(t.p>=g.p*.9){pt+=10;why.push('Protein fast +10')}
   const dev=Math.abs(t.kcal-g.kcal)/g.kcal;if(dev<=.1){pt+=20;why.push('Kalorien im Ziel +20')}else if(dev<=.2){pt+=10;why.push('Kalorien nah dran +10')}}
- if(day.af){const n=afStreak(d),p=afPts(n)+(AF_MS[n]||0);pt+=p;why.push(`Alkoholfrei Tag ${n} +${p}`)}
+ if(day.af===1){const n=afStreak(d),p=afPts(n)+(AF_MS[n]||0);pt+=p;why.push(`Alkoholfrei Tag ${n} +${p}`)}
  const chp=chPoints(d);if(chp){pt+=chp;why.push((chDone(d).length===3?'Alle Challenges +':'Challenges +')+chp)}
  if(day.w){pt+=5;why.push('Gewogen +5')}if((day.water||0)>=waterGoal()){pt+=10;why.push('Wasserziel +10')}
  if(day.wkc){pt+=WK_PTS;why.push('Wochen-Challenge +'+WK_PTS)}if(day.cpc){pt+=CP_PTS;why.push('Paar-Challenge +'+CP_PTS)}
@@ -80,7 +89,7 @@ function healthLink(){if(!HA.token)return '';const age=S.hT?Date.now()-S.hT:Infi
 function scoreLine(){const s=dayScore(today());return healthLink()+`<p class="nline" data-a="view" data-v="nut">Heute <b>${s.pt} Punkte</b> · Woche <b>${weekScore()}</b>${s.why.length?' · '+s.why.join(', '):' · Trainiere, iss im Ziel und trink genug, um Punkte zu sammeln'}</p>`}
 let lastPub='';
 async function publish(){if(!HA.token||!S.prof.name)return;const d=today(),s=dayScore(d);
- const base={d,k:Math.round(s.t.kcal),kz:s.g.kcal,p:Math.round(s.t.p),pz:s.g.p,tr:s.tr,c:Math.round(s.c),pt:s.pt,wp:weekScore(),w:myWeekStats(),tp:myTotal()};
+ const base={d,k:Math.round(s.t.kcal),kz:s.g.kcal,p:Math.round(s.t.p),pz:s.g.p,tr:s.tr,c:Math.round(s.c),pt:s.pt,wp:weekScore(),w:myWeekStats(),tp:myTotal(),af:(S.nut.days[d]||{}).af||0};
  /* Wasser und Schritte von heute (für den Zwischenstand um 22 Uhr) – nur wenn es in 255 Zeichen passt, nie abgeschnittenes JSON */
  const full={...base,wa:(S.nut.days[d]||{}).water||0,wz:waterGoal(),s:daySteps(d),sz:stepGoal()};let v=JSON.stringify(full);if(v.length>255)v=JSON.stringify(base);if(v===lastPub)return;
  try{const r=await haCall([{type:'call_service',domain:'input_text',service:'set_value',service_data:{entity_id:'input_text.sport_cockpit_'+slugN(S.prof.name),value:v.slice(0,255)}}]);if(r[0]&&r[0].success)lastPub=v}catch(e){}

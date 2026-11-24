@@ -7,7 +7,7 @@ function weekDaysIso(){const m=new Date(wk(Date.now())),t=today(),out=[];for(let
 function myWeekStats(){const r={s:0,c:0,p:0,h:0,st:0,a:0,o:0,ca:0};
  for(const d of weekDaysIso()){const day=S.nut.days[d]||{},ss=S.sessions.filter(s=>iso(s.date)===d);
   r.s+=ss.filter(s=>s.ex&&s.ex.length).length;r.c+=ss.reduce((a,s)=>a+(s.cardio||[]).reduce((b,x)=>b+(+x.min||0),0),0);
-  const t=totals(d);if(t.kcal>0&&t.p>=goals(d).p)r.p++;if((day.water||0)>=waterGoal())r.h++;r.st+=daySteps(d);if(day.af)r.a++;
+  const t=totals(d);if(t.kcal>0&&t.p>=goals(d).p)r.p++;if((day.water||0)>=waterGoal())r.h++;r.st+=daySteps(d);if(day.af===1)r.a++;
   r.o+=(day.ch||[]).filter(x=>/^wo_/.test(x)).length;if(chDone(d).length===3)r.ca++}
  r.c=Math.round(r.c);return r}
 const WEEKLY=[
