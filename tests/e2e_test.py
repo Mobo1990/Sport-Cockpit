@@ -44,6 +44,15 @@ try:
             if OFF["busy"]: r.fulfill(status=200, content_type="text/html", body="<!DOCTYPE html><title>Page temporarily unavailable</title>")
             else: r.fulfill(status=200, content_type="application/json", body=json.dumps(OFF_REPLY))
         pg.unroute("https://world.openfoodfacts.org/**"); pg.route("https://world.openfoodfacts.org/**", off_route2)
+        def off_search(r):
+            u = r.request.url
+            if "proxy" in u or "kinder" in u: r.abort(); return
+            if "quarkteil" in u:
+                r.fulfill(status=200, content_type="application/json", body=json.dumps({"hits": [{"code": "4201", "product_name_de": "Quarkteil Mager", "brands": ["xx:Aldi"], "nutriscore_data": {"components": {"positive": [{"id": "proteins", "value": 12}], "negative": [{"id": "energy", "value": 281.1}, {"id": "sugars", "value": 4.1}]}}}]})); return
+            off_calls.append(u)
+            if OFF["busy"]: r.fulfill(status=503, content_type="text/html", body="busy")
+            else: r.fulfill(status=200, content_type="application/json", body=json.dumps({"hits": OFF_REPLY["products"]}))
+        pg.route("https://search.openfoodfacts.org/**", off_search)
         pg.goto("http://localhost:8765/"); pg.evaluate("localStorage.clear()"); pg.reload(); pg.wait_for_timeout(500)
 
         print("Name & Icon")
@@ -222,7 +231,7 @@ try:
         pg.evaluate("void(window.__offFetch0 = offFetch, offFetch = async c => c === '4005' ? {status: 1, product: {code: c, product_name: 'Proxyhafer', nutriments: {'energy-kcal_100g': 370, proteins_100g: 13, carbohydrates_100g: 60, fat_100g: 7}}} : {status: 0})")
         pg.fill("#fq", "proxyriegel"); pg.wait_for_timeout(1500)
         check("Proxyhafer" in pg.text_content("#fres") and "370" in pg.text_content("#fres") and pg.evaluate("sheet.results.find(r=>r.name==='Proxyhafer').brand") == "Mühle", "Fehlende Nährwerte werden pro Produkt nachgeladen (Suchindex ohne Nährwerte)")
-        check("Proxyriegel Erdnuss" in pg.text_content("#fres") and len(off_calls) == 0 and "sport_cockpit_food_search" in open("/tmp/calls.log").read(), "Suche über Home Assistant (schnelle Suche ohne CORS-Sperre)")
+        check("Proxyriegel Erdnuss" in pg.text_content("#fres") and len(off_calls) == 0 and "sport_cockpit_food_search" in open("/tmp/calls.log").read(), "Ist die schnelle Suche nicht erreichbar: Suche über Home Assistant")
         pg.evaluate("offCache.set(normQ('kinderriegel'),[])"); pg.evaluate("offCache.delete(normQ('kinderriegel'))")
         pg.fill("#fq", "kinderriegel"); pg.wait_for_timeout(5000)
         t = pg.text_content("#fres")
@@ -233,11 +242,17 @@ try:
         pg.click("[data-name='Proxysnack Gurke (Aldi)']"); pg.wait_for_timeout(150)
         check(pg.input_value("#cN") == "Proxysnack Gurke (Aldi)", "Antippen öffnet 'Eigenes Produkt' mit Namen vorausgefüllt")
         pg.click("[data-n=back]"); pg.wait_for_timeout(150)
+        pg.evaluate("void(offFetch = async c => c === '4201' ? {status: 1, product: {code: c, product_name: 'Quarkteil Mager', nutriments: {'energy-kcal_100g': 67, proteins_100g: 12, carbohydrates_100g: 4.1, fat_100g: 0.2}}} : {status: 0})")
+        pg.wait_for_timeout(4200); pg.fill("#fq", "quarkteil"); pg.wait_for_timeout(1500)
+        check("Quarkteil Mager" in pg.text_content("#fres") and "67 kcal" in pg.text_content("#fres"), "Suchindex ohne Nährwerte: kcal und Eiweiß aus dem Nutri-Score")
+        pg.click("#fres [data-n=pick] >> text=Quarkteil Mager"); pg.wait_for_timeout(500)
+        check(pg.evaluate("sheet.food.c") == 4.1 and not pg.evaluate("!!sheet.food.part"), "Beim Antippen werden Kohlenhydrate und Fett nachgeladen")
+        pg.click("[data-n=back]"); pg.wait_for_timeout(150)
         pg.fill("#fq", "snackgurke"); pg.wait_for_timeout(100)
         check("Gurke" in pg.text_content("#fres"), "'snackgurke' findet die eingebaute 'Gurke'")
         pg.wait_for_timeout(3000)
         pg.fill("#fq", "testriegel"); pg.wait_for_timeout(1500)
-        check("Testriegel Kakao" in pg.text_content("#fres") and len(off_calls) == 1, "Ohne HA-Suchdienst: direkte Online-Suche als Rückfall")
+        check("Testriegel Kakao" in pg.text_content("#fres") and len(off_calls) == 1 and "search.openfoodfacts.org" in off_calls[0], "Ohne HA-Suchdienst: direkte schnelle Suche (search.openfoodfacts.org) als Rückfall")
         pg.fill("#fq", "testriege"); pg.fill("#fq", "testriegel"); pg.wait_for_timeout(1000)
         check("Testriegel Kakao" in pg.text_content("#fres") and len(off_calls) == 1, "Gleiche Online-Suche kommt aus dem Zwischenspeicher")
         check(pg.evaluate("'testriegel' in JSON.parse(localStorage.getItem('sc.offcache2')||'{}')"), "Online-Treffer werden auf dem Gerät gemerkt")
