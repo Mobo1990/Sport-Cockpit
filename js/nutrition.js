@@ -82,7 +82,7 @@ function renderSheet(){const sh=sheet,ml=MEALS.find(m=>m[0]===sh.meal)[1];let b=
  else if(sh.step==='custom'){b=`<button class="back" data-n="back">‹ Zurück</button><h2>Eigenes Produkt</h2><p class="tip" style="padding:0">Werte von der Packung, pro 100 g.</p>
   <div class="cform"><div class="full"><label>Name</label><input id="cN" value="${esc(sh.cname||sh.q||'')}"></div>${[['cK','kcal'],['cP','Protein g'],['cC','Kohlenhydrate g'],['cZ','davon Zucker g'],['cF','Fett g'],['cG','Portion g (optional)']].map(([i,l])=>`<div><label>${l}</label><input id="${i}" inputmode="decimal"></div>`).join('')}</div>
   <button class="primary" data-n="savecustom" style="width:100%">Speichern & weiter</button>`}
- else if(sh.step==='scan'){b=`<button class="back" data-n="back">‹ Zurück</button><h2>Barcode scannen</h2><div id="scanbox"></div><p class="tip" id="scanmsg" style="padding:8px 0">${esc(sh.msg||'Barcode waagerecht in den Rahmen halten, etwa 15 cm Abstand.')}</p><div class="wrow"><input id="codeIn" inputmode="numeric" placeholder="oder Nummer eintippen"><button data-n="code">Suchen</button></div>`}
+ else if(sh.step==='scan'){b=`<button class="back" data-n="back">‹ Zurück</button><h2>Barcode scannen</h2><div id="scanbox"></div><p class="tip" id="scanmsg" style="padding:8px 0">${esc(sh.msg||'Barcode waagerecht in den Rahmen halten, etwa 20–30 cm Abstand, bis er scharf ist.')}</p><label class="scanpic"><input type="file" id="scanPic" accept="image/*" capture="environment" hidden>Klappt nicht? Barcode fotografieren</label><div class="wrow"><input id="codeIn" inputmode="numeric" placeholder="oder Nummer eintippen"><button data-n="code">Suchen</button></div>`}
  else{b=`<div class="shtop"><h2>Essen eintragen</h2><button class="ghost" data-n="close">Schließen</button></div>${mealChips(sh.meal)}
   <div class="srch"><input id="fq" data-n="q" placeholder="Lebensmittel suchen …" value="${esc(sh.q||'')}" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="search"><button data-n="scan" aria-label="Barcode scannen">▦ Scan</button><button data-say="open" aria-label="Per Sprache eintragen" class="saybtn"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button><label class="filebtn">Foto<input type="file" accept="image/*" capture="environment" data-ai="file" hidden></label></div>
   <div id="fres">${sheetList(sh)}</div>
@@ -154,9 +154,22 @@ function eanOk(c){if(!/^\d{8}$|^\d{12,13}$/.test(c))return false;const d=c.padSt
 async function startScan(){try{await loadScanLib();await new Promise(r=>setTimeout(r,50));if(!$('scanbox'))return;stopScan();scanBusy=false;scanLast='';
  const F=Html5QrcodeSupportedFormats;scanner=new Html5Qrcode('scanbox',{formatsToSupport:[F.EAN_13,F.EAN_8,F.UPC_A,F.UPC_E],verbose:false,experimentalFeatures:{useBarCodeDetectorIfSupported:true}});
  const w=Math.min(320,($('scanbox').clientWidth||320)-20);
- await scanner.start({facingMode:'environment'},{fps:15,qrbox:{width:w,height:Math.round(w*.5)},disableFlip:true,videoConstraints:{facingMode:'environment',width:{ideal:1920},height:{ideal:1080},advanced:[{focusMode:'continuous'}]}},
-  code=>{if(scanBusy||!eanOk(code)||code===scanLast&&sheet&&/nicht gefunden/.test(sheet.msg||''))return;scanLast=code;try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}offCode(code)},()=>{})}
+ await scanner.start({facingMode:'environment'},{fps:15,qrbox:{width:w,height:Math.round(w*.5)},disableFlip:true,videoConstraints:{facingMode:'environment',width:{ideal:1280},height:{ideal:720},advanced:[{focusMode:'continuous'}]}},
+  code=>{if(scanBusy||!eanOk(code)||code===scanLast&&sheet&&/nicht gefunden/.test(sheet.msg||''))return;scanLast=code;try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}offCode(code)},()=>{});
+ /* Neuere iPhones fokussieren unter ~20 cm nicht: 2× Zoom, damit man weiter weg halten kann und das Bild scharf ist */
+ try{const c=scanner.getRunningTrackCapabilities&&scanner.getRunningTrackCapabilities();if(c&&c.zoom&&c.zoom.max>=1.5)await scanner.applyVideoConstraints({advanced:[{zoom:Math.min(2,c.zoom.max)}]})}catch(e){}}
  catch(e){scanMsg('Kamera nicht verfügbar – in den iPhone-Einstellungen Kamera-Zugriff erlauben oder Nummer eintippen.')}}
+/* Zuverlässige Alternative: Foto mit der normalen Kamera (Autofokus, Makro) und das Standbild auswerten */
+/* Foto gedreht neu auswerten (Barcode hochkant fotografiert); große Fotos dabei auf max. 2000 px verkleinern */
+function rotImg(file,deg){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{const k=Math.min(1,2000/Math.max(im.width,im.height)),w=im.width*k,h=im.height*k,c=document.createElement('canvas');
+ c.width=h;c.height=w;const x=c.getContext('2d');x.translate(h/2,w/2);x.rotate(deg*Math.PI/180);x.drawImage(im,-w/2,-h/2,w,h);URL.revokeObjectURL(u);c.toBlob(b=>b?res(new File([b],'r.jpg',{type:'image/jpeg'})):rej(),'image/jpeg',.92)};im.onerror=rej;im.src=u})}
+async function scanPhoto(file){if(!file)return;scanMsg('Foto wird ausgewertet …');try{await loadScanLib();stopScan();const F=Html5QrcodeSupportedFormats;
+ let box=document.getElementById('scanfile');if(!box){box=document.createElement('div');box.id='scanfile';box.style.display='none';document.body.appendChild(box)}
+ const h=new Html5Qrcode('scanfile',{formatsToSupport:[F.EAN_13,F.EAN_8,F.UPC_A,F.UPC_E],verbose:false,experimentalFeatures:{useBarCodeDetectorIfSupported:true}});
+ let code='';for(const deg of [0,90,270]){try{code=await h.scanFile(deg?await rotImg(file,deg):file,false)}catch(e){}if(code)break}try{h.clear()}catch(e){}
+ code=String(code||'').replace(/\D/g,'');if(code&&eanOk(code)){offCode(code);return}
+ scanMsg('Auf dem Foto war kein Barcode zu erkennen. Barcode groß und scharf fotografieren, ohne Spiegelung – oder Nummer eintippen.')}catch(e){scanMsg('Foto konnte nicht ausgewertet werden – Nummer eintippen.')}}
+document.addEventListener('change',ev=>{const t=ev.target;if(t.id==='scanPic'&&t.files&&t.files[0]){scanPhoto(t.files[0]);t.value=''}});
 function stopScan(){if(scanner){const s=scanner;scanner=null;let p;try{p=s.stop()}catch(e){p=Promise.resolve()}Promise.resolve(p).catch(()=>{}).finally(()=>{try{s.clear()}catch(e){}})}}
 let offT=null;
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-n]');if(!b||b.tagName==='INPUT')return;const a=b.dataset.n,d=nDate||today();

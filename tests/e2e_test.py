@@ -276,6 +276,11 @@ try:
         try: pg.wait_for_function("(document.getElementById('scanmsg')||{}).textContent.includes('nicht gefunden')", timeout=8000)
         except Exception: pass
         check(pg.is_visible("#scanbox") and "nicht gefunden" in pg.text_content("#scanmsg"), "Nicht gefunden: Scanner bleibt offen, Hinweis erscheint")
+        check(pg.is_visible("label.scanpic") and pg.get_attribute("#scanPic", "capture") == "environment", "Alternative: Barcode mit der Kamera fotografieren")
+        pg.evaluate("void(window.Html5QrcodeSupportedFormats={}, window.Html5Qrcode=class{constructor(){}scanFile(f){return f.name==='r.jpg'?Promise.resolve('4000417025005'):Promise.reject(new Error('none'))}clear(){}}, scanLib=Promise.resolve(), window.__oc=offCode, offCode=c=>{window.__photo=c})")
+        pg.set_input_files("#scanPic", "/tmp/sc_face.png"); pg.wait_for_timeout(800)
+        check(pg.evaluate("window.__photo") == "4000417025005", "Foto: hochkant aufgenommener Barcode wird gedreht erkannt")
+        pg.evaluate("void(offCode=__oc, scanLib=null, sheet.step='scan', render())"); pg.wait_for_timeout(200)
         pg.evaluate("void(scanner={stop(){throw new Error('Cannot stop, scanner is not scanning')},clear(){}})")
         pg.fill("#codeIn", "4000417025005"); pg.click("[data-n=code]")
         try: pg.wait_for_selector("#gIn", timeout=8000)
