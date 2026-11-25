@@ -31,8 +31,8 @@ function shareInboxHtml(){const l=shareInbox.filter(x=>x.kind!=='say');if(!l.len
 function shareAmtHtml(sh){const to=sharePartner();if(!to)return '';const g=num(sh.g)||0,pg=sh.sgEd?sh.sg:String(Math.round(g*shareRatio()));
  return `<label class="shchk"><input type="checkbox" data-sh-in="on"${sh.share?' checked':''}> Auch für ${esc(to)} eintragen</label>
  ${sh.share?`<div class="shg"><span>${esc(to)} isst</span><input id="shG" inputmode="decimal" data-sh-in="g" value="${esc(pg)}" aria-label="Menge für ${esc(to)} in Gramm"><span>g</span></div>`:''}`}
-function shareMealBtn(m,its){const to=sharePartner();return to&&its.length?`<button class="ghost" data-sh="meal" data-m="${m}">Mit ${esc(to)} teilen</button>`:''}
-function shareSheetHtml(sh){const to=sharePartner()||'Partner',d=nDate||today(),its=(S.nut.days[d]||{items:[]}).items.filter(i=>i.meal===sh.meal),r=sh.ratio||shareRatio();
+function shareMealBtn(m,its){const to=sharePartner();its=its.filter(i=>!i.bws);return to&&its.length?`<button class="ghost" data-sh="meal" data-m="${m}">Mit ${esc(to)} teilen</button>`:''}
+function shareSheetHtml(sh){const to=sharePartner()||'Partner',d=nDate||today(),its=(S.nut.days[d]||{items:[]}).items.filter(i=>i.meal===sh.meal&&!i.bws),r=sh.ratio||shareRatio();
  return `<button class="back" data-n="close">‹ Zurück</button><h2>${esc(mealName(sh.meal))} mit ${esc(to)} teilen</h2><p class="tip" style="padding:0">${esc(to)} bekommt die Liste und übernimmt sie mit einem Tipp.</p>
  <div class="shpct"><span>${esc(to)} isst</span>${[50,75,100,125].map(v=>`<button data-sh="ratio" data-v="${v}" aria-pressed="${Math.round(r*100)===v}">${v} %</button>`).join('')}</div>
  <div class="shlist">${its.map(i=>`<div class="shrow"><span>${esc(i.name)}<small>du: ${fmt(i.g)} g</small></span><input inputmode="decimal" data-sh-in="mg" data-id="${i.id}" value="${fmt(Math.round(((sh.mg||{})[i.id]??i.g*r)))}" aria-label="Menge für ${esc(to)}"><span>g</span></div>`).join('')}</div>
@@ -47,7 +47,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-sh]');if
  else if(a==='no')shareDone(b.dataset.uid);
  else if(a==='meal'){sheet={meal:b.dataset.m,step:'share',ratio:shareRatio(),mg:{}};render()}
  else if(a==='ratio'){sheet.ratio=+b.dataset.v/100;sheet.mg={};render()}
- else if(a==='send'){const d=nDate||today(),its=(S.nut.days[d]||{items:[]}).items.filter(i=>i.meal===sheet.meal).map(i=>({...i,pg:num(String((sheet.mg||{})[i.id]??Math.round(i.g*(sheet.ratio||shareRatio()))))||0})).filter(i=>i.pg>0);
+ else if(a==='send'){const d=nDate||today(),its=(S.nut.days[d]||{items:[]}).items.filter(i=>i.meal===sheet.meal&&!i.bws).map(i=>({...i,pg:num(String((sheet.mg||{})[i.id]??Math.round(i.g*(sheet.ratio||shareRatio()))))||0})).filter(i=>i.pg>0);
   const mine=its.reduce((a,i)=>a+i.g,0),theirs=its.reduce((a,i)=>a+i.pg,0);if(mine)shareLearn(theirs/mine);const m=sheet.meal;sheet=null;persist();render();shareSend(its,m,d)}});
 document.addEventListener('input',ev=>{const t=ev.target,k=t.dataset.shIn;if(!k||!sheet)return;
  if(k==='on'){sheet.share=t.checked;render()}else if(k==='g'){sheet.sg=t.value;sheet.sgEd=true}else if(k==='mg'){(sheet.mg=sheet.mg||{})[t.dataset.id]=t.value}});

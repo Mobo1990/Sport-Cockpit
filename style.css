@@ -1125,3 +1125,12 @@ html.kbopen .nav{display:none}
 .bwme{display:flex;gap:8px;margin:8px 0}.bwme>div{flex:1;background:var(--s2);border-radius:14px;padding:10px 12px}.bwme small{display:block;font-size:12px;color:var(--mute);font-weight:700;text-transform:uppercase;letter-spacing:.05em}.bwme b{display:block;font:800 20px var(--fh)}.bwme span{font-size:13px;color:var(--mute)}
 .bwbar{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--d-sagel,#E3ECE6);border-radius:14px;padding:8px 8px 8px 14px;margin:0 0 10px;font-weight:600}.bwbar button{min-height:38px;padding:4px 14px}
 .bwz{font-size:12px;color:var(--mute);margin-top:2px}.bwz summary{cursor:pointer}
+/* Koch-Modus Runde 2 */
+.bwname input{color:var(--ink)}.bwlist li span small{display:block;font-size:12px;color:var(--mute)}
+.bwh{font:800 19px var(--fh);margin:14px 0 6px}.bwpct{flex-wrap:nowrap}.bwpct button{flex:1;min-height:46px;font-size:19px;font-weight:700}.bwpp{flex-wrap:wrap}.bwpp button{font-size:15px;min-height:40px}
+.bwweigh{display:flex;align-items:center;gap:8px;margin:6px 0 10px;font-size:14px;color:var(--mute)}.bwweigh input{width:90px;text-align:right;font-size:16px}.bwweigh em{font-style:normal}
+.bwme{flex-wrap:wrap}.bwme>div{min-width:44%}.bwme span{display:block}.bwrest{opacity:.75}
+.bwsave{position:sticky;bottom:0;padding:10px 0 4px;background:linear-gradient(transparent,var(--bg,#f3f2ee) 30%)}.bwsave .primary{width:100%}.bwsave .primary[disabled]{opacity:.55}
+.bwz{font-size:14px;white-space:pre-line;color:var(--ink)}.bwz summary{color:var(--mute);font-size:13px;white-space:normal}
+.sheetin .rshare{display:block;line-height:1.45}.sheetin .rshare input{vertical-align:-4px;margin-right:6px}.sheetin .rshare span{display:inline}
+.sheetin .rshare input{width:22px;height:22px;vertical-align:-5px}.bwpp button{white-space:nowrap}

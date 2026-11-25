@@ -1,63 +1,79 @@
-/* Duo – Koch-Modus „Schale für mehrere“ (Wunsch: Pauline macht Joghurt für beide in eine Schale).
-   Ablauf: Gesamtmengen in die Schale (normale Suche/Scan/eigene Produkte) → „Ich esse 50 %“ → eine Zeile im Tagebuch
-   (Name + Zutaten), der Rest geht als Vorschlag an den Partner (todo-Liste, er bestätigt selbst).
-   Schalen werden gemerkt (S.nut.bowls, mit Sync) und lassen sich mit einem Tipp wieder füllen. */
+/* Duo – Koch-Modus „Für mehrere gemacht“ (Wunsch: Pauline macht Joghurt für beide in eine Schale).
+   Ablauf: Gesamtmengen in Schale/Topf (normale Suche/Scan/eigene Produkte) → „Ich esse ½“ (oder Teller wiegen)
+   → eine Zeile im eigenen Tagebuch (mein Anteil je Zutat), auf Wunsch geht ein Anteil als Vorschlag an den Partner
+   (todo-Liste, er bestätigt selbst). Kinder/Gäste: Rest wird nicht eingetragen.
+   Nach Tester-Runde 1: Einstieg direkt an jeder Mahlzeit, nichts vorausgewählt, Partner nur auf Haken,
+   Brüche statt 10-%-Schritte + Teller wiegen, KH/Fett sichtbar, Zutaten im Tagebuch zeilenweise mit meinem Anteil,
+   Schalen werden automatisch gemerkt (S.nut.bowls, mit Sync) und stehen als „↻ Name“ an der Mahlzeit. */
 'use strict';
-const BOWL_PCT=[30,40,50,60,70];
+const BOWL_FR=[[33,'⅓'],[50,'½'],[67,'⅔'],[100,'alles']];
 const bowlSum=b=>b.items.reduce((a,x)=>{const k=x.g/100;a.g+=x.g;a.kcal+=x.f.kcal*k;a.p+=x.f.p*k;a.c+=x.f.c*k;a.f+=x.f.f*k;a.z+=(x.f.z||0)*k;return a},{g:0,kcal:0,p:0,c:0,f:0,z:0});
 const bowlFood=f=>({id:f.id,name:f.name,kcal:f.kcal,p:f.p,c:f.c,f:f.f,z:f.z||0});
-function bowlStart(meal){const pn=typeof sharePartner==='function'?sharePartner():null;sheet={meal,step:'bowl',bowl:{n:'',items:[],pct:pn?50:100,pa:!!pn,keep:true}}}
-/* Übersicht der Schale */
-function bowlHtml(sh){const b=sh.bowl,pn=typeof sharePartner==='function'?sharePartner():null,t=bowlSum(b),k=b.pct/100,ml=MEALS.find(m=>m[0]===sh.meal)[1],last=(S.nut.bowls||[]).slice(0,4);
- return `<div class="shtop"><h2>Schale für mehrere</h2><button class="ghost" data-bw="close">Schließen</button></div>${mealChips(sh.meal)}
- <p class="tip bwtip">Trag ein, was <b>insgesamt</b> in die Schale kommt. Danach wählst du, wie viel davon du isst${pn?` – der Rest geht als Vorschlag an ${esc(pn)}`:''}.</p>
- ${!b.items.length&&last.length?`<div class="bwlast"><span>Wieder machen:</span>${last.map(x=>`<button data-bw="again" data-id="${esc(x.id)}">${esc(x.n)}</button>`).join('')}</div>`:''}
+const bowlPn=()=>typeof sharePartner==='function'?sharePartner():null;
+function bowlStart(meal,id){const x=id&&(S.nut.bowls||[]).find(y=>y.id===id);
+ sheet={meal,step:'bowl',bowl:x?{n:x.n,items:x.items.map(i=>({f:{...i.f},g:i.g})),pct:x.pct||null,pa:false,pp:'r'}:{n:'',items:[],pct:null,pa:false,pp:'r'}}}
+/* Anteil des Partners in % (Rest oder fester Bruch, nie mehr als übrig) */
+const bowlPaPct=b=>!b.pa||b.pct==null||b.pct>=100?0:b.pp==='r'?100-b.pct:Math.min(+b.pp,100-b.pct);
+const bowlTile=(cls,lab,t,k,sub)=>`<div class="${cls}"><small>${lab}</small><b>${fmt(Math.round(t.kcal*k))} kcal</b><span>${fmt(Math.round(t.p*k))} g Eiweiß · ${fmt(Math.round(t.c*k))} g KH · ${fmt(Math.round(t.f*k))} g Fett</span><span>${fmt(Math.round(t.g*k))} g${sub?' · '+sub:''}</span></div>`;
+function bowlHtml(sh){const b=sh.bowl,pn=bowlPn(),t=bowlSum(b),ml=MEALS.find(m=>m[0]===sh.meal)[1],last=(S.nut.bowls||[]).slice(0,4),me=b.pct,pa=bowlPaPct(b),rest=me==null?0:Math.max(0,100-me-pa);
+ const fr=BOWL_FR.some(([v])=>v===me),wg=me!=null&&!fr?Math.round(t.g*me/100):'';
+ return `<div class="shtop"><h2>Für mehrere gemacht</h2><button class="ghost" data-bw="close">Schließen</button></div>${mealChips(sh.meal)}
+ <p class="tip bwtip">Schale, Topf oder Auflauf: Trag ein, was <b>insgesamt</b> drin ist. Danach wählst du, wie viel davon du isst.</p>
+ ${!b.items.length&&last.length?`<div class="bwlast"><span>Wie letztes Mal:</span>${last.map(x=>`<button data-bw="again" data-id="${esc(x.id)}">↻ ${esc(x.n)}</button>`).join('')}</div>`:''}
  <label class="bwname"><span>Name</span><input id="bwN" data-bw-in="n" placeholder="z. B. Joghurt-Schale" value="${esc(b.n)}"></label>
- <ul class="bwlist">${b.items.map((x,i)=>`<li><span>${esc(x.f.name)}</span><input inputmode="decimal" data-bw-in="g" data-i="${i}" value="${fmt(x.g)}" aria-label="Menge ${esc(x.f.name)} in Gramm"><em>g</em><button data-bw="rm" data-i="${i}" aria-label="${esc(x.f.name)} entfernen">✕</button></li>`).join('')}</ul>
- <button class="bwadd" data-bw="add">+ Zutat in die Schale</button>
- ${b.items.length?`<p class="bwtot">Ganze Schale: <b>${fmt(Math.round(t.g))} g · ${fmt(Math.round(t.kcal))} kcal · ${fmt(Math.round(t.p))} g Eiweiß</b></p>
- ${pn?`<div class="bwpct"><span>Ich esse</span>${BOWL_PCT.map(v=>`<button data-bw="pct" data-v="${v}" aria-pressed="${b.pct===v}">${v} %</button>`).join('')}<button data-bw="pct" data-v="100" aria-pressed="${b.pct===100}">alles</button></div>`:''}
- <div class="bwme"><div><small>Du</small><b>${fmt(Math.round(t.kcal*k))} kcal</b><span>${fmt(Math.round(t.p*k))} g Eiweiß · ${fmt(Math.round(t.g*k))} g</span></div>
- ${pn&&b.pct<100?`<div class="bwpa"><small>${esc(pn)}</small><b>${fmt(Math.round(t.kcal*(1-k)))} kcal</b><span>${fmt(Math.round(t.p*(1-k)))} g Eiweiß · ${fmt(Math.round(t.g*(1-k)))} g</span></div>`:''}</div>
- ${pn&&b.pct<100?`<label class="rshare"><input type="checkbox" id="bwPa"${b.pa?' checked':''}> Rest an ${esc(pn)} schicken <span>(bestätigt selbst)</span></label>`:''}
- <label class="rshare"><input type="checkbox" id="bwKeep"${b.keep?' checked':''}> Schale merken für nächstes Mal</label>
- <button class="primary" data-bw="save" style="width:100%">Zu ${ml} eintragen</button>`:''}`}
-/* Normale Suche/Mengen-Schritte im Schalen-Modus: Kopfzeile + „In die Schale“ statt „Hinzufügen“ */
+ <ul class="bwlist">${b.items.map((x,i)=>`<li><span>${esc(x.f.name)}<small>${fmt(Math.round(x.f.kcal*x.g/100))} kcal · ${fmt(Math.round(x.f.p*x.g/100))} g Eiweiß</small></span><input inputmode="decimal" data-bw-in="g" data-i="${i}" value="${fmt(x.g)}" aria-label="Menge ${esc(x.f.name)} in Gramm"><em>g</em><button data-bw="rm" data-i="${i}" aria-label="${esc(x.f.name)} entfernen">✕</button></li>`).join('')}</ul>
+ <button class="bwadd" data-bw="add">+ Zutat hinzufügen</button>
+ ${b.items.length?`<p class="bwtot">Insgesamt: <b>${fmt(Math.round(t.g))} g · ${fmt(Math.round(t.kcal))} kcal · ${fmt(Math.round(t.p))} g Eiweiß</b></p>
+ <h3 class="bwh">Wie viel isst du?</h3>
+ <div class="bwpct">${BOWL_FR.map(([v,l])=>`<button data-bw="pct" data-v="${v}" aria-pressed="${me===v}">${l}</button>`).join('')}</div>
+ <label class="bwweigh"><span>oder Teller gewogen:</span><input id="bwW" inputmode="decimal" data-bw-in="w" value="${wg}" placeholder="z. B. 320" aria-label="Mein Teller in Gramm"><em>g</em></label>
+ ${pn&&me!=null&&me<100?`<label class="rshare"><input type="checkbox" id="bwPa"${b.pa?' checked':''}> Auch für ${esc(pn)} eintragen <span>(${esc(pn)} bestätigt selbst und kann die Menge ändern)</span></label>
+ ${b.pa?`<div class="bwpct bwpp"><span>${esc(pn)} isst</span><button data-bw="pp" data-v="r" aria-pressed="${b.pp==='r'}">den Rest</button>${BOWL_FR.slice(0,3).filter(([v])=>v<=100-me).map(([v,l])=>`<button data-bw="pp" data-v="${v}" aria-pressed="${b.pp==v}">${l}</button>`).join('')}</div>`:''}`:''}
+ ${me!=null?`<div class="bwme">${bowlTile('','Du',t,me/100)}${pa?bowlTile('bwpa',esc(pn),t,pa/100,'als Vorschlag'):''}${rest>0.5?bowlTile('bwrest','Rest',t,rest/100,'wird nicht eingetragen'):''}</div>`:''}
+ <div class="bwsave"><button class="primary" data-bw="save"${me==null?' disabled':''}>${me==null?'Erst wählen, wie viel du isst':`Zu ${ml} eintragen`}</button></div>`:''}`}
+/* Normale Such-/Mengen-Schritte im Koch-Modus: Leiste oben + „Hinzufügen“ landet in der Schale */
 const _bwRenderSheet=renderSheet;
 renderSheet=function(){const sh=sheet;
- if(sh&&sh.step==='bowl')return `<div class="sheet" role="dialog" aria-modal="true" aria-label="Schale für mehrere"><div class="sheetin" data-step="bowl">${bowlHtml(sh)}</div></div>`;
- let h=_bwRenderSheet();if(!sh)return h;
- if(!sh.bowl)return h.replace('<div class="actions"><button class="ghost" data-n="custom">','<div class="actions"><button class="ghost bwgo" data-bw="start">Schale für mehrere</button><button class="ghost" data-n="custom">');const n=sh.bowl.items.length;
- const bar=`<div class="bwbar"><span>Schale: ${n} ${n===1?'Zutat':'Zutaten'}</span><button class="primary" data-bw="view">Zur Schale ›</button></div>`;
- return h.replace('<div class="sheetin" data-step="'+(sh.step||'search')+'">','$&'+bar).replace(/<button class="primary" data-n="addit"([^>]*)>[^<]*<\/button>/,'<button class="primary" data-n="addit"$1>In die Schale</button>').replace('<h2>Essen eintragen</h2>','<h2>Zutat für die Schale</h2>')};
+ if(sh&&sh.step==='bowl')return `<div class="sheet" role="dialog" aria-modal="true" aria-label="Für mehrere gemacht"><div class="sheetin" data-step="bowl">${bowlHtml(sh)}</div></div>`;
+ let h=_bwRenderSheet();if(!sh||!sh.bowl)return h;const n=sh.bowl.items.length;
+ const bar=`<div class="bwbar"><span>${esc(sh.bowl.n||'Schale')}: ${n} ${n===1?'Zutat':'Zutaten'}</span><button class="primary" data-bw="view">Zurück zur Schale ›</button></div>`;
+ h=h.replace('<div class="sheetin" data-step="'+(sh.step||'search')+'">','$&'+bar).replace(/<button class="primary" data-n="addit"([^>]*)>[^<]*<\/button>/,'<button class="primary" data-n="addit"$1>Hinzufügen</button>').replace('<h2>Essen eintragen</h2>','<h2>Zutat hinzufügen</h2>');
+ /* Löffel/Hand statt Gramm (Richtwerte) */
+ return sh.step==='amount'?h.replace('<div class="vars">','<div class="vars"><button data-n="gq" data-v="5">1 TL ≈ 5 g</button><button data-n="gq" data-v="15">1 EL ≈ 15 g</button><button data-n="gq" data-v="30">1 Handvoll ≈ 30 g</button>'):h};
 const _bwShareAmt=shareAmtHtml;
 shareAmtHtml=function(sh){return sh&&sh.bowl?'':_bwShareAmt(sh)};
-/* „In die Schale“ fängt den normalen Hinzufügen-Knopf ab (Capture, bevor nutrition.js einträgt) */
+/* Einstieg an jeder Mahlzeit + gemerkte Schalen als „↻ Name“ */
+function bowlMealBtns(m){const l=(S.nut.bowls||[]).filter(x=>x.meal===m).slice(0,2);
+ return `<button class="ghost bwgo" data-bw="start" data-m="${m}">Für mehrere gemacht</button>${l.map(x=>`<button class="ghost" data-bw="start" data-m="${m}" data-id="${esc(x.id)}">↻ ${esc(x.n)}</button>`).join('')}`}
+/* „Hinzufügen“ im Mengen-Schritt fängt den normalen Knopf ab (Capture, bevor nutrition.js einträgt) */
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-n="addit"]');if(!b||!sheet||!sheet.bowl)return;ev.stopPropagation();ev.preventDefault();
  const g=num(sheet.g);if(!g||g<=0){note('Menge eingeben');return}remember(sheet.food);sheet.bowl.items.push({f:bowlFood(sheet.food),g});sheet.step='bowl';sheet.food=null;render()},true);
-/* Zurück aus der Suche landet in der Schale, nicht im normalen Eintragen */
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-n="back"],[data-n="close"]');if(!b||!sheet||!sheet.bowl)return;if(sheet.step==='search'||b.dataset.n==='close'){ev.stopPropagation();sheet.step='bowl';render()}},true);
-function bowlSave(){const b=sheet.bowl,d=nDate||today(),t=bowlSum(b),k=b.pct/100,pn=typeof sharePartner==='function'?sharePartner():null;
- if(!b.items.length){note('Erst Zutaten in die Schale');return}const name=(b.n||'').trim()||'Schale',meal=sheet.meal,bw=b.items.map(x=>`${x.f.name} ${fmt(Math.round(x.g))} g`).join(' · ');
- const it={id:'i'+Date.now().toString(36),name:name+' (selbst gemacht)',g:Math.round(t.g*k),meal,kcal:Math.round(t.kcal*k),p:r1(t.p*k),c:r1(t.c*k),f:r1(t.f*k),z:r1(t.z*k),bw:`ganze Schale: ${bw} · du ${b.pct} %`},wb=d===today()?cheerFrom(d):null;
+function bowlSave(){const b=sheet.bowl,d=nDate||today(),t=bowlSum(b),pn=bowlPn();if(!b.items.length||b.pct==null)return;
+ const k=b.pct/100,pk=bowlPaPct(b)/100,name=(b.n||'').trim()||'Schale',meal=sheet.meal,fr=(BOWL_FR.find(([v])=>v===b.pct)||[0,b.pct+' %'])[1];
+ const bw=`Dein Anteil (${fr==='alles'?'alles':fr+' von '+fmt(Math.round(t.g))+' g'}):\n`+b.items.map(x=>`${x.f.name} ${fmt(Math.round(x.g*k))} g`).join('\n');
+ const it={id:'i'+Date.now().toString(36),name:name+' (selbst gemacht)',g:Math.round(t.g*k),meal,kcal:Math.round(t.kcal*k),p:Math.round(t.p*k),c:Math.round(t.c*k),f:Math.round(t.f*k),z:Math.round(t.z*k),bw},wb=d===today()?cheerFrom(d):null;
+ const send=pn&&pk>0?[{...it,pg:Math.round(t.g*pk)}]:null;if(send)it.bws=1;
  ND(d).items.push(it);
- if(b.keep){const id='b'+name.toLowerCase().replace(/[^a-zäöüß0-9]+/g,'-');S.nut.bowls=[{id,n:name,items:b.items,pct:b.pct},...(S.nut.bowls||[]).filter(x=>x.id!==id)].slice(0,8);S.metaT=Date.now()}
- const send=pn&&b.pct<100&&b.pa?[{...it,pg:Math.round(t.g*(1-k))}]:null;
+ const id='b'+name.toLowerCase().replace(/[^a-zäöüß0-9]+/g,'-');S.nut.bowls=[{id,n:name,meal,items:b.items,pct:b.pct},...(S.nut.bowls||[]).filter(x=>x.id!==id)].slice(0,8);S.metaT=Date.now();
  sheet=null;touch(d);setTimeout(()=>cheerDiff(d,wb),0);if(send)shareSend(send,meal,d);
- note(`Eingetragen: ${name} · ${fmt(it.kcal)} kcal${send?' – Rest an '+pn+' geschickt':''}`)}
+ note(`Eingetragen: ${name} · ${fmt(it.kcal)} kcal${send?' – Vorschlag an '+pn+' geschickt':''}`)}
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-bw]');if(!b)return;const a=b.dataset.bw;
- if(a==='start'){bowlStart(b.dataset.m||(sheet&&sheet.meal)||mealNow());render();return}
+ if(a==='start'){bowlStart(b.dataset.m||(sheet&&sheet.meal)||mealNow(),b.dataset.id);render();return}
  if(!sheet||!sheet.bowl)return;const w=sheet.bowl;bowlRead();
  if(a==='close'){sheet=null}
  else if(a==='add'){sheet.step='search';sheet.q='';sheet.results=null;sheet.focus=true}
  else if(a==='view'){sheet.step='bowl'}
  else if(a==='rm'){w.items.splice(+b.dataset.i,1)}
  else if(a==='pct'){w.pct=+b.dataset.v}
- else if(a==='again'){const x=(S.nut.bowls||[]).find(y=>y.id===b.dataset.id);if(x){w.n=x.n;w.items=x.items.map(i=>({f:{...i.f},g:i.g}));w.pct=x.pct||w.pct}}
+ else if(a==='pp'){w.pp=b.dataset.v}
+ else if(a==='again'){const x=(S.nut.bowls||[]).find(y=>y.id===b.dataset.id);if(x){w.n=x.n;w.items=x.items.map(i=>({f:{...i.f},g:i.g}));w.pct=x.pct||null}}
  else if(a==='save'){bowlSave()}
  render()});
-/* Eingaben (Name, Mengen, Haken) in den Zustand übernehmen, ohne bei jedem Tastendruck neu zu zeichnen */
+/* Eingaben übernehmen, ohne bei jedem Tastendruck neu zu zeichnen */
 function bowlRead(){if(!sheet||!sheet.bowl||sheet.step!=='bowl')return;const w=sheet.bowl,n=$('bwN');if(n)w.n=n.value;
  document.querySelectorAll('[data-bw-in="g"]').forEach(e=>{const g=num(e.value),x=w.items[+e.dataset.i];if(x&&g>0)x.g=g});
- const p=$('bwPa');if(p)w.pa=p.checked;const k=$('bwKeep');if(k)w.keep=k.checked}
-document.addEventListener('change',ev=>{if(ev.target.closest&&ev.target.closest('.sheetin[data-step="bowl"]')){bowlRead();if(ev.target.dataset.bwIn==='g')render()}});
+ const p=$('bwPa');if(p)w.pa=p.checked}
+document.addEventListener('change',ev=>{const t=ev.target;if(!(t.closest&&t.closest('.sheetin[data-step="bowl"]')))return;bowlRead();
+ if(t.dataset.bwIn==='w'){const g=num(t.value),tot=bowlSum(sheet.bowl).g;if(g>0&&tot>0)sheet.bowl.pct=Math.min(100,Math.round(g/tot*1000)/10)}
+ if(t.dataset.bwIn==='g'||t.dataset.bwIn==='w'||t.id==='bwPa')render()});
