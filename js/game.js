@@ -143,12 +143,13 @@ const SC_URL='shortcuts://run-shortcut?name='+encodeURIComponent('Cockpit Health
 function healthLink(){if(!HA.token)return '';const age=S.hT?Date.now()-S.hT:Infinity;const stale=age>3600e3;
  return `<a class="hlink${stale?' stale':''}" href="${SC_URL}" data-hl="1">↻ Apple Health ${stale?'aktualisieren':'· vor '+Math.max(1,Math.round(age/60000))+' min geholt'}</a>`}
 function scoreLine(){const s=dayScore(today());return healthLink()+`<p class="nline" data-a="view" data-v="nut">Heute <b>${s.pt} Punkte</b> · Woche <b>${weekScore()}</b>${s.why.length?' · '+s.why.join(', '):' · Trainiere, iss im Ziel und trink genug, um Punkte zu sammeln'}</p>`}
-let lastPub='';
+let lastPub='',lastTd='';/* Trainingstage (42 Tage) für den Kalender des Partners */
 async function publish(){if(!HA.token||!S.prof.name)return;const d=today(),s=dayScore(d);
  const base={d,k:Math.round(s.t.kcal),kz:s.g.kcal,p:Math.round(s.t.p),pz:s.g.p,tr:s.tr,c:Math.round(s.c),pt:s.pt,wp:weekScore(),w:myWeekStats(),tp:myTotal(),af:(S.nut.days[d]||{}).af||0};
  /* Wasser und Schritte von heute (für den Zwischenstand um 22 Uhr) – nur wenn es in 255 Zeichen passt, nie abgeschnittenes JSON */
  const full={...base,wa:(S.nut.days[d]||{}).water||0,wz:waterGoal(),s:daySteps(d),sz:stepGoal()};let v=JSON.stringify(full);if(v.length>255)v=JSON.stringify(base);if(v===lastPub)return;
  try{const r=await haCall([{type:'call_service',domain:'input_text',service:'set_value',service_data:{entity_id:'input_text.sport_cockpit_'+slugN(S.prof.name),value:v.slice(0,255)}}]);if(r[0]&&r[0].success)lastPub=v}catch(e){}
+ if(typeof tdMine==='function'){const tv=JSON.stringify(tdMine());if(tv!==lastTd){try{const r=await haCall([{type:'call_service',domain:'input_text',service:'set_value',service_data:{entity_id:'input_text.sport_cockpit_'+slugN(S.prof.name)+'_tage',value:tv}}]);if(r[0]&&r[0].success)lastTd=tv}catch(e){}}}
  const dd=S.nut.days[d];if(dd&&s.t.p>=s.g.p&&!dd.pg){dd.pg=1;touch(d);tell('Proteinziel geschafft','💪 '+S.prof.name+' hat heute '+Math.round(s.t.p)+' g Protein gegessen.')}}
 async function tell(titel,nachricht){if(!HA.token||!S.prof.name)return;try{await haCall([{type:'call_service',domain:'script',service:'sport_cockpit_meldung',service_data:{von:S.prof.name,titel,nachricht}}])}catch(e){}}
 function announce(s,prs){const n=S.prof.name||'Jemand',sets=s.ex.reduce((a,x)=>a+x.sets.length,0),cm=(s.cardio||[]).reduce((a,c)=>a+c.min,0);
