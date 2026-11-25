@@ -22,9 +22,12 @@ async function recCall(service,data){const r=await haCall([{type:'call_service',
  let c=res.content;if(typeof c==='string'){try{c=JSON.parse(c)}catch(e){}}return c||{}}
 const recNum=v=>{const n=parseFloat(String(v==null?'':v).replace(',','.'));return isFinite(n)?n:0};
 /* Chefkoch-Einzelrezept in unsere kompakte Form bringen */
-function recCompact(r){const n=r.nutrition||{},serv=recNum(r.servings)||1,ing=[];let gsum=0;
+/* „Pro Portion: kJ/kcal: 1755/421 · EW: 32,4 g · F: 16,7 g · KH: 33,4 g“ aus dem Rezepttext lesen (genauer als unvollständige Chefkoch-Werte) */
+function recTextNut(t){t=String(t||'');const k=t.match(/kcal[^\d]*(?:\d+\s*\/\s*)?(\d+)/i),g=re=>{const m=t.match(re);return m?recNum(m[1]):0};
+ if(!k||!/pro\s+(portion|person|stück)/i.test(t))return null;return{kCalories:+k[1],proteinContent:g(/(?:EW|Eiweiß|Protein)\s*:?\s*([\d.,]+)/i),fatContent:g(/\bF(?:ett)?\s*:\s*([\d.,]+)/i),carbohydrateContent:g(/\bKH\s*:?\s*([\d.,]+)/i)}}
+function recCompact(r){const tn=recTextNut(r.instructions),n0=r.nutrition||{},part=n0.status==='partial',n=tn&&tn.proteinContent?tn:part?{}:n0,serv=recNum(r.servings)||1,ing=[];let gsum=0;
  for(const g of r.ingredientGroups||[])for(const i of g.ingredients||[]){const a=recNum(i.amount),u=String(i.unit||'');ing.push({n:String(i.name||'')+(i.usageInfo?' '+i.usageInfo:''),a,u});if(/^(g|ml)$/i.test(u))gsum+=a;else if(/^kg|^l$/i.test(u))gsum+=a*1000}
- const steps=String(r.instructions||'').split(/\n\s*\n|\r\n\r\n/).map(x=>x.replace(/\s+/g,' ').trim()).filter(Boolean);
+ const steps=String(r.instructions||'').split(/\n\s*\n|\r\n\r\n/).map(x=>x.replace(/\s+/g,' ').trim()).filter(x=>x&&!/^pro\s+(portion|person|stück)\s*:/i.test(x));
  const img=r.previewImageUrlTemplate?String(r.previewImageUrlTemplate).replace('<format>','crop-480x320'):'';
  return{id:String(r.id),t:String(r.title||'Rezept'),url:r.siteUrl||('https://www.chefkoch.de/rezepte/'+r.id),img,r:recNum((r.rating||{}).rating),v:recNum((r.rating||{}).numVotes),
   min:recNum(r.totalTime||r.preparationTime)||0,serv,kcal:Math.round(recNum(n.kCalories||r.kCalories)),p:Math.round(recNum(n.proteinContent)),c:Math.round(recNum(n.carbohydrateContent)),f:Math.round(recNum(n.fatContent)),

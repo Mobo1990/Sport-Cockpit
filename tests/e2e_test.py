@@ -556,6 +556,11 @@ try:
         try: pg.wait_for_selector(".rcard h3", timeout=8000); ok = True
         except Exception: ok = False
         check(ok and pg.is_visible(".rdone") and not pg.is_visible(".tile.big") and "Hähnchen-Reis-Bowl" in pg.text_content(".rcard"), "Nach dem Training: 'erledigt' statt 'Als Nächstes' + eiweißreiches Chefkoch-Rezept (Torte aussortiert)")
+        r = pg.evaluate("""(()=>{const ins='Hähnchen ca. 2 Minuten anbraten.\\n\\nServieren.\\n\\nPro Portion:\\nkJ/kcal: 1755/421\\nEW: 32,4 g\\nF: 16,7 g\\nKH: 33,4 g\\nBE: 3';
+          const a=recCompact({id:1,title:'X',servings:4,nutrition:{kCalories:345,proteinContent:37.5,status:'partial'},instructions:ins,ingredientGroups:[]}),
+                b=recCompact({id:2,title:'Y',servings:4,nutrition:{kCalories:345,proteinContent:37.5,status:'partial'},instructions:'Kochen.',ingredientGroups:[]});
+          return [a.kcal,a.p,a.f,a.c,a.steps.length,b.kcal].join(',')})()""")
+        check(r == "421,32,17,33,2,0", "Chefkoch: unvollständige Nährwerte → Werte aus 'Pro Portion' im Text, sonst Rezept aussortiert (" + r + ")")
         pg.click(".rcard [data-rec=open]"); pg.wait_for_timeout(150)
         check(pg.locator(".recv.on .rsteps li").count() == 3 and pg.locator(".recv.on .ring li").count() == 3 and "chefkoch.de" in pg.get_attribute(".recv .rsrc a", "href"), "Zubereitung: Zutaten, Schritte und Link zum Original")
         pg.click(".recv [data-rec=add]"); pg.wait_for_timeout(200)
