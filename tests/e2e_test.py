@@ -220,7 +220,9 @@ try:
         check(pg.is_visible(".awadd") and "Gerade ist nichts eingetragen" in pg.text_content(".away.list"), "Unterwegs-Seite: leer, Knopf zum Eintragen")
         pg.click("[data-aw=new]"); pg.fill("#awWas", "tecis Workshop"); pg.fill("#awOrt", "Köln")
         tm = (datetime.date.today() + datetime.timedelta(days=1)).isoformat(); pg.fill("#awVon", tm); pg.dispatch_event("#awVon", "change"); pg.fill("#awVt", "08:00")
-        pg.click("[data-aw=night][data-v='1']"); pg.wait_for_timeout(100)
+        pg.click("[data-aw=night][data-v='1']")
+        try: pg.wait_for_function("(document.getElementById('awBis')||{}).value===%r" % (datetime.date.today() + datetime.timedelta(days=2)).isoformat(), timeout=3000)
+        except Exception: pass
         check(pg.input_value("#awWas") == "tecis Workshop" and pg.input_value("#awBis") == (datetime.date.today() + datetime.timedelta(days=2)).isoformat(), "Übernachtung: Ende springt auf den Folgetag, Eingaben bleiben")
         pg.fill("#awBt", "18:00"); pg.click("[data-aw=save]"); pg.wait_for_timeout(1500)
         calls = [json.loads(l) for l in open("/tmp/calls.log")]
@@ -504,6 +506,20 @@ try:
         calls = open("/tmp/calls.log").read()
         check('\\"wz\\":' in calls and '\\"sz\\":' in calls, "Wasser und Schritte von heute gehen an Home Assistant (Zwischenstand 22 Uhr)")
         check(pg.evaluate("(()=>{const base={d:'2026-11-22',k:9999,kz:9999,p:999,pz:999,tr:'Push',c:999,pt:999,wp:99999,w:{s:99,c:99999,p:9,h:9,st:999999,a:9,o:99,ca:9},tp:999999};return JSON.stringify(base).length<=255})()"), "Grunddaten passen immer in 255 Zeichen")
+        print("Heim-Training")
+        r = pg.evaluate("""(()=>{const loc=S.prof.loc,n0=S.sessions.length,p0=dayScore(today()).pt;S.prof.loc='home';view='train';day='pull';render();
+          const card=!!document.querySelector('.hwo [data-home=pull]')&&!document.querySelector('.gymgo');homeStart('pull');const st=woSteps(),mins=WO.home_pull.min,lbl=homeLabel('home_pull',st.find(x=>x[0]==='Rudern mit Wasserflaschen'));
+          const okMoves=st.every(x=>x[0]==='Pause'||x[0]==='Gleich geht’s los'||moveFor(x[0]));woFinish();woClose();const s=S.sessions[S.sessions.length-1];
+          const res=[card,mins>=20&&mins<=30,lbl,okMoves,s.day==='pull'&&s.ex[0].home===true,!trained().some(x=>x.id==='home_pull')].join('|');
+          S.sessions=S.sessions.filter(x=>x!==s);S.prof.loc=loc;persist();render();return res})()""")
+        check(r == "true|true|Runde 1 von 3 · Übung 2 von 6|true|true|true", "Zu Hause: Pull mit Timer (20–30 min, Runden), Strichmännchen für jede Übung, zählt als Krafteinheit (" + r + ")")
+        r = pg.evaluate("""(()=>{const P={...S.prof},n0=S.sessions.length;S.prof.loc='home';const m=k=>{S.prof.hlen=k;return homeBuild('push').min};const len=[m('k'),m('n'),m('l')];S.prof.hlen='n';
+          S.prof.heq={};const c=homeCirc('push').map(x=>x[0]);S.prof.heq={band:1,pole:1};const c2=homeCirc('push').map(x=>x[0]);S.prof.heq={};
+          homeStart('legs');woFinish();const sum=/Punkte/.test(woEl.textContent)&&/Diese Woche/.test(woEl.textContent);homeRepOpen=true;woRender();const html=sum&&woEl.innerHTML.includes('data-hrep');document.querySelectorAll('[data-hrep]').forEach(i=>i.value='9');homeSaveReps();
+          const last=homeReps('Po-Heben am Boden').last;homeStart('legs');const st=woSteps(),i=st.findIndex(x=>x[0]==='Po-Heben am Boden');wo.i=i;woRender();const t=woEl.textContent;woClose();
+          S.sessions=S.sessions.slice(0,n0);S.prof=P;persist();render();
+          return [len[0]<=12,len[1]>=20&&len[1]<=26,len[2]>=28,!c.some(x=>/Band|Stange/.test(x))&&c.includes('Arme heben in Bauchlage')&&c2.includes('Rudern an der Stange')&&c2.includes('Band zum Gesicht ziehen'),html,last===9,/Letztes Mal 9 Wiederholungen/.test(t)&&/Leichter:/.test(t)].join('|')})()""")
+        check(r == "true|true|true|true|true|true|true", "Zu Hause: kurz/normal/lang, Ersatz ohne Band und Stange, Wiederholungen eintragen → 'Letztes Mal' + 'Leichter' im Training (" + r + ")")
         print("Rezept nach dem Training")
         pg.evaluate("""(()=>{window._rs=S.sessions.length;window._ri=ND(today()).items.length;if(!trainedToday())S.sessions.push({id:'s_rec',date:Date.now(),day:'legs',ex:[{id:'bank',name:'Bank',sets:[{kg:60,reps:8}]}]});REC=null;view='home';render()})()""")
         try: pg.wait_for_selector(".rcard h3", timeout=8000); ok = True
