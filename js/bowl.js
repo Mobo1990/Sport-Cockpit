@@ -31,14 +31,14 @@ function bowlHtml(sh){const b=sh.bowl,pn=bowlPn(),t=bowlSum(b),ml=MEALS.find(m=>
  ${pn&&me!=null&&me<100?`<label class="rshare"><input type="checkbox" id="bwPa"${b.pa?' checked':''}> Auch für ${esc(pn)} eintragen <span>(bestätigt selbst)</span></label>
  ${b.pa?`<p class="bwlab">${esc(pn)} isst:</p><div class="bwpct bwpp"><button data-bw="pp" data-v="r" aria-pressed="${b.pp==='r'}">Rest</button>${BOWL_FR.slice(0,3).filter(([v])=>v<=100-me+0.01).map(([v,l])=>`<button data-bw="pp" data-v="${v}" aria-pressed="${b.pp!=='r'&&Math.abs(+b.pp-v)<0.01}">${l}</button>`).join('')}</div>`:''}`:''}
  ${me!=null?(()=>{const A=bowlPart(t,me/100),P=bowlPart(t,pa/100),T=bowlPart(t,1),R={};for(const k in T)R[k]=Math.max(0,T[k]-A[k]-(pa?P[k]:0));
-  return `<div class="bwme">${bowlTile('','Du',A)}${pa?bowlTile('bwpa',esc(pn),P,'als Vorschlag'):''}${rest>0.5?bowlTile('bwrest','Rest',R,'Kind/Gäste – wird nicht eingetragen'):''}</div>`})():''}
+  return `<div class="bwme">${bowlTile('','Du',A)}${pa?bowlTile('bwpa',esc(pn),P,'als Vorschlag'):''}${rest>0.5?bowlTile('bwrest','Übrig',R,'Übrig (z. B. Kind, Gäste) – wird nicht eingetragen'):''}</div>`})():''}
  <div class="bwsave"><button class="primary" data-bw="save"${me==null?' disabled':''}>${me==null?'Erst wählen, wie viel du isst':`Zu ${ml} eintragen`}</button></div>`:''}`}
 /* Normale Such-/Mengen-Schritte im Koch-Modus: Leiste oben + „Hinzufügen“ landet in der Schale */
 const _bwRenderSheet=renderSheet;
 renderSheet=function(){const sh=sheet;
  if(sh&&sh.step==='bowl')return `<div class="sheet" role="dialog" aria-modal="true" aria-label="Für mehrere gemacht"><div class="sheetin" data-step="bowl">${bowlHtml(sh)}</div></div>`;
  let h=_bwRenderSheet();if(!sh||!sh.bowl)return h;const n=sh.bowl.items.length;
- const bar=`<div class="bwbar"><span>${esc(sh.bowl.n||'Schale')}: ${n} ${n===1?'Zutat':'Zutaten'}</span><button class="primary" data-bw="view">Zurück zur Schale ›</button></div>`;
+ const bar=`<div class="bwbar"><span>${esc(sh.bowl.n||'Schale')}: ${n} ${n===1?'Zutat':'Zutaten'}</span><button class="ghost" data-bw="view">Zurück zur Schale ›</button></div>`;
  h=h.replace('<div class="sheetin" data-step="'+(sh.step||'search')+'">','$&'+bar).replace(/<button class="primary" data-n="addit"([^>]*)>[^<]*<\/button>/,'<button class="primary" data-n="addit"$1>Hinzufügen</button>').replace('<h2>Essen eintragen</h2>','<h2>Zutat hinzufügen</h2>');
  /* Löffel/Hand statt Gramm (Richtwerte) */
  if(sh.step!=='amount'||!sh.food)return h;const pl=(sh.food.por&&sh.food.por.l||'').toLowerCase(),hand=/flocken|nüss|nuss|mandel|beere|müsli|granola|kerne|samen|rosine|cranberr|obst|frücht/i.test(sh.food.name);

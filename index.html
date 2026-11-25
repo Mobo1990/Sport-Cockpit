@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="description" content="Duo – Training, Essen und Wochenziel für zwei: Push/Pull/Legs, Heim-Training, Rezepte und gemeinsamer Kalender.">
 <title>Duo</title>
 <meta name="theme-color" content="#f3f2ee">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -10,6 +11,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script>/* Ansicht vor dem ersten Zeichnen setzen: Duo-Design, außer „Klassisch“ gewählt */try{if(localStorage.getItem('sc.ui')!=='classic')document.documentElement.classList.add('th-duo')}catch(e){document.documentElement.classList.add('th-duo')}</script>
 <link rel="stylesheet" href="style.css">
@@ -25,16 +27,16 @@
   </div>
   <div class="stats" id="stats"></div>
 </div></header>
-<main><div class="wrap" id="view"></div></main>
+<main><h1 class="sr">Duo</h1><div class="wrap" id="view"></div></main>
 <div class="toast" id="toast" role="status"><b id="toastT"></b><span id="toastS"></span></div><div class="timer" id="timer"><b id="tLeft">1:30</b><div class="bar"><i id="tBar"></i></div><button data-a="t" data-s="-15">−15</button><button data-a="t" data-s="15">+15</button><button data-a="tstop">Fertig</button></div>
-<nav class="nav" role="tablist">
+<nav class="nav" aria-label="Hauptmenü"><div class="navtabs" role="tablist" aria-label="Bereiche">
   <button role="tab" data-a="view" data-v="home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>Start</button>
   <button role="tab" data-a="view" data-v="train"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8v8M18 8v8M3 10v4M21 10v4M6 12h12"/></svg>Training</button>
   <button role="tab" data-a="view" data-v="nut"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v8a3 3 0 0 0 3 3v7M10 3v6M13 3v8"/><path d="M17 21V3c2 1 3 4 3 7h-3"/></svg>Essen</button>
   <button role="tab" data-a="view" data-v="cal"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Kalender</button>
   <button role="tab" data-a="view" data-v="rew"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11h16v9H4z"/><path d="M3 7h18v4H3zM12 7v13"/><path d="M12 7c-2-3-6-3-6 0M12 7c2-3 6-3 6 0"/></svg>Belohnung<i class="nbadge" id="rwBadge" hidden></i></button>
   <button role="tab" data-a="view" data-v="more"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>Mehr</button>
-</nav>
+</div></nav>
 <script src="js/data.js"></script><script src="js/training.js"></script><script src="js/cheer.js"></script><script src="js/nutrition.js"></script><script src="js/smart.js"></script><script src="js/sync.js"></script><script src="js/game.js"></script><script src="js/workout.js"></script><script src="js/moves.js"></script><script src="js/guide.js"></script>
 <script src="js/homewo.js"></script><script src="js/share.js"></script><script src="js/bowl.js"></script><script src="js/weekly.js"></script><script src="js/board.js"></script><script src="js/rewards.js"></script><script src="js/recipes.js"></script><script src="js/home.js"></script><script src="js/onboarding.js"></script><script src="js/gym.js"></script><script src="js/coach.js"></script><script src="js/review.js"></script><script src="js/photo.js"></script><script src="js/voice.js"></script><script src="js/advent.js"></script><script src="js/away.js"></script><script src="js/main.js"></script>
 </body></html>

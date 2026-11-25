@@ -23,10 +23,10 @@ function boardHtml(sc){const me=S.prof.name||'Ich',p=boardPartner(),a=weekScore(
  const b=p.week,d=Math.abs(a-b),lead=a===b?0:a>b?1:-1,share=a+b?a/(a+b)*100:50;
  const txt=(lead===0?'Gleichstand':lead>0?`Du führst mit ${fmt(d)}`:`${esc(p.name)} führt · dir fehlen ${fmt(d+1)}`);
  const split=Math.max(12,Math.min(88,share));
- return `<section class="board split" data-bd="1" role="button" aria-expanded="${boardOpen}" style="--split:${split.toFixed(1)}%">${meCol(lead>0)}
+ return `<div class="board split" data-bd="1" role="button" tabindex="0" aria-expanded="${boardOpen}" style="--split:${split.toFixed(1)}%">${meCol(lead>0)}
  <div class="bmid"><span class="bk">Woche</span><b class="cond">${fmt(a)}<i>:</i>${fmt(b)}</b><em class="${lead>0?'me':lead<0?'pa':''}">${txt}</em>${typeof weekGoal==='function'&&weekGoal(wk(Date.now()))<S.goal?`<small class="btrip">Reise-Woche · Ziel ${weekGoal(wk(Date.now()))} statt ${S.goal}</small>`:''}</div>
  <div class="bp pa">${lead<0?CROWN:''}${avaHtml(p.name,false)}<span class="bn">${esc(p.name)}</span><b class="cond bpt">${fmt(p.today)}</b><small>heute${p.tr?' · '+esc(p.tr):''}</small></div>
- <div class="bbar" aria-label="Anteil an den Wochenpunkten"><i style="width:${share.toFixed(1)}%"></i><s></s></div><small class="bmore">${boardOpen?'weniger ▴':'Details ▾'}</small></section>${boardOpen?boardDetail(a,p,lead,d):''}`}
+ <div class="bbar" aria-label="Anteil an den Wochenpunkten"><i style="width:${share.toFixed(1)}%"></i><s></s></div><small class="bmore">${boardOpen?'weniger ▴':'Details ▾'}</small></div>${boardOpen?boardDetail(a,p,lead,d):''}`}
 /* Bild klein und quadratisch rechnen (Mitte), JPEG */
 function picShrink(file,size=160){return new Promise((res,rej)=>{const img=new Image(),u=URL.createObjectURL(file);img.onload=()=>{const c=document.createElement('canvas');c.width=c.height=size;const s=Math.min(img.width,img.height);
  c.getContext('2d').drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,size,size);URL.revokeObjectURL(u);res(c.toDataURL('image/jpeg',.8))};img.onerror=()=>rej(new Error('Bild nicht lesbar'));img.src=u})}

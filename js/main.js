@@ -14,3 +14,5 @@ if(window.visualViewport){const vv=window.visualViewport;let raf=0;let kbWas=fal
 function navFix(){setTimeout(()=>{const n=document.querySelector('.nav');window.scrollTo(window.scrollX,window.scrollY);if(!n)return;n.style.display='none';void n.offsetHeight;n.style.display=''},60)}
 document.addEventListener('focusout',ev=>{if(/^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName))setTimeout(()=>{const a=document.activeElement;if(!a||!/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))navFix()},250)});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)navFix()});
+/* Tastatur: Elemente mit role=button per Enter/Leertaste bedienbar */
+document.addEventListener('keydown',ev=>{const t=ev.target;if((ev.key==='Enter'||ev.key===' ')&&t&&t.getAttribute&&t.getAttribute('role')==='button'&&t.tagName!=='BUTTON'){ev.preventDefault();t.click()}});

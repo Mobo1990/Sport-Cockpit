@@ -694,7 +694,7 @@ try:
         pg.click("[data-meal=s] [data-bw=start][data-id]"); pg.wait_for_timeout(150)
         check(nosh and pg.locator(".bwlist li").count() == 2 and pg.input_value("#bwN") == "Joghurt-Schale", "Gemerkte Schale steht als '↻ Name' an der Mahlzeit, 'Mit … teilen' fällt weg, wenn schon geschickt")
         pg.fill("#bwW", "115"); pg.dispatch_event("#bwW", "change"); pg.wait_for_timeout(150)
-        check("Rest" in pg.text_content(".bwme") and pg.evaluate("sheet.bowl.pct") == 25, "Teller gewogen (115 g von 460 g) → 25 %, Rest wird nicht eingetragen")
+        check("Übrig" in pg.text_content(".bwme") and pg.evaluate("sheet.bowl.pct") == 25, "Teller gewogen (115 g von 460 g) → 25 %, Rest wird nicht eingetragen")
         pg.click("[data-bw=close]"); pg.wait_for_timeout(100)
 
         print("Adventskalender")
@@ -726,6 +726,7 @@ try:
         _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         _bad = [f for f in ['index.html', 'style.css', 'sw.js'] + glob.glob(os.path.join(_root, 'js', '*.js')) if _re.search(r'^(<{7}|={7}|>{7})( |$)', open(os.path.join(_root, f), encoding='utf-8').read(), _re.M)]
         check(not _bad, "Keine Merge-Konfliktmarker in ausgelieferten Dateien" + ("" if not _bad else ": " + ", ".join(_bad)))
+        check(pg.locator("main h1").count() == 1 and pg.locator("nav.nav[aria-label] [role=tablist] [role=tab]").count() == 6 and pg.locator("section[role=button]").count() == 0, "Barrierefreiheit: Seitenüberschrift, Navigation als Landmarke, Tabs in Tabliste")
         check(not errs, "Keine JavaScript-Fehler" + ("" if not errs else ": " + "; ".join(errs)))
         b.close()
 finally:
