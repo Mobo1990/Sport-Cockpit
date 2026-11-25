@@ -1134,3 +1134,10 @@ html.kbopen .nav{display:none}
 .bwz{font-size:14px;white-space:pre-line;color:var(--ink)}.bwz summary{color:var(--mute);font-size:13px;white-space:normal}
 .sheetin .rshare{display:block;line-height:1.45}.sheetin .rshare input{vertical-align:-4px;margin-right:6px}.sheetin .rshare span{display:inline}
 .sheetin .rshare input{width:22px;height:22px;vertical-align:-5px}.bwpp button{white-space:nowrap}
+/* Koch-Modus Runde 3 */
+.bwsave{position:static;background:none;padding:10px 0 0}.bwlab{margin:8px 0 4px;font-size:14px;color:var(--mute)}
+.bwpp{flex-wrap:nowrap}.bwpp button{flex:1;min-width:0;font-size:17px}
+.bwme .bwp{color:var(--ink);font-weight:600;font-size:14px}.bwme span{font-size:13px}
+.bwrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;width:100%;margin-top:2px}.bwrow .glink{font-size:14px;color:var(--mute);text-decoration:underline;text-underline-offset:3px;min-height:36px;padding:0}
+.bwsent{display:block;font-size:12px;color:var(--d-saged,#3E5A4C)}
+.mfoot .bwrow .glink,.bwrow .glink{background:none!important;border:0!important;box-shadow:none!important}
