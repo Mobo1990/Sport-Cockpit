@@ -261,6 +261,8 @@ try:
         check(r == "k/c/", "Partner-Trainingstage aus HA: Kraft gestern, Cardio vorgestern")
         r = pg.evaluate("""(()=>{const o=AWAY,mon=wk(Date.now()),d0=iso(mon+12*36e5),d1=iso(mon+36*36e5);AWAY=[{wer:S.prof.name,s:d0,start:new Date(d0+'T00:00').getTime(),stop:new Date(d1+'T23:59').getTime()}];const g=weekGoal(mon);AWAY=o;return g})()""")
         check(r == pg.evaluate("Math.max(1,S.goal-1)"), "Fair: 2 Tage unterwegs senken das Wochenziel um 1")
+        r = pg.evaluate("""(()=>{const c=s=>getComputedStyle(document.querySelector(s)).backgroundColor,a=[c('.clegend .cd.me'),c('.clegend .cd.pa')];document.documentElement.classList.add('me-w');const b=[c('.clegend .cd.me'),c('.clegend .cd.pa')];document.documentElement.classList.remove('me-w');return a[0]===b[1]&&a[1]===b[0]&&a[0]!==a[1]})()""")
+        check(r, "Kalender: feste Personenfarben – bei ihr ist er Salbei, sie Rosé (wie auf seinem Handy)")
         check(any(c.get("service") == "set_value" and c["service_data"]["entity_id"] == "input_text.sport_cockpit_michell_tage" for c in [json.loads(l) for l in open("/tmp/calls.log")]), "Eigene Trainingstage werden für den Partner-Kalender geteilt")
 
         print("Anzeigetafel & Profilbild")

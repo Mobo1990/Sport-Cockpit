@@ -1075,3 +1075,7 @@ html.kbopen .nav{display:none}
 /* Kalender: genauer eintragen */
 .away.form{background:var(--s1);border-radius:18px;box-shadow:var(--sh);padding:14px;margin:0 0 12px;scroll-margin-top:70px}.awlab{margin:6px 0 4px;font-size:14px;color:var(--mute)}
 .cform label i{font-style:normal;font-weight:400;color:var(--mute);font-size:12px;margin-left:4px}.awokb{display:flex;flex-wrap:wrap;gap:8px;width:100%}.awokb button{flex:1 1 auto}
+/* Kalender: feste Personenfarben wie überall (Mann Salbei, Frau Rosé – per :root.me-w getauscht) */
+.cd.me,.cbar s.me,.clegend s.me{background:var(--me)}.cd.pa,.cbar s.pa,.clegend s.pa{background:var(--pa)}
+.cd.me.ring{color:var(--me)}.cd.pa.ring{color:var(--pa)}
+:root.me-w .calsum .pa b{color:var(--d-saged,#3E5A4C)}
