@@ -81,7 +81,7 @@ Object.assign(MOVES,{
  'gym:curl':{dur:2.4,load:['hand'],poses:[{...GSTAND,elbow:[102,56],hand:[106,78]},{...GSTAND,elbow:[102,56],hand:[118,40]}]},
  'gym:squat':{dur:2.6,load:['hand'],poses:[
   {...GSTAND,elbow:[88,46],hand:[96,32]},{head:[110,46],neck:[104,58],hip:[76,92],knee:[110,94],foot:[100,MV_FLOOR],elbow:[92,70],hand:[100,56]}]},
- 'gym:rdl':{dur:2.8,load:['hand'],poses:[{...GSTAND,elbow:[102,54],hand:[102,74]},{head:[146,52],neck:[134,56],hip:[86,72],knee:[96,97],foot:[100,MV_FLOOR],elbow:[134,76],hand:[132,96]}]},
+ 'gym:rdl':{dur:2.8,load:['hand'],poses:[{...GSTAND,elbow:[102,54],hand:[102,74]},{head:[125,54],neck:[113,62],hip:[82,84],knee:[104,98],foot:[100,MV_FLOOR],elbow:[112,82],hand:[110,101]}]},
  'gym:kreuz':{dur:2.8,load:['hand'],lr:9,poses:[
   {head:[132,54],neck:[120,60],hip:[82,88],knee:[112,96],foot:[100,MV_FLOOR],elbow:[116,84],hand:[112,104]},{...GSTAND,elbow:[102,54],hand:[102,74]}]},
  'gym:presse':{dur:2.6,props:['36,112 74,112 46,62','100,98 120,62'],poses:[
