@@ -1026,3 +1026,12 @@ html.kbopen .nav{display:none}
 .wo .wobody{overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0}.wo .wobody:has(.hwsum){justify-content:flex-start}
 .hwl b{font-size:17px}.hwl span{font-size:14px}.hwnew{display:block;font-style:normal;font-size:12px;font-weight:700;color:var(--mute);margin-top:3px}
 .woring b{white-space:nowrap}.wonx{text-wrap:balance}
+/* Rezepte nach Tester-Befragung */
+.rkpi{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0}.rkpi span{background:var(--s2);border-radius:12px;padding:8px;text-align:center;font-size:13px;color:var(--mute)}.rkpi b{display:block;font:800 20px var(--fh);color:var(--ink)}
+.rfit{margin:0 0 4px;font-size:14px;color:var(--acc);font-weight:600}.rfit.ok{color:var(--d-saged,#3E5A4C)}.rmeta{margin:0 0 10px;font-size:13px;color:var(--mute)}
+.rlinks{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px}.rlinks .glink{padding:4px 0;font-size:13px;color:var(--mute)}
+.rserv{display:flex;gap:6px;margin:0 0 6px}.rserv button{flex:1;min-height:38px;font-size:14px}.rserv button[aria-pressed=true],.rpor button[aria-pressed=true]{background:var(--dark,#3E5A4C);color:#fff}
+.ring label{display:flex;align-items:flex-start;gap:10px;font-size:17px}.ring input{width:22px;height:22px;margin-top:2px}.ring input:checked+span{text-decoration:line-through;color:var(--mute)}
+.rsteps li{font-size:18px;line-height:1.5;margin-bottom:12px}
+.rfoot{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);background:var(--s1)}.rpor{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.rpor button{min-width:44px;min-height:40px;padding:4px 8px}.rpor span{font-size:14px;color:var(--mute)}.rpor b{color:var(--ink)}
+.rshare{display:flex;align-items:center;gap:8px;font-size:15px}.rshare input{width:20px;height:20px}
