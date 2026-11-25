@@ -1003,3 +1003,9 @@ html.kbopen .nav{display:none}
 .wohome{justify-content:flex-start;padding-top:10px;gap:4px}.wohome .won{font-size:clamp(28px,8vw,38px)}.wohome .wosub{font-size:15px;line-height:1.35}
 .wohome .woeasy{font-size:14px;margin-top:2px}.wohome .wolast{font-size:15px}.wohome .wofig{width:auto;height:min(22vh,170px);max-width:74vw}
 .wohome .woring{width:118px!important;height:118px!important;margin:4px 0!important}.wohome .woring b{font-size:42px}
+.hwwk{margin:0 0 10px!important;padding:8px 12px;border-radius:12px;background:var(--d-sagel,#E3ECE6);color:var(--ink)!important;font-size:14px}.hwwk .glink{padding:0;font-size:14px;display:inline}
+.hwsum{display:flex;flex-direction:column;align-items:center;gap:2px;margin:6px 0 10px}.hwsum b{font-size:44px;color:var(--acc);line-height:1}.hwsum span{font-size:15px;color:var(--mute)}
+.hwfeel{width:100%;background:var(--s1);border-radius:16px;padding:12px;margin:0 0 8px}.hwfeel>b{display:block;font:800 17px var(--fh);margin-bottom:8px}.hwfeel>div{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.hwfeel button{min-height:46px}.hwfeel button[aria-pressed=true]{background:var(--dark,#3E5A4C);color:#fff}.hwfeel small{display:block;margin-top:8px;color:var(--mute)}
+.hwok{width:100%;margin-top:8px}.hwl li{padding:6px 0}.hwl .hwfig{flex-basis:84px;width:84px;height:60px}
+.tiles+.hwlen{margin:-4px 0 14px}
+.hwrec{display:block!important}.tiles+.hwlen{margin:8px 0 16px!important}

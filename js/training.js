@@ -81,7 +81,7 @@ const wpKg=()=>lastWeight(today())||num(S.prof.weight)||80;
 function wpLastKmh(){const s=[...S.sessions].filter(x=>(x.cardio||[]).some(isWP)).sort((a,b)=>b.date-a.date)[0];const c=s&&s.cardio.find(isWP);return c&&c.kmh||4}
 /* Cardio: zuletzt genutzte Art vorauswählen; Kalorien für alle Arten schätzen (MET × kg × Stunden, nach Kompendium) */
 function lastCT(){const s=[...S.sessions].filter(x=>(x.cardio||[]).length).sort((a,b)=>b.date-a.date)[0];return s&&CT.includes(s.cardio[0].type)?s.cardio[0].type:CT[0]}
-const CMET={'Laufband':[7,9,11],'Laufen draußen':[7,9.8,11.5],'Fahrrad / Ergometer':[5,7,10],'Crosstrainer':[4.5,5.5,7.5],'Rudergerät':[4.8,7,8.5],'Stepper / Treppe':[5,8,9],'Schwimmen':[5.8,8,9.8],'Seilspringen':[8.8,11,12.3]};
+const CMET={'Laufband':[7,9,11],'Laufen draußen':[7,9.8,11.5],'Fahrrad / Ergometer':[5,7,10],'Crosstrainer':[4.5,5.5,7.5],'Rudergerät':[4.8,7,8.5],'Stepper / Treppe':[5,8,9],'Schwimmen':[5.8,8,9.8],'Seilspringen':[8.8,11,12.3],'Pole Dance / Tanzkurs':[4.5,5.5,7]};
 function metKcal(c){const m=num(c.min);if(!(m>0))return 0;const t=CMET[c.type];if(!t)return 0;return Math.round(t[{l:0,m:1,h:2}[c.lvl]??1]*wpKg()*m/60)}
 function cHint(c){if(isWP(c))return wpHint(c);const k=metKcal(c);return k?`≈ <b>${fmt(k)} kcal</b> in ${fmt(num(c.min))} min (${{l:'locker',m:'mittel',h:'hart'}[c.lvl]||'mittel'}, ${fmt(wpKg())} kg)`:'Minuten eintragen – dann siehst du die geschätzten Kalorien.'}
 function wpHint(c){const m=num(c.min),k=num(c.kmh)||wpLastKmh(),kg=wpKg();

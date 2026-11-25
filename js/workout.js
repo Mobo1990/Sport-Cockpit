@@ -38,7 +38,7 @@ function woUpd(){const st=woSteps(),cur=st[wo.i],t=document.getElementById('woT'
  const rest=st.slice(wo.i+1).reduce((a,x)=>a+x[1],0)+wo.left,tl=document.getElementById('woTotal');if(tl)tl.textContent=mmss(rest)+' übrig'}
 function woRender(){if(!wo){woEl.classList.remove('on');woEl.innerHTML='';return}woEl.classList.add('on');const W=WO[wo.k],st=woSteps();
  if(wo.done){const c=CH.find(x=>x.id===wo.ch);woEl.innerHTML=`<div class="gh"><button class="gx" data-wo-a="close" aria-label="Schließen">✕</button><div><b>${esc(W.n)}</b><small>Fertig</small></div></div>
-  <div class="wobody"><p class="wodone cond">Geschafft!</p><p class="wosub">${W.min} Minuten ${esc(W.n)} erledigt${c?` · <b>+${c.pt} Punkte</b>`:''}</p>${W.home&&typeof homeDoneHtml==='function'&&homeLast?homeDoneHtml()+'<button class="ghost" data-hw="skiprep">Ohne Eintragen schließen</button>':'<button class="primary" data-wo-a="close">Zurück zur Startseite</button>'}</div>`;return}
+  <div class="wobody"><p class="wodone cond">Geschafft!</p><p class="wosub">${W.min} Minuten ${esc(W.n)} erledigt${c?` · <b>+${c.pt} Punkte</b>`:''}</p>${W.home&&typeof homeDoneHtml==='function'&&homeLast?homeDoneHtml():'<button class="primary" data-wo-a="close">Zurück zur Startseite</button>'}</div>`;return}
  const cur=st[wo.i],nx=st[wo.i+1],isP=cur[0]==='Pause'||wo.i===0,work=st.slice(1).filter(x=>x[0]!=='Pause'),wi=wo.i===0?0:work.indexOf(cur)+1;
  woEl.innerHTML=`<div class="gh"><button class="gx" data-wo-a="close" aria-label="Abbrechen">✕</button><div><b>${esc(W.n)}</b><small id="woTotal"></small></div></div>
  <div class="gprog">${st.slice(1).map((x,i)=>`<i class="${i+1<wo.i?'d':i+1===wo.i?'c':''}${x[0]==='Pause'?' p':''}"></i>`).join('')}</div>
@@ -47,7 +47,7 @@ function woRender(){if(!wo){woEl.classList.remove('on');woEl.innerHTML='';return
   ${(()=>{const fn=cur[0]==='Pause'?(nx?nx[0]:''):(wo.i===0?st[1][0]:cur[0]);if(!fn||fn==='Pause')return '';const mf=moveFor(fn),fe=mf&&mf.m.feel;return moveSvg(fn,'wofig'+(cur[0]==='Pause'||wo.i===0?' soon':''))+(fe?`<p class="wofeel">Spürst du hier: <b>${esc(fe)}</b></p>`:'')})()}
   <div class="woring"><svg viewBox="0 0 110 110" aria-hidden="true"><circle cx="55" cy="55" r="48" class="bg"/><circle id="woR" cx="55" cy="55" r="48" class="fg" stroke-dasharray="301.6" stroke-dashoffset="0"/></svg><b id="woT" class="cond">${Math.ceil(wo.left)}</b></div>
   ${wo.i===0&&woHasKnee(wo.k)?`<button class="woknee" data-wo-a="knee" aria-pressed="${!!wo.knee}">${wo.knee?'Knieschonend an ✓':'Knieschonend'}</button>`:''}${nx?`<p class="wonx">Als Nächstes: <b>${esc(nx[0]==='Pause'?(nx[2]||'Pause'):nx[0])}</b>${nx[0]==='Pause'?'':' · '+nx[1]+' s'}</p>`:'<p class="wonx">Letzte Runde!</p>'}</div>
- <div class="gfoot"><button data-wo-a="pause">${wo.paused?'Weiter':'Pause'}</button><button class="primary" data-wo-a="skip">Überspringen ›</button></div>`;woUpd()}
+ <div class="gfoot"><button data-wo-a="pause">${wo.paused?'Weiter':'Anhalten'}</button><button class="primary" data-wo-a="skip">Überspringen ›</button></div>`;woUpd()}
 document.addEventListener('click',ev=>{const s=ev.target.closest('[data-wo]');if(s){ev.stopPropagation();woStart(s.dataset.wo,s.dataset.woc);return}
  const b=ev.target.closest('[data-wo-a]');if(!b||!wo)return;const a=b.dataset.woA;
  if(a==='close'){if(!wo.done&&wo.i>0&&!confirm('Workout wirklich abbrechen? Es zählt dann nicht.'))return;woClose()}else if(a==='pause'){wo.paused=!wo.paused;wo.last=Date.now();woRender()}else if(a==='skip')woNext();else if(a==='knee'){wo.knee=!wo.knee;woRender()}},true);
