@@ -9,16 +9,24 @@ function avaHtml(name,me,cls=''){const p=picFor(name,me);return `<span class="av
 const CROWN='<svg class="crown" viewBox="0 0 24 16" aria-hidden="true"><path d="M2 14 L4 4 L9 9 L12 2 L15 9 L20 4 L22 14 Z"/></svg>';
 function boardPartner(){const p=(typeof partners!=='undefined'?partners:[]).find(x=>x.name);if(!p)return null;
  const inWeek=p.d&&wk(new Date(p.d+'T12:00:00'))===wk(Date.now());return{name:p.name,today:p.d===today()?(+p.pt||0):0,week:inWeek?(+p.wp||0):0,tr:p.d===today()?p.tr:''}}
+/* Duell antippen: Punkte pro Tag dieser Woche, Abstand, schnellste Punkte, Hinweis für Neueinsteiger */
+let boardOpen=false;
+function boardDetail(a,p,lead,d){const days=weekDaysIso(),wd=['Mo','Di','Mi','Do','Fr','Sa','So'],per=days.map((x,i)=>[wd[i],dayScore(x).pt]),hasOld=Object.keys(S.nut.days).some(x=>x<days[0]&&(S.nut.days[x].items||[]).length)||S.sessions.some(s=>iso(s.date)<days[0]);
+ const first=days.findIndex(x=>(S.nut.days[x]&&((S.nut.days[x].items||[]).length||S.nut.days[x].water||S.nut.days[x].af))||S.sessions.some(s=>iso(s.date)===x));
+ return `<section class="bdet"><div class="bdrow">${per.map(([n,v])=>`<div><small>${n}</small><b>${v}</b></div>`).join('')}</div>
+ <p>${lead<0?`<b>Dir fehlen ${fmt(d+1)} Punkte</b> bis zur Führung.`:lead>0?`<b>Du führst mit ${fmt(d)}.</b> ${esc(p.name)} hat heute ${fmt(p.today)} Punkte.`:'<b>Gleichstand.</b>'} Am schnellsten gibt's Punkte für Training (+30), Protein (+20), Challenges und Wasser (+10).</p>
+ ${!hasOld&&first>0?`<p class="bfair">Du bist erst seit ${wd[first]} dabei – ab Montag startet ihr beide wieder bei 0.</p>`:''}<p class="bfair">Wochenpunkte zählen von Montag bis Sonntag, danach geht's von vorne los.</p></section>`}
+document.addEventListener('click',ev=>{const b=ev.target.closest('[data-bd]');if(!b||ev.target.closest('.avawrap,input,label'))return;boardOpen=!boardOpen;render()});
 function boardHtml(sc){const me=S.prof.name||'Ich',p=boardPartner(),a=weekScore(),ta=sc.pt;
  const meCol=lead=>`<div class="bp"><label class="avawrap" title="Profilbild ändern">${lead?CROWN:''}${avaHtml(me,true)}<input type="file" accept="image/*" data-pic="file" hidden></label><span class="bn">${esc(me)}</span><span class="pts"><b class="cond">${fmt(ta)}</b></span><small>heute</small></div>`;
  if(!p)return `<section class="board solo">${meCol(false)}<div class="bmid"><span class="bk">Woche</span><b class="cond">${fmt(a)}</b><em>Punkte</em></div><p class="bhint">Sobald dein Partner mit Home Assistant verbunden ist, steht hier euer Vergleich.</p></section>`;
  const b=p.week,d=Math.abs(a-b),lead=a===b?0:a>b?1:-1,share=a+b?a/(a+b)*100:50;
  const txt=lead===0?'Gleichstand':lead>0?`Du führst mit ${fmt(d)}`:`${esc(p.name)} führt · dir fehlen ${fmt(d+1)}`;
  const split=Math.max(12,Math.min(88,share));
- return `<section class="board split" style="--split:${split.toFixed(1)}%">${meCol(lead>0)}
+ return `<section class="board split" data-bd="1" role="button" aria-expanded="${boardOpen}" style="--split:${split.toFixed(1)}%">${meCol(lead>0)}
  <div class="bmid"><span class="bk">Woche</span><b class="cond">${fmt(a)}<i>:</i>${fmt(b)}</b><em class="${lead>0?'me':lead<0?'pa':''}">${txt}</em></div>
  <div class="bp pa">${lead<0?CROWN:''}${avaHtml(p.name,false)}<span class="bn">${esc(p.name)}</span><b class="cond bpt">${fmt(p.today)}</b><small>heute${p.tr?' · '+esc(p.tr):''}</small></div>
- <div class="bbar" aria-label="Anteil an den Wochenpunkten"><i style="width:${share.toFixed(1)}%"></i><s></s></div></section>`}
+ <div class="bbar" aria-label="Anteil an den Wochenpunkten"><i style="width:${share.toFixed(1)}%"></i><s></s></div><small class="bmore">${boardOpen?'weniger ▴':'Details ▾'}</small></section>${boardOpen?boardDetail(a,p,lead,d):''}`}
 /* Bild klein und quadratisch rechnen (Mitte), JPEG */
 function picShrink(file,size=160){return new Promise((res,rej)=>{const img=new Image(),u=URL.createObjectURL(file);img.onload=()=>{const c=document.createElement('canvas');c.width=c.height=size;const s=Math.min(img.width,img.height);
  c.getContext('2d').drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,size,size);URL.revokeObjectURL(u);res(c.toDataURL('image/jpeg',.8))};img.onerror=()=>rej(new Error('Bild nicht lesbar'));img.src=u})}

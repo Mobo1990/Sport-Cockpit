@@ -38,7 +38,7 @@ function best(k){let b=0;for(const s of S.sessions){const x=s.ex.find(x=>x.id===
 const vol=s=>s.ex.reduce((a,x)=>isA(x.id)?a:a+x.sets.reduce((b,t)=>b+t.kg*t.reps,0),0);
 function wk(t){const x=new Date(t);x.setHours(0,0,0,0);x.setDate(x.getDate()-(x.getDay()+6)%7);return x.getTime()}
 function prevWk(k){const d=new Date(k);d.setDate(d.getDate()-7);return wk(d)}
-function draftFor(d){if(!drafts[d])drafts[d]={start:Date.now(),ex:{},extra:[]};const dr=drafts[d];dr.extra=dr.extra||[];dr.ex=dr.ex||{};dr.cardio=dr.cardio||(d==='cardio'?[{type:CT[0],min:'',km:'',lvl:'m'}]:[]);for(const e of dayEx(d)){if(!dr.ex[e.id])dr.ex[e.id]=Array.from({length:e.sets},()=>({kg:'',reps:'',done:false}))}return dr}
+function draftFor(d){if(!drafts[d])drafts[d]={start:Date.now(),ex:{},extra:[]};const dr=drafts[d];dr.extra=dr.extra||[];dr.ex=dr.ex||{};dr.cardio=dr.cardio||(d==='cardio'?[{type:lastCT(),min:'',km:'',lvl:'m'}]:[]);for(const e of dayEx(d)){if(!dr.ex[e.id])dr.ex[e.id]=Array.from({length:e.sets},()=>({kg:'',reps:'',done:false}))}return dr}
 function lastDay(){const s=[...S.sessions].filter(s=>s.day!=='cardio'&&DAYS[s.day]).sort((a,b)=>b.date-a.date)[0];return s?s.day:null}
 
 function renderHead(){document.body.className='v-'+view;document.documentElement.classList.toggle('me-w',!!S.prof&&S.prof.sex==='w');const br=document.querySelector('.brand');if(br)br.textContent='DUO'+(S.prof&&S.prof.name?' · '+S.prof.name.toUpperCase():'');
@@ -78,13 +78,18 @@ function wpNet(min,kmh,kg){const v=(+kmh||0)*1000/60;return Math.round((0.1*v+1.
 function wpKcal(min,kmh,kg){const v=(+kmh||0)*1000/60,vo2=0.1*v+1.8*v*WP_GRADE+3.5;return Math.round(vo2*(+kg||0)/1000*5*(+min||0))}
 const wpKg=()=>lastWeight(today())||num(S.prof.weight)||80;
 function wpLastKmh(){const s=[...S.sessions].filter(x=>(x.cardio||[]).some(isWP)).sort((a,b)=>b.date-a.date)[0];const c=s&&s.cardio.find(isWP);return c&&c.kmh||4}
+/* Cardio: zuletzt genutzte Art vorauswählen; Kalorien für alle Arten schätzen (MET × kg × Stunden, nach Kompendium) */
+function lastCT(){const s=[...S.sessions].filter(x=>(x.cardio||[]).length).sort((a,b)=>b.date-a.date)[0];return s&&CT.includes(s.cardio[0].type)?s.cardio[0].type:CT[0]}
+const CMET={'Laufband':[7,9,11],'Laufen draußen':[7,9.8,11.5],'Fahrrad / Ergometer':[5,7,10],'Crosstrainer':[4.5,5.5,7.5],'Rudergerät':[4.8,7,8.5],'Stepper / Treppe':[5,8,9],'Schwimmen':[5.8,8,9.8],'Seilspringen':[8.8,11,12.3]};
+function metKcal(c){const m=num(c.min);if(!(m>0))return 0;const t=CMET[c.type];if(!t)return 0;return Math.round(t[{l:0,m:1,h:2}[c.lvl]??1]*wpKg()*m/60)}
+function cHint(c){if(isWP(c))return wpHint(c);const k=metKcal(c);return k?`≈ <b>${fmt(k)} kcal</b> in ${fmt(num(c.min))} min (${{l:'locker',m:'mittel',h:'hart'}[c.lvl]||'mittel'}, ${fmt(wpKg())} kg)`:'Minuten eintragen – dann siehst du die geschätzten Kalorien.'}
 function wpHint(c){const m=num(c.min),k=num(c.kmh)||wpLastKmh(),kg=wpKg();
  return m>0?`≈ <b>${fmt(wpKcal(m,k,kg))} kcal</b> in ${fmt(m)} min bei ${fmt(k)} km/h, 7 % Steigung, ${fmt(kg)} kg`:`Bei ${fmt(k)} km/h und 7 % Steigung: ≈ <b>${fmt(wpKcal(60,k,kg))} kcal pro Stunde</b>`}
 function cardioBlock(dr){const last=[...S.sessions].filter(s=>s.cardio&&s.cardio.length).sort((a,b)=>b.date-a.date)[0];
  return `<article class="ex"><div class="exhead"><div class="pic">${svg('run')}</div><div><h3>Cardio</h3><p class="tgt">${day==='cardio'?'Ausdauer-Einheit':'Optional nach dem Krafttraining'}${last?` · zuletzt ${esc(last.cardio[0].type)} ${fmt(last.cardio[0].min)} min`:''}</p></div></div>
  ${dr.cardio.map((c,i)=>`<div class="sets" style="margin-bottom:10px"><select data-a="cin" data-i="${i}" data-f="type" aria-label="Cardio-Art">${CT.map(t=>`<option${t===c.type?' selected':''}>${t}</option>`).join('')}</select>
  <div class="clab"><span>Minuten</span><span>${isWP(c)?'Tempo km/h':'km'}</span><span>Puls Ø</span></div><div class="row" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);margin-top:2px"><input inputmode="numeric" placeholder="Minuten" aria-label="Minuten" data-a="cin" data-i="${i}" data-f="min" value="${esc(c.min)}">${isWP(c)?`<input inputmode="decimal" placeholder="${fmt(wpLastKmh())} km/h" aria-label="Tempo in km/h" data-a="cin" data-i="${i}" data-f="kmh" value="${esc(c.kmh||'')}">`:`<input inputmode="decimal" placeholder="km (optional)" aria-label="Kilometer" data-a="cin" data-i="${i}" data-f="km" value="${esc(c.km)}">`}<input inputmode="numeric" placeholder="Puls Ø (opt.)" aria-label="Durchschnittspuls" data-a="cin" data-i="${i}" data-f="hr" value="${esc(c.hr)}"></div>
- ${isWP(c)?`<p class="wpk" id="wpk${i}">${wpHint(c)}</p><label class="wpeat"><input type="checkbox" data-a="ceat" data-i="${i}"${c.eat?' checked':''}> Im Essensziel einrechnen <small>(nur der Mehrverbrauch, ohne Grundumsatz)</small></label>`:''}<div class="vars" style="margin-top:6px">${[['l','Locker'],['m','Mittel'],['h','Intervalle / hart']].map(([k,l])=>`<button data-a="clvl" data-i="${i}" data-r="${k}" aria-pressed="${c.lvl===k}">${l}</button>`).join('')}<button class="ghost" data-a="crm" data-i="${i}">Entfernen</button></div></div>`).join('')}
+ ${!isWP(c)?`<p class="wpk" id="wpk${i}">${cHint(c)}</p>`:''}${isWP(c)?`<p class="wpk" id="wpk${i}">${wpHint(c)}</p><label class="wpeat"><input type="checkbox" data-a="ceat" data-i="${i}"${c.eat?' checked':''}> Im Essensziel einrechnen <small>(nur der Mehrverbrauch, ohne Grundumsatz)</small></label>`:''}<div class="vars" style="margin-top:6px">${[['l','Locker'],['m','Mittel'],['h','Intervalle / hart']].map(([k,l])=>`<button data-a="clvl" data-i="${i}" data-r="${k}" aria-pressed="${c.lvl===k}">${l}</button>`).join('')}<button class="ghost" data-a="crm" data-i="${i}">Entfernen</button></div></div>`).join('')}
  <div class="exfoot"><button data-a="cadd">+ Cardio ${dr.cardio.length?'hinzufügen':'eintragen'}</button></div></article>`}
 function renderPicker(){const have=new Set(dayEx(day).map(e=>e.id)),ids=Object.keys(CAT).filter(id=>!have.has(id)).sort((a,b)=>(CAT[a].d===day?0:1)-(CAT[b].d===day?0:1));
  return `<section class="picker"><h2>Übung für heute hinzufügen</h2><div class="plist">${ids.map(id=>`<button class="pitem" data-a="pick" data-id="${id}"><div class="pic">${svg(CAT[id].p)}</div><span>${esc(CAT[id].n)}</span></button>`).join('')}</div>
@@ -159,7 +164,7 @@ function renderCore(){memoReset();renderHead();const v=$('view');if(!profOK()||o
 
 function finish(){const dr=draftFor(day),ex=[],p0=dayScore(today()).pt;
  for(const e of dayEx(day)){const sets=dr.ex[e.id].map(r=>({kg:num(r.kg)??0,reps:Math.round(num(r.reps)??0),...(r.rpe?{rpe:r.rpe}:{})})).filter(t=>t.reps>0);if(sets.length)ex.push({id:vkey(e),base:e.id,v:e.v||'',name:vname(e)+(isA(e.v)?' (kg = Hilfe)':''),...(isA(e.v)?{assist:true}:{}),sets})}
- const cardio=(dr.cardio||[]).filter(c=>num(c.min)>0).map(c=>({type:c.type,min:num(c.min),...(isWP(c)?(()=>{const k=num(c.kmh)||wpLastKmh(),m=num(c.min);return{kmh:k,km:Math.round(k*m/6)/10,kcal:wpKcal(m,k,wpKg()),...(c.eat?{eat:wpNet(m,k,wpKg())}:{})}})():{}),...(num(c.km)?{km:num(c.km)}:{}),...(num(c.hr)?{hr:Math.round(num(c.hr))}:{}),lvl:c.lvl||'m'}));
+ const cardio=(dr.cardio||[]).filter(c=>num(c.min)>0).map(c=>({type:c.type,min:num(c.min),...(isWP(c)?(()=>{const k=num(c.kmh)||wpLastKmh(),m=num(c.min);return{kmh:k,km:Math.round(k*m/6)/10,kcal:wpKcal(m,k,wpKg()),...(c.eat?{eat:wpNet(m,k,wpKg())}:{})}})():{}),...(num(c.km)?{km:num(c.km)}:{}),...(!isWP(c)&&metKcal(c)?{kcal:metKcal(c)}:{}),...(num(c.hr)?{hr:Math.round(num(c.hr))}:{}),lvl:c.lvl||'m'}));
  if(!ex.length&&!cardio.length){note('Trag mindestens einen Satz oder Cardio ein');return}
  const date=Date.now(),s={id:'s_'+date,date,day,start:dr.start,ex,...(cardio.length?{cardio}:{})},prs=[];
  for(const x of ex){if(isA(x.id))continue;const b=best(x.id),m=Math.max(...x.sets.map(t=>e1(t.kg,t.reps)));if(b>0&&m>b+0.01)prs.push(`${x.name}: Kraftwert ${fmt(m)} kg (vorher ${fmt(b)})`)}
@@ -169,7 +174,8 @@ function finish(){const dr=draftFor(day),ex=[],p0=dayScore(today()).pt;
   const top=Math.max(...x.sets.map(t=>t.kg)),pt=Math.max(...ps.ex.find(y=>y.id===x.id).sets.map(t=>t.kg));if(top>pt+0.01)ups.push({n:x.name,d:top-pt})}
  s.prn=prs.length;S.sessions.push(s);delete drafts[day];saveDrafts();announce(s,prs);
  summary={day,pts:Math.max(0,dayScore(iso(date)).pt-p0),vol:vol(s),prevVol:prev?vol(prev):0,sets:ex.reduce((a,x)=>a+x.sets.length,0),prs,ups,dur:dur>0&&dur<240?dur:0,cmin:cardio.reduce((a,c)=>a+c.min,0)};
- putSession(s);stopT();render();scrollTo({top:0,behavior:'smooth'});if(ex.length)cheer({big:true,title:cheerWord(),sub:DAYS[day].n+'-Training geschafft'+(prs.length?' · neuer Bestwert':''),pts:dayScore(iso(date)).pt-p0})}
+ putSession(s);stopT();render();scrollTo({top:0,behavior:'smooth'});if(!ex.length&&cardio.length){const cm=cardio.reduce((a,c)=>a+c.min,0),ck=cardio.reduce((a,c)=>a+(c.kcal||0),0);cheer({title:'Cardio gespeichert',sub:`${fmt(cm)} min${ck?' · ca. '+fmt(ck)+' kcal':''}`,pts:dayScore(iso(date)).pt-p0})}
+ if(ex.length)cheer({big:true,title:cheerWord(),sub:DAYS[day].n+'-Training geschafft'+(prs.length?' · neuer Bestwert':''),pts:dayScore(iso(date)).pt-p0})}
 
 let tEnd=0,tTot=0,tInt=null;
 function startT(sec){tTot=sec;tEnd=Date.now()+sec*1000;$('timer').classList.add('on');clearInterval(tInt);tInt=setInterval(tick,250);tick()}
@@ -186,7 +192,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-a]');if(
   if(!r.done){if(r.kg==='')r.kg=ins[0].placeholder==='–'?'':ins[0].placeholder;if(r.reps==='')r.reps=ins[1].placeholder==='–'?'':ins[1].placeholder;if(r.reps===''){note('Erst Wiederholungen eintragen');return}r.done=true;r.at=Date.now();startT(S.rest);const e=dayEx(day).find(x=>x.id===eid),k=vkey(e),b0=best(k),m=e1(num(r.kg)??0,num(r.reps)??0),prevSets=dr.ex[eid].filter((x,j)=>j!==i&&x.done).map(x=>e1(num(x.kg)??0,num(x.reps)??0));if(!isA(e.v)&&b0>0&&m>b0+0.01&&m>Math.max(0,...prevSets))cheer({title:'Neuer Bestwert!',sub:`${vname(e)}: ${fmt(num(r.kg))} kg × ${r.reps} · Kraftwert ${fmt(m)} kg`})}else r.done=false;saveDrafts()}
  else if(a==='exopen'){exOpen.has(eid)?exOpen.delete(eid):exOpen.add(eid)}
  else if(a==='rpe'){const r=draftFor(day).ex[eid][i];r.rpe=r.rpe===b.dataset.r?'':b.dataset.r;saveDrafts()}
- else if(a==='cadd'){draftFor(day).cardio.push({type:CT[0],min:'',km:'',lvl:'m'});saveDrafts()}
+ else if(a==='cadd'){draftFor(day).cardio.push({type:lastCT(),min:'',km:'',lvl:'m'});saveDrafts()}
  else if(a==='crm'){draftFor(day).cardio.splice(i,1);saveDrafts()}
  else if(a==='clvl'){draftFor(day).cardio[i].lvl=b.dataset.r;saveDrafts()}
  else if(a==='addset'){const rows=draftFor(day).ex[eid],l=rows[rows.length-1]||{kg:''};rows.push({kg:l.kg,reps:'',done:false});saveDrafts()}
@@ -212,7 +218,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-a]');if(
  if(open)document.querySelectorAll('details.pl').forEach((d,k)=>{if(open[k])d.open=true})});
 document.addEventListener('input',ev=>{const t=ev.target,a=t.dataset.a;
  if(a==='ceat'){draftFor(day).cardio[+t.dataset.i].eat=t.checked;saveDrafts();return}
- if(a==='cin'){const c=draftFor(day).cardio[+t.dataset.i];c[t.dataset.f]=t.value;saveDrafts();if(t.dataset.f==='type')render();else if(isWP(c)){const h=$('wpk'+t.dataset.i);if(h)h.innerHTML=wpHint(c)}}
+ if(a==='cin'){const c=draftFor(day).cardio[+t.dataset.i];c[t.dataset.f]=t.value;saveDrafts();if(t.dataset.f==='type')render();else{const h=$('wpk'+t.dataset.i);if(h)h.innerHTML=cHint(c)}}
  else if(a==='in'){draftFor(day).ex[t.dataset.e][+t.dataset.i][t.dataset.f]=t.value.trim();saveDrafts()}
  else if(a==='pl'){const e=S.plan[day][+t.dataset.i],f=t.dataset.f;if(f==='name')e.name=t.value;else{const n=num(t.value);if(n!==null&&n>=0)e[f]=f==='step'?n:Math.max(1,Math.round(n))}savePlan()}
  else if(a==='set'){const n=num(t.value);if(n!==null&&n>0){S[t.dataset.f]=Math.round(n);savePlan();renderHead()}}});
