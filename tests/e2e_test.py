@@ -662,6 +662,10 @@ try:
         c6.click("[data-ob=go]"); c6.wait_for_timeout(300)
         check(c6.is_visible(".adv.tease") and c6.text_content(".advcount b") == "10" and "Tage bis zum ersten Türchen" in c6.text_content(".advcount"), "November: Vorschau mit Countdown (noch 10 Tage)")
 
+        import glob, re as _re
+        _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        _bad = [f for f in ['index.html', 'style.css', 'sw.js'] + glob.glob(os.path.join(_root, 'js', '*.js')) if _re.search(r'^(<{7}|={7}|>{7})( |$)', open(os.path.join(_root, f), encoding='utf-8').read(), _re.M)]
+        check(not _bad, "Keine Merge-Konfliktmarker in ausgelieferten Dateien" + ("" if not _bad else ": " + ", ".join(_bad)))
         check(not errs, "Keine JavaScript-Fehler" + ("" if not errs else ": " + "; ".join(errs)))
         b.close()
 finally:

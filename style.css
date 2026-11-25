@@ -985,7 +985,6 @@ html.kbopen .nav{display:none}
 .awmore{margin:6px 0 0;font-size:13px;color:var(--mute)}
 .awadd{display:block;width:100%;min-height:52px;margin:8px 0 12px;border-radius:var(--r);border:1.5px dashed var(--line);background:var(--s1);color:var(--ink);font:700 18px var(--fh)}
 .away.form .actions{margin:12px 0 0}.away.form .actions .primary{flex:1}
-<<<<<<< HEAD
 /* Training/Kraft-Umschalter oben im Training-Tab */
 .tsw{display:flex;gap:4px;padding:4px;margin:4px 0 14px;background:var(--s2);border-radius:999px}
 .tsw button{flex:1;min-height:38px;border:0;border-radius:999px;background:none;color:var(--mute);font:700 16px var(--fh)}
@@ -1042,7 +1041,6 @@ html.kbopen .nav{display:none}
 .awhotel small{display:block;font:700 13px var(--fh);color:var(--acc);letter-spacing:.04em;text-transform:uppercase}
 .calsum .cs2 b{display:inline;font-size:inherit;line-height:inherit}.cs2 p{flex-wrap:wrap;gap:4px 8px}
 .cltap{font-size:15px;color:var(--ink)}.awsee{display:block;font-style:normal;font-size:13px;color:var(--mute);margin-top:2px}
-=======
 /* Heim-Training */
 .hwo{background:var(--s1);border-radius:20px;box-shadow:var(--sh);padding:16px;margin:0 0 12px}.hwo small{font:700 12px var(--fh);letter-spacing:.06em;text-transform:uppercase;color:var(--acc)}.hwo h2{font:800 26px var(--fh);margin:2px 0}.hwo p{margin:0;color:var(--mute)}
 .hwlv{margin:10px 0!important;padding:8px 12px;border-radius:12px;background:var(--s2);font-size:14px}
@@ -1071,7 +1069,6 @@ html.kbopen .nav{display:none}
 .wo .wobody{overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0}.wo .wobody:has(.hwsum){justify-content:flex-start}
 .hwl b{font-size:17px}.hwl span{font-size:14px}.hwnew{display:block;font-style:normal;font-size:12px;font-weight:700;color:var(--mute);margin-top:3px}
 .woring b{white-space:nowrap}.wonx{text-wrap:balance}
->>>>>>> main
 .awkind{display:flex;gap:6px;margin:0 0 8px}.awkind button{flex:1;min-height:40px;font-size:15px}.awkind button[aria-pressed=true]{background:var(--dark,#3E5A4C);color:#fff}.awhb{display:flex;flex-direction:column;gap:6px}.awhb .ghost{min-height:36px;font-size:13px}
 .awkrow{display:flex;align-items:center;gap:8px;margin:10px 0 0;font-size:14px;color:var(--mute)}.awkrow .awkind{flex:1;margin:0}.awkrow .awkind button{min-height:34px;font-size:13px;padding:4px 8px}.away.form .awkind{margin:6px 0 4px}p.awsee{margin:8px 0 0}
 .btrip{display:inline-block;margin-top:4px;padding:2px 8px;border-radius:999px;background:var(--d-sagel,#E3ECE6);color:var(--d-saged,#3E5A4C);font-size:12px;font-weight:700}
