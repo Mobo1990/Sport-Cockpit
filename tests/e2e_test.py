@@ -142,6 +142,10 @@ try:
             pg.click(".board .bmid"); pg.wait_for_timeout(100)
         check(pg.evaluate("(()=>{const o=weekly;weekly=()=>({k:'h',g:99,t:'99 Tage Wasser',u:'Tage',s:'x'});const h=weeklyHtml();weekly=o;return /nicht mehr zu schaffen/.test(h)})()"), "Wochen-Challenge: 'nicht mehr zu schaffen', wenn die Tage nicht reichen")
         check(pg.evaluate("metKcal({type:'Fahrrad / Ergometer',min:30,lvl:'m'})") > 200, "Cardio: Kalorien auch für Rad & Co. geschätzt")
+        r = pg.evaluate("""(()=>{const n0=S.sessions.length,d0=day;day='legs';const dr=draftFor('legs');dr.ex[dayEx('legs')[0].id][0].kg='40';dr.cardio=[{type:'Laufband',min:'30',km:'',lvl:'m'}];finish();
+          const s=S.sessions[S.sessions.length-1],keep=drafts.legs&&drafts.legs.ex[dayEx('legs')[0].id][0].kg==='40',h=summary&&summary.co?'Cardio erledigt':'';
+          S.sessions=S.sessions.filter(x=>x!==s);delete drafts.legs;saveDrafts();summary=null;day=d0;persist();render();return [s.day,keep,/Cardio erledigt/i.test(h),S.sessions.length===n0].join('/')})()""")
+        check(r == "cardio/true/true/true", "Nur Cardio vor dem Training: zählt als Cardio, Legs bleibt offen (" + r + ")")
         print("Erfolgs-Momente")
         pg.evaluate("cheerHide()")
         check(pg.evaluate("(()=>{const d=today(),dd=ND(d),o=dd.water;dd.water=0;const wb=cheerFrom(d);dd.water=waterGoal();cheerDiff(d,wb);dd.water=o;return document.getElementById('cheer').className})()") == "cheer on small" and "Wasserziel" in pg.text_content("#cheer"), "Wasserziel erreicht: kleine Einblendung mit Lob und Punkten")
