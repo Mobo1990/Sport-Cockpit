@@ -35,7 +35,7 @@ async function syncNow(){if(!HA.url||!HA.token)return;if(syncing){syncAgain=true
   if(!HA.force&&rn&&S.prof.name&&slugN(rn)!==slugN(S.prof.name)){HA.conflict=rn;syncing=false;note(`Konto gehört zu „${rn}“ – nicht synchronisiert`);if(view==='more')render();return}
   HA.conflict='';const changed=HA.force?false:merge(R);HA.force=false;health(r[keys.length]);lsSave();
   await haCall([{type:'frontend/set_user_data',key:'sc_meta',value:metaOf()},{type:'frontend/set_user_data',key:'sc_sessions',value:{list:S.sessions,del:S.del}},{type:'frontend/set_user_data',key:'sc_nut',value:{days:S.nut.days}}]);
-  note('Synchronisiert · '+new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}));publish();shareFetch();
+  note('Synchronisiert · '+new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}));publish();shareFetch();awayFetch();
   const busy=document.activeElement&&document.activeElement.tagName==='INPUT';if((changed||partnersCh)&&!busy&&!sheet)render();partnersCh=false}
  catch(e){note((navigator.onLine?e.message:'Offline')+' – lokal gespeichert')}
  syncing=false;if(syncAgain){syncAgain=false;syncNow()}}

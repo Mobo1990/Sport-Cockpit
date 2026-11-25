@@ -3,6 +3,7 @@ import asyncio, json, websockets
 store={}
 stores={}
 todo=[]
+cal=[]
 async def h(ws):
     await ws.send(json.dumps({"type":"auth_required"}))
     m=json.loads(await ws.recv())
@@ -52,6 +53,21 @@ async def h(ws):
                 todo[:]=[t for t in todo if t["uid"]!=sd.get("item")]
                 await ws.send(json.dumps({"id":m["id"],"type":"result","success":True,"result":{"context":{}}}))
             open("/tmp/todo.json","w").write(json.dumps(todo))
+        elif m["type"]=="call_service" and m.get("domain")=="calendar":
+            open("/tmp/calls.log","a").write(json.dumps(m)+"\n")
+            sd=m.get("service_data") or {}
+            if m["service"]=="create_event":
+                ev={"uid":"c%d"%len(cal),"summary":sd["summary"],"location":sd.get("location",""),"description":sd.get("description","")}
+                if "start_date" in sd: ev.update(start=sd["start_date"],end=sd["end_date"])
+                else: ev.update(start=sd["start_date_time"].replace(" ","T"),end=sd["end_date_time"].replace(" ","T"))
+                cal.append(ev)
+                await ws.send(json.dumps({"id":m["id"],"type":"result","success":True,"result":{"context":{}}}))
+            else:
+                await ws.send(json.dumps({"id":m["id"],"type":"result","success":True,"result":{"context":{},"response":{"calendar.unterwegs":{"events":cal}}}}))
+        elif m["type"]=="calendar/event/delete":
+            open("/tmp/calls.log","a").write(json.dumps(m)+"\n")
+            cal[:]=[e for e in cal if e["uid"]!=m.get("uid")]
+            await ws.send(json.dumps({"id":m["id"],"type":"result","success":True,"result":None}))
         elif m["type"]=="call_service":
             open("/tmp/calls.log","a").write(json.dumps(m)+"\n")
             await ws.send(json.dumps({"id":m["id"],"type":"result","success":True,"result":{}}))

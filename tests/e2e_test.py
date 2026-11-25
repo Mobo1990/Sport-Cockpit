@@ -215,6 +215,24 @@ try:
         check("Synchronisiert" in pg.text_content("#sync"), "Sync mit HA")
         check(pg.get_attribute("#sync", "data-st") == "ok", "Status-Punkt grün nach Sync")
 
+        print("Unterwegs")
+        pg.click(".nav >> text=Mehr"); pg.click("[data-v=away]"); pg.wait_for_timeout(200)
+        check(pg.is_visible(".awadd") and "Gerade ist nichts eingetragen" in pg.text_content(".away.list"), "Unterwegs-Seite: leer, Knopf zum Eintragen")
+        pg.click("[data-aw=new]"); pg.fill("#awWas", "tecis Workshop"); pg.fill("#awOrt", "Köln")
+        tm = (datetime.date.today() + datetime.timedelta(days=1)).isoformat(); pg.fill("#awVon", tm); pg.dispatch_event("#awVon", "change"); pg.fill("#awVt", "08:00")
+        pg.click("[data-aw=night][data-v='1']"); pg.wait_for_timeout(100)
+        check(pg.input_value("#awWas") == "tecis Workshop" and pg.input_value("#awBis") == (datetime.date.today() + datetime.timedelta(days=2)).isoformat(), "Übernachtung: Ende springt auf den Folgetag, Eingaben bleiben")
+        pg.fill("#awBt", "18:00"); pg.click("[data-aw=save]"); pg.wait_for_timeout(1500)
+        calls = [json.loads(l) for l in open("/tmp/calls.log")]
+        ce = [c for c in calls if c.get("service") == "create_event"]
+        check(len(ce) == 1 and ce[0]["service_data"]["summary"] == "Michell: tecis Workshop" and ce[0]["service_data"]["description"] == "Übernachtung" and ce[0]["service_data"]["start_date_time"] == tm + " 08:00:00", "Eintrag landet im HA-Kalender Unterwegs")
+        check(any(c.get("service") == "sport_cockpit_meldung" and "unterwegs" in c["service_data"]["titel"] and "Köln" in c["service_data"]["nachricht"] for c in calls), "Partner bekommt sofort eine Nachricht")
+        check(pg.locator(".away.list .awr").count() == 1 and "Morgen" in pg.text_content(".away.list") and "Über Nacht" in pg.text_content(".away.list"), "Liste zeigt: morgen, Köln, über Nacht")
+        pg.click(".nav >> text=Start"); pg.wait_for_timeout(200)
+        check(pg.is_visible(".away .awr") and "Köln" in pg.text_content(".away"), "Startseite zeigt die Unterwegs-Karte")
+        pg.click(".away [data-v=away]"); pg.click("[data-aw=del]"); pg.click("[data-aw=del]"); pg.wait_for_timeout(1200)
+        check(pg.locator(".away.list .awr").count() == 0 and any(json.loads(l).get("type") == "calendar/event/delete" for l in open("/tmp/calls.log")), "Löschen (zweimal tippen) entfernt den Eintrag aus HA")
+
         print("Anzeigetafel & Profilbild")
         pg.click(".nav >> text=Start"); pg.wait_for_timeout(200)
         check(pg.is_visible(".board") and "Pauline" in pg.text_content(".board") and "Woche" in pg.text_content(".board"), "Anzeigetafel oben: du und Pauline mit Wochenpunkten")

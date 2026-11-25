@@ -967,3 +967,21 @@ html.kbopen .nav{display:none}
 .mvghost button{display:none}.it.mvsrc{opacity:.35}html.mving,html.mving body{overscroll-behavior:none}
 .meal.mvdrop{outline:2px dashed var(--acc);outline-offset:-2px;background:color-mix(in srgb,var(--acc) 7%,var(--s1))}
 .mvmenu{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 0 10px;font-size:13px;color:var(--mute)}.mvmenu span{width:100%}.mvmenu button{min-height:38px;padding:6px 12px;font-size:14px}
+/* Unterwegs – wer wann weg ist (js/away.js) */
+.away{background:var(--s1);border-radius:var(--r);box-shadow:var(--sh);padding:14px;margin:8px 0 12px}
+.awh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}.awh b{font:800 22px var(--fh)}
+.awh button{min-height:32px;padding:0 10px;border:0;background:none;color:var(--acc);font-weight:600;font-size:14px}
+.away ul{list-style:none;margin:0;padding:0}
+.awr{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}.awr:first-child{border-top:0}
+.awr>div:nth-child(2){flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.awr b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.awr span{font-size:14px;color:var(--ink)}.awr small{font:600 14px var(--fh);color:var(--mute);letter-spacing:.2px}
+.ava.sm{width:40px;height:40px;border-width:2px}.ava.sm i{font-size:15px}
+.awm{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex:none}
+.awm em,.awm i{font-style:normal;font-size:12px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.awm em{background:var(--acc2);color:var(--acc)}.awm i{background:var(--s2);color:var(--mute)}
+.awr.jetzt em{background:var(--acc);color:var(--onacc)}
+.awx{min-height:30px;min-width:30px;padding:0 8px;border-radius:999px;background:none;border:1px solid var(--line);color:var(--mute);font-size:15px}
+.awx.danger{border-color:var(--acc);color:var(--acc);font-size:13px;font-weight:600}
+.awmore{margin:6px 0 0;font-size:13px;color:var(--mute)}
+.awadd{display:block;width:100%;min-height:52px;margin:8px 0 12px;border-radius:var(--r);border:1.5px dashed var(--line);background:var(--s1);color:var(--ink);font:700 18px var(--fh)}
+.away.form .actions{margin:12px 0 0}.away.form .actions .primary{flex:1}
