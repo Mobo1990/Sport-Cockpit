@@ -21,7 +21,7 @@ function boardHtml(sc){const me=S.prof.name||'Ich',p=boardPartner(),a=weekScore(
  const meCol=lead=>`<div class="bp"><label class="avawrap" title="Profilbild ändern">${lead?CROWN:''}${avaHtml(me,true)}<input type="file" accept="image/*" data-pic="file" hidden></label><span class="bn">${esc(me)}</span><span class="pts"><b class="cond">${fmt(ta)}</b></span><small>heute</small></div>`;
  if(!p)return `<section class="board solo">${meCol(false)}<div class="bmid"><span class="bk">Woche</span><b class="cond">${fmt(a)}</b><em>Punkte</em></div><p class="bhint">Sobald dein Partner mit Home Assistant verbunden ist, steht hier euer Vergleich.</p></section>`;
  const b=p.week,d=Math.abs(a-b),lead=a===b?0:a>b?1:-1,share=a+b?a/(a+b)*100:50;
- const txt=lead===0?'Gleichstand':lead>0?`Du führst mit ${fmt(d)}`:`${esc(p.name)} führt · dir fehlen ${fmt(d+1)}`;
+ const txt=(lead===0?'Gleichstand':lead>0?`Du führst mit ${fmt(d)}`:`${esc(p.name)} führt · dir fehlen ${fmt(d+1)}`)+(typeof weekGoal==='function'&&weekGoal(wk(Date.now()))<S.goal?` · Reise-Woche: Ziel ${weekGoal(wk(Date.now()))} statt ${S.goal}`:'');
  const split=Math.max(12,Math.min(88,share));
  return `<section class="board split" data-bd="1" role="button" aria-expanded="${boardOpen}" style="--split:${split.toFixed(1)}%">${meCol(lead>0)}
  <div class="bmid"><span class="bk">Woche</span><b class="cond">${fmt(a)}<i>:</i>${fmt(b)}</b><em class="${lead>0?'me':lead<0?'pa':''}">${txt}</em></div>
