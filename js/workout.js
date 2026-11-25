@@ -15,7 +15,11 @@ const KNEE_HINT={'Hüftbeuger links':'Kissen oder Handtuch unters hintere Knie.'
  'Quadrizepsdehnung links':'Nur so weit ziehen, wie es angenehm ist – Handtuch um den Fuß hilft.','Quadrizepsdehnung rechts':'Nur so weit ziehen, wie es angenehm ist – Handtuch um den Fuß hilft.'};
 const woKneeSteps=st=>st.map(x=>KNEE_WO[x[0]]?[KNEE_WO[x[0]][0],x[1],KNEE_WO[x[0]][1]]:KNEE_HINT[x[0]]?[x[0],x[1],KNEE_HINT[x[0]]]:x);
 const woHasKnee=k=>WO[k].steps.some(x=>KNEE_WO[x[0]]||KNEE_HINT[x[0]]);
-function woSteps(){const st=wo.knee?woKneeSteps(WO[wo.k].steps):WO[wo.k].steps;return [['Gleich geht’s los',PREP,st[0][0]],...st]}
+/* Zwischen Dehnungen 5 Sekunden zum Wechseln: „Seite wechseln“ bzw. bei den Dehn-Programmen „In Position gehen“ */
+const woSide=n=>String(n).replace(/\s+(links|rechts)$/,'');
+function woGaps(k,st){const out=[];st.forEach((x,i)=>{out.push(x);const nx=st[i+1];if(!nx||x[0]==='Pause'||nx[0]==='Pause')return;
+  if(/links$/.test(x[0])&&/rechts$/.test(nx[0])&&woSide(x[0])===woSide(nx[0]))out.push(['Pause',5,'Seite wechseln']);else if(/^flex_/.test(k))out.push(['Pause',5,'In Position gehen'])});return out}
+function woSteps(){const st=woGaps(wo.k,wo.knee?woKneeSteps(WO[wo.k].steps):WO[wo.k].steps);return [['Gleich geht’s los',PREP,st[0][0]],...st]}
 function woStart(k,ch){wo={k,ch,i:0,left:PREP,paused:false,done:false,last:Date.now(),knee:kneeOn()};woRun();woRender();
  try{navigator.wakeLock&&navigator.wakeLock.request('screen').then(l=>woLock=l).catch(()=>{})}catch(e){}}
 function woRun(){clearInterval(woTick);woTick=setInterval(()=>{if(!wo||wo.paused||wo.done)return;const now=Date.now();wo.left-=(now-wo.last)/1000;wo.last=now;
@@ -38,10 +42,10 @@ function woRender(){if(!wo){woEl.classList.remove('on');woEl.innerHTML='';return
  woEl.innerHTML=`<div class="gh"><button class="gx" data-wo-a="close" aria-label="Abbrechen">✕</button><div><b>${esc(W.n)}</b><small id="woTotal"></small></div></div>
  <div class="gprog">${st.slice(1).map((x,i)=>`<i class="${i+1<wo.i?'d':i+1===wo.i?'c':''}${x[0]==='Pause'?' p':''}"></i>`).join('')}</div>
  <div class="wobody${isP?' rest':''}"><small class="wok">${wo.i===0?'Bereit machen':cur[0]==='Pause'?'Pause':'Übung '+(wi>0?wi:'')+' von '+work.length}</small>
-  <h2 class="won">${esc(cur[0]==='Pause'?'Durchatmen':cur[0])}</h2>${cur[2]&&cur[0]!=='Pause'&&wo.i>0?`<p class="wosub">${esc(cur[2])}</p>`:''}
-  ${(()=>{const fn=cur[0]==='Pause'?(nx?nx[0]:''):(wo.i===0?st[1][0]:cur[0]);return fn&&fn!=='Pause'?moveSvg(fn,'wofig'+(cur[0]==='Pause'||wo.i===0?' soon':'')):''})()}
+  <h2 class="won">${esc(cur[0]==='Pause'?(cur[2]||'Durchatmen'):cur[0])}</h2>${cur[2]&&cur[0]!=='Pause'&&wo.i>0?`<p class="wosub">${esc(cur[2])}</p>`:''}
+  ${(()=>{const fn=cur[0]==='Pause'?(nx?nx[0]:''):(wo.i===0?st[1][0]:cur[0]);if(!fn||fn==='Pause')return '';const mf=moveFor(fn),fe=mf&&mf.m.feel;return moveSvg(fn,'wofig'+(cur[0]==='Pause'||wo.i===0?' soon':''))+(fe?`<p class="wofeel">Spürst du hier: <b>${esc(fe)}</b></p>`:'')})()}
   <div class="woring"><svg viewBox="0 0 110 110" aria-hidden="true"><circle cx="55" cy="55" r="48" class="bg"/><circle id="woR" cx="55" cy="55" r="48" class="fg" stroke-dasharray="301.6" stroke-dashoffset="0"/></svg><b id="woT" class="cond">${Math.ceil(wo.left)}</b></div>
-  ${wo.i===0&&woHasKnee(wo.k)?`<button class="woknee" data-wo-a="knee" aria-pressed="${!!wo.knee}">${wo.knee?'Knieschonend an ✓':'Knieschonend'}</button>`:''}${nx?`<p class="wonx">Als Nächstes: <b>${esc(nx[0])}</b>${nx[0]==='Pause'?'':' · '+nx[1]+' s'}</p>`:'<p class="wonx">Letzte Runde!</p>'}</div>
+  ${wo.i===0&&woHasKnee(wo.k)?`<button class="woknee" data-wo-a="knee" aria-pressed="${!!wo.knee}">${wo.knee?'Knieschonend an ✓':'Knieschonend'}</button>`:''}${nx?`<p class="wonx">Als Nächstes: <b>${esc(nx[0]==='Pause'?(nx[2]||'Pause'):nx[0])}</b>${nx[0]==='Pause'?'':' · '+nx[1]+' s'}</p>`:'<p class="wonx">Letzte Runde!</p>'}</div>
  <div class="gfoot"><button data-wo-a="pause">${wo.paused?'Weiter':'Pause'}</button><button class="primary" data-wo-a="skip">Überspringen ›</button></div>`;woUpd()}
 document.addEventListener('click',ev=>{const s=ev.target.closest('[data-wo]');if(s){ev.stopPropagation();woStart(s.dataset.wo,s.dataset.woc);return}
  const b=ev.target.closest('[data-wo-a]');if(!b||!wo)return;const a=b.dataset.woA;

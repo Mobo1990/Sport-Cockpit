@@ -109,6 +109,26 @@ Object.assign(MOVES,{
   {head:[138,36],neck:[128,46],hip:[104,74],kneeL:[128,100],footL:[134,MV_FLOOR],kneeR:[88,98],footR:[72,MV_FLOOR],elbow:[144,46],hand:[159,40]},
   {head:[141,38],neck:[131,48],hip:[108,76],kneeL:[132,100],footL:[134,MV_FLOOR],kneeR:[90,99],footR:[72,MV_FLOOR],elbow:[146,48],hand:[159,42]}]}
 });
+/* Dehnungen genauer: erst in die Dehnung gehen, dann halten (hold), gedehnte Stelle farbig (hl), Text „Spürst du hier“ (feel) */
+{const M=MOVES,P=(k,o)=>Object.assign(M[k],o);
+ P('Brustdehnung',{dur:6,hold:true,hl:[['neck','elbowR'],['elbowR','handR']],feel:'Brust und vordere Schulter',poses:[M['Brustdehnung'].poses[0],
+  {head:[92,21],neck:[95,35],hip:[100,74],elbowL:[86,54],handL:[84,72],elbowR:[148,36],handR:[148,14],knee:[101,98],foot:[102,MV_FLOOR]}]});
+ P('Trizepsdehnung',{dur:6,hold:true,hl:[['neck','elbowL'],['elbowL','handL']],feel:'Rückseite Oberarm',poses:[
+  {...GFRONT,elbowL:[92,54],handL:[90,72],elbowR:[108,54],handR:[110,72]},{...GFRONT,elbowL:[90,6],handL:[104,30],elbowR:[118,26],handR:[94,8]}]});
+ P('Quadrizepsdehnung',{dur:6,hold:true,hl:[['hip','kneeR']],feel:'Vorderseite Oberschenkel',poses:[
+  {head:[100,20],neck:[100,34],hip:[100,72],kneeL:[100,97],footL:[100,MV_FLOOR],kneeR:[100,97],footR:[100,MV_FLOOR],elbowL:[106,54],handL:[108,72],elbowR:[94,54],handR:[92,72]},
+  {head:[100,20],neck:[100,34],hip:[100,72],kneeL:[100,97],footL:[100,MV_FLOOR],kneeR:[103,98],footR:[86,76],elbowL:[114,48],handL:[128,50],elbowR:[94,56],handR:[86,76]}]});
+ P('Wadendehnung',{dur:6,hold:true,hl:[['kneeR','footR']],feel:'Wade des hinteren Beins',poses:[
+  {head:[132,32],neck:[124,44],hip:[100,72],kneeL:[124,98],footL:[134,MV_FLOOR],kneeR:[86,97],footR:[72,MV_FLOOR],elbow:[140,48],hand:[159,46]},
+  {head:[143,40],neck:[133,50],hip:[110,78],kneeL:[134,100],footL:[134,MV_FLOOR],kneeR:[91,100],footR:[72,MV_FLOOR],elbow:[148,50],hand:[159,44]}]});
+ P('Hüftbeuger',{dur:6,hold:true,hl:[['hip','kneeL']],feel:'Vorderseite Hüfte am hinteren Bein',poses:[M['Hüftbeuger'].poses[0],
+  {head:[106,40],neck:[106,54],hip:[106,96],elbow:[98,72],hand:[104,88],kneeL:[80,MV_FLOOR],footL:[56,MV_FLOOR],kneeR:[130,94],footR:[130,MV_FLOOR]}]});
+ P('Kindhaltung',{dur:7,hold:true,hl:['torso',['neck','elbow']],feel:'Rücken und seitlicher Rumpf',poses:[
+  {head:[80,64],neck:[78,78],hip:[70,108],knee:[98,120],foot:[64,120],elbow:[84,96],hand:[96,110]},M['Kindhaltung'].poses[0]]});
+ P('Vorbeuge',{dur:6,hold:true,hl:[['hip','knee'],['knee','foot']],feel:'Rückseite der Beine'});
+ P('Katze-Kuh',{hl:['torso'],feel:'Ganzer Rücken, Wirbel für Wirbel'});
+ P('Weltbeste Dehnung',{hl:[['hip','kneeL'],['neck','elbowR']],feel:'Hüfte, oberer Rücken und Schulter'});
+ P('Schulterkreisen',{hl:[['neck','elbow']],feel:'Schultern lockern'})}
 MOVES['gym:hammer']=MOVES['gym:curl'];
 const gymMove=e=>MOVES['gym:'+e.id+'|'+e.v]?'gym:'+e.id+'|'+e.v:MOVES['gym:'+e.id]?'gym:'+e.id:null;
 

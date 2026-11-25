@@ -64,7 +64,7 @@ const MOVES={
 function moveFor(name){const n=String(name||'').replace(/\s+(links|rechts)$/,'');const m=MOVES[n];if(!m)return null;return{m,mirror:/rechts$/.test(name||'')}}
 const MV_SEG=[['neck','elbowL'],['elbowL','handL'],['hip','kneeL'],['kneeL','footL'],['hip','kneeR'],['kneeR','footR'],['neck','elbowR'],['elbowR','handR']];
 const mvJ=(p,j)=>p[j]||p[j.replace(/[LR]$/,'')];
-function moveSvg(name,cls='wofig',label){const f=moveFor(name);if(!f)return '';const {m,mirror}=f,ps=[...m.poses,m.poses[0]],n=ps.length,
+function moveSvg(name,cls='wofig',label){const f=moveFor(name);if(!f)return '';const {m,mirror}=f,ps=m.hold?[m.poses[0],m.poses[1],m.poses[1],m.poses[1],m.poses[0]]:[...m.poses,m.poses[0]],n=ps.length,
  kt=ps.map((_,i)=>(i/(n-1)).toFixed(3)).join(';'),ks=Array(n-1).fill('0.45 0 0.55 1').join(';'),
  an=(attr,vals)=>`<animate attributeName="${attr}" values="${vals.join(';')}" keyTimes="${kt}" keySplines="${ks}" calcMode="spline" dur="${m.dur}s" repeatCount="indefinite"/>`,
  v=(j,k)=>ps.map(p=>mvJ(p,j)[k]),p0=m.poses[0];
@@ -72,9 +72,13 @@ function moveSvg(name,cls='wofig',label){const f=moveFor(name);if(!f)return '';c
   sp=ps.map(p=>p.spine||[(p.neck[0]+p.hip[0])/2,(p.neck[1]+p.hip[1])/2]),
   torso=`<path d="M${p0.neck[0]} ${p0.neck[1]} Q${sp[0][0]} ${sp[0][1]} ${p0.hip[0]} ${p0.hip[1]}" class="mvf">${an('d',ps.map((p,i)=>`M${p.neck[0]} ${p.neck[1]} Q${sp[i][0]} ${sp[i][1]} ${p.hip[0]} ${p.hip[1]}`))}</path>`,
   head=`<circle cx="${p0.head[0]}" cy="${p0.head[1]}" r="10" class="mvh">${an('cx',v('head',0))}${an('cy',v('head',1))}</circle>`,
+  /* gedehnte Stelle: breiter, halbtransparenter Strich in Akzentfarbe unter der Figur, pulsiert leicht */
+  pulse='<animate attributeName="opacity" values=".35;.7;.35" dur="2.4s" repeatCount="indefinite"/>',
+  hl=(m.hl||[]).map(h=>h==='torso'?`<path d="M${p0.neck[0]} ${p0.neck[1]} Q${sp[0][0]} ${sp[0][1]} ${p0.hip[0]} ${p0.hip[1]}" class="mvhl">${an('d',ps.map((p,i)=>`M${p.neck[0]} ${p.neck[1]} Q${sp[i][0]} ${sp[i][1]} ${p.hip[0]} ${p.hip[1]}`))}${pulse}</path>`
+   :`<line x1="${mvJ(p0,h[0])[0]}" y1="${mvJ(p0,h[0])[1]}" x2="${mvJ(p0,h[1])[0]}" y2="${mvJ(p0,h[1])[1]}" class="mvhl">${an('x1',v(h[0],0))}${an('y1',v(h[0],1))}${an('x2',v(h[1],0))}${an('y2',v(h[1],1))}${pulse}</line>`).join(''),
   wall=m.wall?`<line x1="${m.wall}" y1="0" x2="${m.wall}" y2="${MV_FLOOR}" class="mvw"/>`:'';
  /* Geräte: props = feste Linien (Bank, Stange), cable = Seil von festem Punkt zur Hand, load = Gewicht an einem Gelenk */
  const props=(m.props||[]).map(pt=>`<polyline points="${pt}" class="mvp"/>`).join(''),
   cable=(m.cable||[]).map(([x,y,j])=>`<line x1="${x}" y1="${y}" x2="${mvJ(p0,j)[0]}" y2="${mvJ(p0,j)[1]}" class="mvc">${an('x2',v(j,0))}${an('y2',v(j,1))}</line>`).join(''),
   load=(m.load||[]).map(j=>`<circle cx="${mvJ(p0,j)[0]}" cy="${mvJ(p0,j)[1]}" r="${m.lr||7}" class="mvl">${an('cx',v(j,0))}${an('cy',v(j,1))}</circle>`).join('');
- return `<svg class="${cls}" viewBox="0 -10 200 140" role="img" aria-label="Strichmännchen zeigt: ${esc(label||name)}"><line x1="10" y1="${MV_FLOOR+1}" x2="190" y2="${MV_FLOOR+1}" class="mvw"/>${wall}<g${mirror?' transform="translate(200 0) scale(-1 1)"':''}>${props}${cable}${lines.slice(0,4).join('')}${torso}${head}${lines.slice(4).join('')}${load}</g></svg>`}
+ return `<svg class="${cls}" viewBox="0 -10 200 140" role="img" aria-label="Strichmännchen zeigt: ${esc(label||name)}"><line x1="10" y1="${MV_FLOOR+1}" x2="190" y2="${MV_FLOOR+1}" class="mvw"/>${wall}<g${mirror?' transform="translate(200 0) scale(-1 1)"':''}>${hl}${props}${cable}${lines.slice(0,4).join('')}${torso}${head}${lines.slice(4).join('')}${load}</g></svg>`}
