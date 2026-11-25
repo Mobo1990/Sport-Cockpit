@@ -985,3 +985,10 @@ html.kbopen .nav{display:none}
 .awmore{margin:6px 0 0;font-size:13px;color:var(--mute)}
 .awadd{display:block;width:100%;min-height:52px;margin:8px 0 12px;border-radius:var(--r);border:1.5px dashed var(--line);background:var(--s1);color:var(--ink);font:700 18px var(--fh)}
 .away.form .actions{margin:12px 0 0}.away.form .actions .primary{flex:1}
+/* Heim-Training */
+.hwo{background:var(--s1);border-radius:20px;box-shadow:var(--sh);padding:16px;margin:0 0 12px}.hwo small{font:700 12px var(--fh);letter-spacing:.06em;text-transform:uppercase;color:var(--acc)}.hwo h2{font:800 26px var(--fh);margin:2px 0}.hwo p{margin:0;color:var(--mute)}
+.hwlv{margin:10px 0!important;padding:8px 12px;border-radius:12px;background:var(--s2);font-size:14px}
+.hwl{list-style:none;padding:0;margin:0}.hwl li{display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid var(--line)}.hwl li:first-child{border-top:0}
+.hwl .hwfig{flex:0 0 92px;width:92px;height:66px;background:var(--s2);border-radius:12px}.hwl b{display:block;font:700 16px var(--fh)}.hwl span{font-size:13px;color:var(--mute)}
+.hwfig .mvf{stroke:var(--ink);stroke-width:6;stroke-linecap:round;fill:none}.hwfig .mvb{stroke:#a9a39b;stroke-width:6;stroke-linecap:round}.hwfig .mvh{fill:var(--ink)}.hwfig .mvw,.hwfig .mvp{stroke:#d8cfc5;stroke-width:3;stroke-linecap:round;fill:none}.hwfig .mvc{stroke:var(--acc);stroke-width:2}.hwfig .mvl{fill:var(--acc)}
+.hwnote{margin:10px 0 12px!important;font-size:14px}.hwgo{width:100%;min-height:52px;font-size:18px}

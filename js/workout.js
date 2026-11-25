@@ -13,7 +13,7 @@ const KNEE_WO={'Kniebeugen':['Stuhl-Kniebeugen','Nur bis zum Stuhl absetzen, Kni
  'Hampelmänner':['Step-Jacks','Ohne Sprung: abwechselnd seitlich raustippen, Arme hoch.'],'Burpees':['Burpees ohne Sprung','Beine nacheinander zurücksetzen, aufrichten ohne Sprung.']};
 const KNEE_HINT={'Hüftbeuger links':'Kissen oder Handtuch unters hintere Knie.','Hüftbeuger rechts':'Kissen oder Handtuch unters hintere Knie.','Weltbeste Dehnung':'Kissen unters hintere Knie, Schritt etwas kürzer.',
  'Quadrizepsdehnung links':'Nur so weit ziehen, wie es angenehm ist – Handtuch um den Fuß hilft.','Quadrizepsdehnung rechts':'Nur so weit ziehen, wie es angenehm ist – Handtuch um den Fuß hilft.'};
-const woKneeSteps=st=>st.map(x=>KNEE_WO[x[0]]?[KNEE_WO[x[0]][0],x[1],KNEE_WO[x[0]][1]]:KNEE_HINT[x[0]]?[x[0],x[1],KNEE_HINT[x[0]]]:x);
+const woKneeSteps=st=>st.map(x=>KNEE_WO[x[0]]?[KNEE_WO[x[0]][0],x[1],KNEE_WO[x[0]][1],x[3]]:KNEE_HINT[x[0]]?[x[0],x[1],KNEE_HINT[x[0]],x[3]]:x);
 const woHasKnee=k=>WO[k].steps.some(x=>KNEE_WO[x[0]]||KNEE_HINT[x[0]]);
 /* Zwischen Dehnungen 5 Sekunden zum Wechseln: „Seite wechseln“ bzw. bei den Dehn-Programmen „In Position gehen“ */
 const woSide=n=>String(n).replace(/\s+(links|rechts)$/,'');
@@ -27,7 +27,7 @@ function woRun(){clearInterval(woTick);woTick=setInterval(()=>{if(!wo||wo.paused
 function woBuzz(){try{navigator.vibrate&&navigator.vibrate([120,60,120])}catch(e){}}
 function woNext(){const st=woSteps();wo.i++;wo.last=Date.now();if(wo.i>=st.length){woFinish();return}wo.left=st[wo.i][1];woBuzz();woRender()}
 function woFinish(){wo.done=true;clearInterval(woTick);woBuzz();try{woLock&&woLock.release()}catch(e){}woLock=null;
- const d=today(),dd=ND(d),p0=dayScore(d).pt;if(wo.ch&&!(dd.ch||[]).includes(wo.ch)){const before=chDone(d).length;dd.ch=[...(dd.ch||[]),wo.ch];touch(d);
+ const d=today(),dd=ND(d),p0=dayScore(d).pt;if(/^home_/.test(wo.k)&&typeof homeFinish==='function')homeFinish(wo.k);/* Heim-Training zählt als Krafteinheit */if(wo.ch&&!(dd.ch||[]).includes(wo.ch)){const before=chDone(d).length;dd.ch=[...(dd.ch||[]),wo.ch];touch(d);
   if(chDone(d).length===3&&before<3)tell(`${S.prof.name||'Jemand'} hat alle Challenges geschafft`,`Heute alle 3 Coach-Challenges erledigt (+${chPoints(d)} Punkte). Und du?`)}
  woRender();render();cheer({big:true,title:cheerWord(),sub:WO[wo.k].n+' geschafft',pts:dayScore(d).pt-p0})}
 function woClose(){clearInterval(woTick);try{woLock&&woLock.release()}catch(e){}woLock=null;wo=null;woRender()}
@@ -41,7 +41,7 @@ function woRender(){if(!wo){woEl.classList.remove('on');woEl.innerHTML='';return
  const cur=st[wo.i],nx=st[wo.i+1],isP=cur[0]==='Pause'||wo.i===0,work=st.slice(1).filter(x=>x[0]!=='Pause'),wi=wo.i===0?0:work.indexOf(cur)+1;
  woEl.innerHTML=`<div class="gh"><button class="gx" data-wo-a="close" aria-label="Abbrechen">✕</button><div><b>${esc(W.n)}</b><small id="woTotal"></small></div></div>
  <div class="gprog">${st.slice(1).map((x,i)=>`<i class="${i+1<wo.i?'d':i+1===wo.i?'c':''}${x[0]==='Pause'?' p':''}"></i>`).join('')}</div>
- <div class="wobody${isP?' rest':''}"><small class="wok">${wo.i===0?'Bereit machen':cur[0]==='Pause'?'Pause':'Übung '+(wi>0?wi:'')+' von '+work.length}</small>
+ <div class="wobody${isP?' rest':''}"><small class="wok">${wo.i===0?'Bereit machen':cur[0]==='Pause'?'Pause':(typeof homeLabel==='function'&&homeLabel(wo.k,cur))||'Übung '+(wi>0?wi:'')+' von '+work.length}</small>
   <h2 class="won">${esc(cur[0]==='Pause'?(cur[2]||'Durchatmen'):cur[0])}</h2>${cur[2]&&cur[0]!=='Pause'&&wo.i>0?`<p class="wosub">${esc(cur[2])}</p>`:''}
   ${(()=>{const fn=cur[0]==='Pause'?(nx?nx[0]:''):(wo.i===0?st[1][0]:cur[0]);if(!fn||fn==='Pause')return '';const mf=moveFor(fn),fe=mf&&mf.m.feel;return moveSvg(fn,'wofig'+(cur[0]==='Pause'||wo.i===0?' soon':''))+(fe?`<p class="wofeel">Spürst du hier: <b>${esc(fe)}</b></p>`:'')})()}
   <div class="woring"><svg viewBox="0 0 110 110" aria-hidden="true"><circle cx="55" cy="55" r="48" class="bg"/><circle id="woR" cx="55" cy="55" r="48" class="fg" stroke-dasharray="301.6" stroke-dashoffset="0"/></svg><b id="woT" class="cond">${Math.ceil(wo.left)}</b></div>
