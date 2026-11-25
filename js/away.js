@@ -22,7 +22,7 @@ function awayWhen(a){const s=new Date(a.start),e=new Date(a.allDay?a.e+'T12:00':
 function awayTag(a){const now=Date.now(),td=today(),tm=iso(Date.now()+864e5);if(a.start<=now&&a.stop>=now)return['jetzt','Gerade unterwegs'];
  const sd=iso(a.start);return sd===td?['heute','Heute']:sd===tm?['morgen','Morgen']:['',''];}
 function awayRow(a,del){const me=slugN(a.wer)===slugN(S.prof.name||''),[tc,tl]=awayTag(a);
- return `<li class="awr${tc?' '+tc:''}">${avaHtml(a.wer||'?',me,'sm')}<div><b>${esc(a.wer||'?')}${a.ort?` · ${esc(a.ort)}`:''}</b><span>${esc(a.was)}</span><small>${esc(awayWhen(a))}</small></div>
+ return `<li class="awr${tc?' '+tc:''}">${avaHtml(a.wer||'?',me,'sm')}<div><b>${esc(a.wer||'?')}${a.ort?` · ${esc(a.ort)}`:''}</b><span>${esc(a.was)}</span><small>${esc(awayWhen(a))}</small>${del&&calMe(a)?`<em class="awsee">${esc(sharePartner()||'Partner')} sieht: ${a.was&&a.was!=='unterwegs'||a.ort?'Zeitraum'+(a.was&&a.was!=='unterwegs'?', Anlass':'')+(a.ort?', Ort':''):'nur den Zeitraum'}</em>`:''}</div>
  <div class="awm">${tl?`<em>${tl}</em>`:''}${a.nacht?'<i>Über Nacht</i>':''}${del?`<button class="awx${awayDel===a.uid?' danger':''}" data-aw="del" data-uid="${esc(a.uid)}" aria-label="Löschen">${awayDel===a.uid?'Wirklich löschen?':'Löschen'}</button>`:''}</div></li>`}
 const awayNext=days=>AWAY.filter(a=>a.stop>=Date.now()&&a.start<=Date.now()+days*864e5);
 /* Karte auf der Startseite – nur sichtbar, wenn in den nächsten 14 Tagen jemand weg ist */
@@ -93,9 +93,9 @@ function calHead(){const mon=wk(Date.now()),mine=S.sessions.filter(s=>wk(s.date)
  let both=0;if(pf){const t=new Date();for(let k=1;k<=t.getDate();k++){const d=iso(new Date(t.getFullYear(),t.getMonth(),k,12));if(pf(d)&&calSess(d).length)both++}}
  const ok=mine>=g,ad=awayDaysWeek(mon),pw=(typeof partners!=='undefined'?partners:[]).find(x=>x.name),wp=typeof weekScore==='function'?weekScore():0;
  const aw=AWAY.filter(a=>calMe(a)&&a.stop>=mon&&a.start<mon+7*864e5).map(awayWhen).join(', ');
- return `<section class="calsum"><div class="cs1"><span class="cst${ok?' ok':''}">${ok?'Im Plan':'Noch '+(g-mine)}</span><b class="cond">${mine} von ${g}</b><span>Krafteinheiten diese Woche</span></div>
+ return `<section class="calsum"><div class="cs1"><span class="cst${ok?' ok':''}">${ok?'Wochenziel geschafft':'Noch '+(g-mine)+' Training bis zum Wochenziel'}</span><b class="cond">${mine} von ${g}</b><span>Krafteinheiten diese Woche</span></div>
  ${pn?`<div class="cs2"><p><i class="cd me"></i>Du: <b>${mk}×</b> trainiert${wp?` · ${fmt(wp)} Punkte`:''}</p><p><i class="cd pa"></i>${esc(pn)}: <b>${pk}×</b> trainiert${pw&&pw.wp!=null?` · ${fmt(pw.wp)} Punkte`:''}</p>${both?`<p class="csw">Diesen Monat ${both}× am selben Tag trainiert</p>`:''}</div>`:''}</section>
- ${g<S.goal?`<p class="calfair"><b>Diese Woche reichen ${g} statt ${S.goal}.</b> Du bist ${ad} Tage unterwegs (${esc(aw)}). Regel für euch beide: Ab 2 Tagen unterwegs in einer Woche zählt eine Einheit weniger. Du verlierst nichts.</p>`:''}`}
+ ${g<S.goal?`<p class="calfair"><b>Diese Woche reichen ${g} statt ${S.goal}</b> – du bist ${ad} Tage unterwegs (${esc(aw)}).<br>Gilt für euch beide gleich. Punkte zählen wie immer.</p>`:''}`}
 function calDayHtml(d){const ss=calSess(d),aw=calAway(d),dt=new Date(d+'T12:00'),pf=tdPartner(),pt=pf?pf(d):'',pn=sharePartner()||'Partner';
  const head=dt.toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'});
  const tr=ss.map(s=>{const sets=s.ex.reduce((a,x)=>a+x.sets.length,0),cm=(s.cardio||[]).reduce((a,c)=>a+(+c.min||0),0);
@@ -115,7 +115,7 @@ function renderCal(){const now=new Date();if(!calM)calM={y:now.getFullYear(),m:n
  ${calHead()}${awayQuickHtml()}
  <section class="away cal"><div class="calnav"><button data-calm="-1" aria-label="Vormonat">‹</button><b>${CALMON[m]} ${y}</b><button data-calm="1" aria-label="Nächster Monat">›</button></div>
  <div class="cgrid">${['Mo','Di','Mi','Do','Fr','Sa','So'].map(x=>`<span class="cwd">${x}</span>`).join('')}${cells}</div>
- <div class="clegend"><span><i class="cd me"></i>Du hast trainiert</span>${pn?`<span><i class="cd pa"></i>${esc(pn)} hat trainiert</span>`:''}<span><s class="me"></s><s class="pa"></s>Strich = unterwegs</span></div><p class="cltap">Tag antippen für Einzelheiten.</p></section>
+ <div class="clegend"><span><i class="cd me"></i>Du hast trainiert</span>${pn?`<span><i class="cd pa"></i>${esc(pn)} hat trainiert</span><span><b class="cboth"></b>Rahmen = beide trainiert</span>`:''}<span><s class="me"></s><s class="pa"></s>Strich = unterwegs</span></div><p class="cltap">Tipp: Auf einen Tag tippen, dann siehst du die Einzelheiten.</p></section>
  ${calDayHtml(calSel)}
  ${renderAway()}`}
 /* Unterwegs mit einem Tipp */
@@ -128,4 +128,4 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-cal],[da
  if(b.dataset.cal){calSel=b.dataset.cal}else{let mm=calM.m+(+b.dataset.calm),yy=calM.y;if(mm<0){mm=11;yy--}if(mm>11){mm=0;yy++}calM={y:yy,m:mm}}render()});
 /* Startseite an eigenen Unterwegs-Tagen: Hotel-Workout als Angebot (gleiche Punkte wie jedes erste Kurz-Workout) */
 function awayHotelHtml(){if(!calAway(today()).some(calMe))return '';const done=((S.nut.days[today()]||{}).ch||[]).some(x=>/^wo_/.test(x));if(done)return '';
- return `<section class="awhotel"><div><small>Du bist heute unterwegs</small><b>6 Minuten im Hotelzimmer</b><span>Ohne Geräte, ohne Sprünge – schont Knie und Rücken · +${WO_FREE} Punkte wie jedes Kurz-Workout</span></div><button class="primary" data-wo="core">Starten</button></section>`}
+ return `<section class="awhotel"><div><small>Du bist heute unterwegs</small><b>6 Minuten Training im Hotelzimmer</b><span>Ohne Geräte, ohne Sprünge · +${WO_FREE} Punkte</span></div><button class="primary" data-wo="core">Starten</button></section>`}
