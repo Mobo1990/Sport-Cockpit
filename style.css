@@ -985,6 +985,19 @@ html.kbopen .nav{display:none}
 .awmore{margin:6px 0 0;font-size:13px;color:var(--mute)}
 .awadd{display:block;width:100%;min-height:52px;margin:8px 0 12px;border-radius:var(--r);border:1.5px dashed var(--line);background:var(--s1);color:var(--ink);font:700 18px var(--fh)}
 .away.form .actions{margin:12px 0 0}.away.form .actions .primary{flex:1}
+/* Rezept nach dem Training (Chefkoch) */
+.rdone{display:flex;align-items:center;gap:12px;background:var(--d-sagel,#E3ECE6);border-radius:18px;padding:14px 16px;margin:0 0 12px}.rdone i{flex:0 0 34px;height:34px;border-radius:50%;background:var(--d-sage,#6F8F7E);color:#fff;display:grid;place-items:center;font-style:normal;font-weight:700}.rdone b{display:block;font:800 18px var(--fh)}.rdone span{font-size:14px;color:var(--mute)}
+.rcard{background:var(--s1);border-radius:20px;box-shadow:var(--sh);overflow:hidden;margin:0 0 14px}.rcard img{display:block;width:100%;aspect-ratio:3/2;object-fit:cover;background:var(--s2)}
+.rbd{padding:14px 16px 16px}.rbd small{font:700 12px var(--fh);letter-spacing:.06em;text-transform:uppercase;color:var(--acc)}.rbd h3{font:800 22px var(--fh);margin:4px 0 6px;line-height:1.15}
+.rmac{margin:0 0 4px;font-size:15px}.rmac span{color:var(--mute);font-size:13px}.rrat{margin:0 0 6px;font-size:14px;color:var(--mute)}.rwhy{background:var(--s2);border-radius:12px;padding:9px 12px;font-size:14px;color:var(--mute);margin:6px 0 12px}
+.rbtn{display:flex;flex-wrap:wrap;gap:8px}.rbtn button{min-height:46px}.rbtn .primary{flex:1}
+.rload{padding:16px}.rload p{margin:0 0 8px;color:var(--mute)}
+.recv{position:fixed;inset:0;z-index:70;background:var(--bg);display:none;flex-direction:column}.recv.on{display:flex}
+.recb{flex:1;overflow:auto;padding:0 16px 24px}.recb img{width:calc(100% + 32px);margin:0 -16px 12px;aspect-ratio:3/2;object-fit:cover}.recb h2{font:800 26px var(--fh);margin:4px 0 6px}
+.recb h3{font:800 19px var(--fh);margin:18px 0 6px}.recb h3 small{font:500 14px var(--fb);color:var(--mute)}
+.ring{list-style:none;padding:0;margin:0}.ring li{padding:7px 0;border-top:1px solid var(--line);font-size:16px}.ring li:first-child{border-top:0}
+.rsteps{padding-left:22px;margin:0}.rsteps li{margin:0 0 10px;font-size:16px;line-height:1.5}.rsrc{font-size:14px;color:var(--mute);margin-top:14px}.rsrc a{color:var(--acc);font-weight:700}
+.recv .gf{padding:10px 16px calc(10px + env(safe-area-inset-bottom))}.recv .gf .primary{width:100%}
 /* Training/Kraft-Umschalter oben im Training-Tab */
 .tsw{display:flex;gap:4px;padding:4px;margin:4px 0 14px;background:var(--s2);border-radius:999px}
 .tsw button{flex:1;min-height:38px;border:0;border-radius:999px;background:none;color:var(--mute);font:700 16px var(--fh)}
@@ -1069,6 +1082,22 @@ html.kbopen .nav{display:none}
 .wo .wobody{overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0}.wo .wobody:has(.hwsum){justify-content:flex-start}
 .hwl b{font-size:17px}.hwl span{font-size:14px}.hwnew{display:block;font-style:normal;font-size:12px;font-weight:700;color:var(--mute);margin-top:3px}
 .woring b{white-space:nowrap}.wonx{text-wrap:balance}
+/* Rezepte nach Tester-Befragung */
+.rkpi{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0}.rkpi span{background:var(--s2);border-radius:12px;padding:8px;text-align:center;font-size:13px;color:var(--mute)}.rkpi b{display:block;font:800 20px var(--fh);color:var(--ink)}
+.rfit{margin:0 0 4px;font-size:14px;color:var(--acc);font-weight:600}.rfit.ok{color:var(--d-saged,#3E5A4C)}.rmeta{margin:0 0 10px;font-size:13px;color:var(--mute)}
+.rlinks{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px}.rlinks .glink{padding:4px 0;font-size:13px;color:var(--mute)}
+.rserv{display:flex;gap:6px;margin:0 0 6px}.rserv button{flex:1;min-height:38px;font-size:14px}.rserv button[aria-pressed=true],.rpor button[aria-pressed=true]{background:var(--dark,#3E5A4C);color:#fff}
+.ring label{display:flex;align-items:flex-start;gap:10px;font-size:17px}.ring input{width:22px;height:22px;margin-top:2px}.ring input:checked+span{text-decoration:line-through;color:var(--mute)}
+.rsteps li{font-size:18px;line-height:1.5;margin-bottom:12px}
+.rfoot{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);background:var(--s1)}.rpor{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.rpor button{min-width:44px;min-height:40px;padding:4px 8px}.rpor span{font-size:14px;color:var(--mute)}.rpor b{color:var(--ink)}
+.rshare{display:flex;align-items:center;gap:8px;font-size:15px}.rshare input{width:20px;height:20px}
+/* Rezepte Runde 2 */
+.rcard img{aspect-ratio:16/9}.rkpi.r4{grid-template-columns:repeat(4,1fr)}.rkpi.r4 b{font-size:18px}
+.rlinks{gap:2px 18px}.rlinks .glink{font-size:15px;min-height:40px;color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.rnote{font-size:13px;color:var(--mute);margin:2px 0 10px}.recb h3 span{font:500 14px var(--fb,inherit);color:var(--mute);margin-left:6px}
+.ring li{padding:5px 0}.rsrc span{font-size:12px}.rveg{display:block;margin:12px 0 4px;min-height:40px;font-size:15px}
+.rpor em{font-style:normal;font-size:14px;color:var(--mute)}.rprev{margin:0;font-size:15px}.rprev span{color:var(--mute);font-size:13px}
+.rok .rbd>p{margin:4px 0 8px;font-size:15px}
 .awkind{display:flex;gap:6px;margin:0 0 8px}.awkind button{flex:1;min-height:40px;font-size:15px}.awkind button[aria-pressed=true]{background:var(--dark,#3E5A4C);color:#fff}.awhb{display:flex;flex-direction:column;gap:6px}.awhb .ghost{min-height:36px;font-size:13px}
 .awkrow{display:flex;align-items:center;gap:8px;margin:10px 0 0;font-size:14px;color:var(--mute)}.awkrow .awkind{flex:1;margin:0}.awkrow .awkind button{min-height:34px;font-size:13px;padding:4px 8px}.away.form .awkind{margin:6px 0 4px}p.awsee{margin:8px 0 0}
 .btrip{display:inline-block;margin-top:4px;padding:2px 8px;border-radius:999px;background:var(--d-sagel,#E3ECE6);color:var(--d-saged,#3E5A4C);font-size:12px;font-weight:700}
@@ -1079,3 +1108,9 @@ html.kbopen .nav{display:none}
 .cd.me,.cbar s.me,.clegend s.me{background:var(--me)}.cd.pa,.cbar s.pa,.clegend s.pa{background:var(--pa)}
 .cd.me.ring{color:var(--me)}.cd.pa.ring{color:var(--pa)}
 :root.me-w .calsum .pa b{color:var(--d-saged,#3E5A4C)}
+/* Rezepte Runde 3 */
+.rtop{display:flex;align-items:center;justify-content:space-between;gap:8px}.rvegc{min-height:34px;padding:4px 12px;border-radius:999px;font-size:14px;border:1.5px solid var(--line);background:none;color:var(--ink)}.rvegc[aria-pressed=true]{background:var(--d-sagel,#E3ECE6);border-color:var(--d-sage,#6F8F7E);color:var(--d-saged,#3E5A4C);font-weight:700}
+.ring label{align-items:center}.ring li{padding:4px 0}.rsrc{margin:10px 0 0}.rsrc span{color:var(--mute)}
+.rtim{display:block;margin:6px 0 0;min-height:38px;padding:4px 12px;border-radius:999px;font-size:15px;font-variant-numeric:tabular-nums}
+.rfoot{gap:6px}.rfoot .rpv{flex:1 1 100%;font-size:14px}.rshare{font-size:14px}.rshare span{color:var(--mute)}.rshare input,.ring input{accent-color:var(--d-saged,#3E5A4C)}
+.rfoot{padding-top:8px!important}.rfoot .rpor button{min-height:36px}.rfoot .rpv{margin:-2px 0 0}.rshare{min-height:32px}.rfoot .primary{min-height:48px}.ring label{font-size:16px}

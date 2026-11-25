@@ -11,10 +11,10 @@ function renderHome(){weeklyCheck();const d=today(),sc=dayScore(d),g=sc.g,t=sc.t
  return `${healthLink()}<section class="hero2"><div><p class="hk">${new Date().toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'})}</p><h2>${gr}, ${esc(S.prof.name)}</h2></div></section>
  ${boardHtml(sc)}
  ${sc.why.length?`<div class="chips">${sc.why.map(w=>`<span>${esc(w)}</span>`).join('')}</div>`:'<p class="tip" style="padding:0 0 12px">Noch keine Punkte heute: Trainieren, im Kalorienziel bleiben und Protein schaffen bringt am meisten.</p>'}
- ${typeof awayHotelHtml==='function'?awayHotelHtml():''}${rwInboxHtml()}${shareInboxHtml()}${sayInboxHtml()}${awayHomeHtml()}
- <section class="tiles">
+ ${typeof awayHotelHtml==='function'?awayHotelHtml():''}${rwInboxHtml()}${shareInboxHtml()}${sayInboxHtml()}
+ ${typeof trainedToday==='function'&&trainedToday()?recHomeHtml():`<section class="tiles">
   <button class="tile big" data-gym="1" data-d="${run?run[0]:nx}"><small>${run?'Training läuft':'Als Nächstes'}</small><b>${typeof homeDayName==='function'?homeDayName(run?run[0]:nx):DAYS[run?run[0]:nx].n}</b><span>${run?runSets+' Sätze erledigt – weiter':typeof isHome==='function'&&isHome()&&HOME[nx]?HOME[nx].sub+' · ca. '+homeBuild(nx).min+' min':DAYS[nx].sub}</span><em>${run?'Fortsetzen':'Training starten'} ›</em></button>
-  </section>${typeof isHome==='function'&&isHome()&&HOME[nx]&&!run?homeLenHtml(nx):''}
+  </section>${typeof isHome==='function'&&isHome()&&HOME[nx]&&!run?homeLenHtml(nx):''}`}
  ${advHtml()}
  <section class="todaybox"><div class="tbh"><b>Heute</b><span>${sc.pt} Punkte</span></div>
  ${isDuo()?duoTodayHtml(sc):` <button class="eatday" data-a="view" data-v="nut" aria-label="Essen heute, zum Essen-Tab"><div class="trow">
@@ -27,7 +27,8 @@ function renderHome(){weeklyCheck();const d=today(),sc=dayScore(d),g=sc.g,t=sc.t
  ${afHtml()}
  </section>
  ${woQuickHtml()}
- <section class="weekbox">${weeklyHtml()}${rwLineHtml()}</section>`}
+ <section class="weekbox">${weeklyHtml()}${rwLineHtml()}</section>
+ ${awayHomeHtml()}`}
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-h]');if(!b)return;const a=b.dataset.h,d=today(),wb=/^(water|wmlok|steps)$/.test(a)?cheerFrom(d):null;
  if(a==='train'){day=b.dataset.d;view='train'}
  else if(a==='meal'){view='nut';nDate=d;sheet={meal:b.dataset.m,step:'search',q:'',focus:true}}
