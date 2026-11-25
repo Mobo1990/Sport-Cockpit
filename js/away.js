@@ -95,7 +95,7 @@ function calHead(){const mon=wk(Date.now()),mine=S.sessions.filter(s=>wk(s.date)
  const aw=AWAY.filter(a=>calMe(a)&&a.stop>=mon&&a.start<mon+7*864e5).map(awayWhen).join(', ');
  return `<section class="calsum"><div class="cs1"><span class="cst${ok?' ok':''}">${ok?'Wochenziel geschafft':'Noch '+(g-mine)+' Training bis zum Wochenziel'}</span><b class="cond">${mine} von ${g}</b><span>Krafteinheiten diese Woche</span></div>
  ${pn?`<div class="cs2"><p><i class="cd me"></i>Du: <b>${mk}×</b> trainiert${wp?` · ${fmt(wp)} Punkte`:''}</p><p><i class="cd pa"></i>${esc(pn)}: <b>${pk}×</b> trainiert${pw&&pw.wp!=null?` · ${fmt(pw.wp)} Punkte`:''}</p>${both?`<p class="csw">Diesen Monat ${both}× am selben Tag trainiert</p>`:''}</div>`:''}</section>
- ${g<S.goal?`<p class="calfair"><b>Diese Woche reichen ${g} statt ${S.goal}</b> – du bist ${ad} Tage unterwegs (${esc(aw)}).<br>Gilt für euch beide gleich. Punkte zählen wie immer.</p>`:''}`}
+ ${g<S.goal?`<p class="calfair"><b>Diese Woche reichen ${g} statt ${S.goal}</b> – du bist ${ad} Tage unterwegs (${esc(aw)}).<br>Gilt für euch beide gleich. Trainierst du trotzdem mehr, zählt alles ganz normal.</p>`:''}`}
 function calDayHtml(d){const ss=calSess(d),aw=calAway(d),dt=new Date(d+'T12:00'),pf=tdPartner(),pt=pf?pf(d):'',pn=sharePartner()||'Partner';
  const head=dt.toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'});
  const tr=ss.map(s=>{const sets=s.ex.reduce((a,x)=>a+x.sets.length,0),cm=(s.cardio||[]).reduce((a,c)=>a+(+c.min||0),0);
@@ -128,4 +128,4 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-cal],[da
  if(b.dataset.cal){calSel=b.dataset.cal}else{let mm=calM.m+(+b.dataset.calm),yy=calM.y;if(mm<0){mm=11;yy--}if(mm>11){mm=0;yy++}calM={y:yy,m:mm}}render()});
 /* Startseite an eigenen Unterwegs-Tagen: Hotel-Workout als Angebot (gleiche Punkte wie jedes erste Kurz-Workout) */
 function awayHotelHtml(){if(!calAway(today()).some(calMe))return '';const done=((S.nut.days[today()]||{}).ch||[]).some(x=>/^wo_/.test(x));if(done)return '';
- return `<section class="awhotel"><div><small>Du bist heute unterwegs</small><b>6 Minuten Training im Hotelzimmer</b><span>Ohne Geräte, ohne Sprünge · +${WO_FREE} Punkte</span></div><button class="primary" data-wo="core">Starten</button></section>`}
+ return `<section class="awhotel"><div><small>Du bist heute unterwegs</small><b>6 Minuten Training im Hotelzimmer</b><span>Ohne Geräte, ohne Sprünge · +${WO_FREE} Punkte${weekGoal(wk(Date.now()))<S.goal?` · dein Wochenziel ist diese Woche ${weekGoal(wk(Date.now()))} statt ${S.goal}`:''}</span></div><button class="primary" data-wo="core">Starten</button></section>`}
