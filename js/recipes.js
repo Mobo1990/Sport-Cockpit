@@ -62,10 +62,10 @@ function recHomeHtml(){const last=S.sessions.filter(s=>iso(s.date)===today()&&s.
  const L=REC.list||[],r=L[recIdx%Math.max(1,L.length)];
  if(!r)return done+`<section class="rcard rload"><p>${REC.err&&REC.err!=='nichts'?'Rezepte gerade nicht erreichbar.':'Gerade kein passendes schnelles Rezept gefunden.'}</p><button data-rec="reload">Nochmal suchen</button></section>`;
  recSeen(r);const ok=!left||r.kcal<=left,np=Math.max(0,need-r.p);
- return done+`<section class="rcard">${r.img?`<img src="${esc(r.img)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:''}<div class="rbd"><small>Dein ${recMealN[meal]} · Chefkoch</small><h3>${esc(r.t)}</h3>
+ return done+`<section class="rcard">${r.img?`<img src="${esc(r.img)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:''}<div class="rbd"><div class="rtop"><small>Dein ${recMealN[meal]} · Chefkoch</small><button class="rvegc" data-rec="veg" aria-pressed="${!!recPref().veg}">${recPref().veg?'✓ Vegetarisch':'Vegetarisch'}</button></div><h3>${esc(r.t)}</h3>
   <div class="rkpi"><span><b>${r.p} g</b>Eiweiß</span><span><b>${fmt(r.kcal)}</b>kcal</span><span><b>${r.min||'–'}</b>Minuten</span></div>
-  <p class="rfit${ok?' ok':''}">${ok?'Passt zu deinem Ziel':`Etwas über deinem Rest (${fmt(left)} kcal) – ein halber Teller passt`}${need?` · danach fehlen noch ${np?np+' g Eiweiß':'0 g – Eiweiß-Ziel erreicht'}`:''}</p>
-  <p class="rmeta">pro Teller · ${r.ing.length} Zutaten${recMild(r)?' · mild, auch für Kinder':''}${r.r?` · ★ ${fmt(Math.round(r.r*10)/10)} (${fmt(r.v)})`:''}</p>
+  <p class="rfit${ok?' ok':''}">${ok?'Passt zu deinem Ziel':`Etwas über deinem Rest (${fmt(left)} kcal) – ein halber Teller passt`}${need?` · nach diesem Teller ${np?`fehlen noch ${np} g Eiweiß`:'ist dein Eiweiß-Ziel erreicht'}`:''}</p>
+  <p class="rmeta">pro Teller${recMild(r)?' · nicht scharf, auch für Kinder':''}</p>
   <div class="rbtn"><button class="primary" data-rec="open">So geht's</button><button data-rec="quick">1 Teller eintragen</button></div>
   <div class="rlinks">${L.length>1?'<button class="glink" data-rec="next">Anderes Rezept</button>':''}<button class="glink" data-rec="no">Nicht mein Fall</button><button class="glink" data-rec="hide">Heute nicht</button></div></div></section>`}
 /* Zubereitung in der App: Portionen umrechnen, Zutaten abhaken, große Schritte, Bildschirm bleibt an. Eintragen mit Menge + Vorschau. */
@@ -73,24 +73,26 @@ const recEl=(()=>{const d=document.createElement('div');d.id='recv';d.className=
 const recAmt=(a,f)=>{const v=a*f;return v>=10?Math.round(v):Math.round(v*4)/4};
 function recRender(){const r=recOpen;if(!r){recEl.classList.remove('on');recEl.innerHTML='';try{recLock&&recLock.release()}catch(e){}recLock=null;return}recEl.classList.add('on');
  if(!recLock){try{navigator.wakeLock&&navigator.wakeLock.request('screen').then(l=>recLock=l).catch(()=>{})}catch(e){}}
- const sv=recServ||1,f=sv/r.serv,pn=typeof sharePartner==='function'?sharePartner():null,P=recPor,veg=!!recPref().veg;
+ const sv=recServ||1,f=sv/r.serv,pn=typeof sharePartner==='function'?sharePartner():null,P=recPor;
  recEl.innerHTML=`<header class="gh"><button class="gx" data-rec="close" aria-label="Schließen">✕</button><div><b>${esc(r.t)}</b><span>Chefkoch · ${r.min?'ca. '+r.min+' min · ':''}Bildschirm bleibt an</span></div></header>
  <section class="recb">${r.img?`<img src="${esc(r.img)}" alt="" referrerpolicy="no-referrer">`:''}
  <div class="rkpi r4"><span><b>${r.p} g</b>Eiweiß</span><span><b>${fmt(r.kcal)}</b>kcal</span><span><b>${r.c} g</b>Kohlenh.</span><span><b>${r.f} g</b>Fett</span></div>
- <p class="rnote">pro Teller, Nährwerte laut Chefkoch${recMild(r)?' · mild, auch für Kinder':''}</p>
+ <p class="rnote">pro Teller, Nährwerte laut Chefkoch${r.r?` · ★ ${fmt(Math.round(r.r*10)/10)} (${fmt(r.v)} Bewertungen)`:''}${recMild(r)?' · nicht scharf, auch für Kinder':''}</p>
  <h3>Ich koche für</h3><div class="rserv rpor">${[1,2,3,4].map(n=>`<button data-rec="serv" data-v="${n}" aria-pressed="${sv===n}">${n}</button>`).join('')}<em>${sv===1?'Person':'Personen'}</em></div>
- ${sv>1&&pn?`<p class="rnote">Isst ${esc(pn)} mit? Unten „Auch bei ${esc(pn)} eintragen“ ist schon angehakt.</p>`:''}
+ ${sv>1?`<p class="rnote">Eingetragen wird nur dein Teller.${pn?` Isst ${esc(pn)} mit, kannst du es unten für ${esc(pn)} vormerken.`:''}</p>`:''}
  <h3>Zutaten <span>für ${sv} ${sv===1?'Person':'Personen'}</span></h3>
  <ul class="ring">${r.ing.map((i,k)=>`<li><label><input type="checkbox" data-rec="tick" data-i="${k}"><span><b>${i.a?fmt(recAmt(i.a,f))+' ':''}${esc(i.u)}</b> ${esc(i.n)}</span></label></li>`).join('')}</ul>
- <h3>So geht's</h3><ol class="rsteps">${r.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>
- <p class="rnote">Chefkoch nennt keine Zeiten pro Schritt – insgesamt ${r.min?'ca. '+r.min+' Minuten':'schnell gemacht'}.</p>
- <p class="rsrc">Rezept von Chefkoch.de · <a href="${esc(r.url)}" target="_blank" rel="noopener">Original mit Fotos ansehen&nbsp;↗</a><br><span>öffnet Chefkoch im Browser</span></p>
- <button class="glink rveg" data-rec="veg" aria-pressed="${veg}">${veg?'Vegetarische Vorschläge: an ✓':'Lieber vegetarische Vorschläge'}</button></section>
- <footer class="gf rfoot"><div class="rpor"><em>Du isst</em>${[[.5,'½'],[1,'1'],[1.5,'1½'],[2,'2']].map(([v,l])=>`<button data-rec="por" data-v="${v}" aria-pressed="${P===v}">${l}</button>`).join('')}<em>${P===1?'Teller':'Teller'}</em></div>
- <p class="rprev">= <b>${fmt(Math.round(r.kcal*P))} kcal · ${Math.round(r.p*P)} g Eiweiß</b> <span>(1 Teller = 1 Person)</span></p>
- ${pn?`<label class="rshare"><input type="checkbox" id="recPa"${recPa?' checked':''}> Auch bei ${esc(pn)} eintragen – ${esc(pn)} bestätigt es bei sich</label>`:''}
+ <h3>So geht's <span>${r.min?'insgesamt ca. '+r.min+' min':''}</span></h3><ol class="rsteps">${r.steps.map((x,k)=>{const t=recStepMin(x);return `<li>${esc(x)}${t?`<button class="rtim" data-rec="tim" data-k="${k}" data-m="${t}">${recTim&&recTim.k===k?recTimTxt():`Timer ${t} min`}</button>`:''}</li>`}).join('')}</ol>
+ <p class="rsrc"><a href="${esc(r.url)}" target="_blank" rel="noopener">Original mit Fotos bei Chefkoch&nbsp;↗</a> <span>(öffnet den Browser)</span></p></section>
+ <footer class="gf rfoot"><div class="rpor"><em>Du isst</em>${[[.5,'½'],[1,'1'],[1.5,'1½'],[2,'2']].map(([v,l])=>`<button data-rec="por" data-v="${v}" aria-pressed="${P===v}">${l}</button>`).join('')}<em class="rpv">Teller = <b>${fmt(Math.round(r.kcal*P))} kcal · ${Math.round(r.p*P)} g Eiweiß</b></em></div>
+ ${pn?`<label class="rshare"><input type="checkbox" id="recPa"${recPa?' checked':''}> Auch für ${esc(pn)} vormerken <span>(sie bestätigt selbst)</span></label>`:''}
  <button class="primary" data-rec="add">Eintragen</button></footer>`}
-let recPa=false;
+let recPa=false,recTim=null;
+/* Zeitangaben aus dem Chefkoch-Text („10 Minuten“, „ca. 5–8 Min.“) als Timer anbieten */
+function recStepMin(x){const m=String(x).match(/(\d{1,3})\s*(?:[-–]|bis)?\s*(\d{1,3})?\s*(?:Minuten|Min\b|Min\.)/i);return m?+(m[2]||m[1]):0}
+const recTimTxt=()=>{const l=Math.max(0,Math.round((recTim.end-Date.now())/1000));return l?`läuft: ${Math.floor(l/60)}:${String(l%60).padStart(2,'0')} · Stopp`:'Fertig!'};
+function recTick(){if(!recTim)return;const b=recEl.querySelector(`.rtim[data-k="${recTim.k}"]`);if(b)b.textContent=recTimTxt();
+ if(Date.now()>=recTim.end){try{navigator.vibrate&&navigator.vibrate([300,150,300])}catch(e){}note('Timer fertig');clearInterval(recTim.iv);recTim.done=1;return}}
 function recAdd(r,P,pa){const d=today(),meal=recMeal(),g=Math.round((r.g||400)*P),it={id:'i'+Date.now().toString(36),name:r.t+' (Chefkoch)',g,meal,kcal:Math.round(r.kcal*P),p:Math.round(r.p*P),c:Math.round(r.c*P),f:Math.round(r.f*P),z:0,rid:r.id},wb=cheerFrom(d);
  ND(d).items.push(it);touch(d);recOpen=null;recPor=1;recServ=0;recPa=false;
  recJust={id:it.id,t:r.t,d,txt:`${P===1?'1 Teller':fmt(P)+' Teller'} · ${fmt(it.kcal)} kcal · ${it.p} g Eiweiß${pa?' – auch an '+esc(sharePartner())+' geschickt':''}`};
@@ -102,8 +104,10 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-rec]');i
  else if(a==='view'){const x=recJust&&((REC&&REC.list)||[]).find(y=>String(y.id)===String((ND(today()).items.find(i=>i.id===recJust.id)||{}).rid));recJust=null;if(x){recOpen=x;recPor=1;recServ=0;recRender()}render()}
  else if(a==='quick'&&r){recAdd(r,1,false)}
  else if(a==='undo'&&recJust){const d=recJust.d;ND(d).items=ND(d).items.filter(i=>i.id!==recJust.id);touch(d);recJust=null;render();note('Wieder entfernt')}
- else if(a==='close'){recOpen=null;recRender()}
- else if(a==='serv'){recServ=+b.dataset.v;if(recServ>1)recPa=true;else recPa=false;recRender()}else if(a==='por'){recPa=!!($('recPa')&&$('recPa').checked);recPor=+b.dataset.v;recRender()}
+ else if(a==='close'){if(recTim){clearInterval(recTim.iv);recTim=null}recOpen=null;recRender()}
+ else if(a==='tim'){const k=+b.dataset.k;if(recTim){clearInterval(recTim.iv);const same=recTim.k===k;recTim=null;b.textContent='Timer '+b.dataset.m+' min';if(same)return}
+  document.querySelectorAll('.rtim').forEach(x=>x.textContent='Timer '+x.dataset.m+' min');recTim={k,end:Date.now()+(+b.dataset.m)*60000};recTim.iv=setInterval(recTick,1000);recTick()}
+ else if(a==='serv'){recServ=+b.dataset.v;recPa=!!($('recPa')&&$('recPa').checked);recRender()}else if(a==='por'){recPa=!!($('recPa')&&$('recPa').checked);recPor=+b.dataset.v;recRender()}
  else if(a==='add'){if(recOpen)recAdd(recOpen,recPor,!!($('recPa')&&$('recPa').checked))}
  else if(a==='next'){recIdx++;render()}else if(a==='reload'){recLoad(true)}
  else if(a==='hide'){recHide=today();render()}
