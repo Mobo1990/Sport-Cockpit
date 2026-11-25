@@ -55,10 +55,11 @@ function renderHead(){document.body.className='v-'+view;document.documentElement
  $('stats').innerHTML=`<div><b>${cnt[mon]||0} / ${S.goal}</b><small>Krafteinheiten diese Woche</small></div><div><b>${st}</b><small>Wochen in Folge im Ziel</small></div><div><b>${fmt(wv/1000)}<small class="unit"> t</small></b><small>bewegt diese Woche</small></div><div><b>${cmin} / ${S.cgoal}<small class="unit"> min</small></b><small>Cardio diese Woche</small></div>`;
  document.querySelectorAll('[data-a=view]').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===view));{const nb=$('rwBadge');if(nb&&typeof rwOpen==='function')nb.hidden=!rwOpen()}
 }
-let exOpen=new Set();
+let exOpen=new Set(),exShut=new Set();/* exShut: laufende Übung bewusst zugeklappt */
+const exIsOpen=(id,rows)=>{const n=rows.filter(r=>r.done).length;return exOpen.has(id)||(n&&n<rows.length&&!exShut.has(id))};
 function card(e,dr){const sg=sugg(e),h0=hist(vkey(e)),rows=dr.ex[e.id],tmp=!S.plan[day].some(x=>x.id===e.id);
  /* Duo-Design: Übungen eingeklappt, bis man sie antippt – laufende Übung bleibt offen */
- const nDone=rows.filter(r=>r.done).length;if(isDuo()&&!exOpen.has(e.id)&&!(nDone&&nDone<rows.length))return `<article class="ex exc"><button class="exhead exbtn" data-a="exopen" data-e="${e.id}" aria-expanded="false"><div class="pic">${svg(picOf(e))}</div><div><h3>${esc(e.n)}</h3><p class="tgt">${tmp?'<span class="tagtmp">Nur heute · </span>':''}${e.sets} Sätze · ${e.min}–${e.max} Wdh.${e.vars.length>1?' · '+esc(e.v):''}</p></div><span class="exst${nDone===rows.length?' ok':''}">${nDone===rows.length?'✓':nDone?nDone+'/'+rows.length:'›'}</span></button></article>`;
+ const nDone=rows.filter(r=>r.done).length;if(isDuo()&&!exIsOpen(e.id,rows))return `<article class="ex exc"><button class="exhead exbtn" data-a="exopen" data-e="${e.id}" aria-expanded="false"><div class="pic">${svg(picOf(e))}</div><div><h3>${esc(e.n)}</h3><p class="tgt">${tmp?'<span class="tagtmp">Nur heute · </span>':''}${e.sets} Sätze · ${e.min}–${e.max} Wdh.${e.vars.length>1?' · '+esc(e.v):''}</p></div><span class="exst${nDone===rows.length?' ok':''}">${nDone===rows.length?'✓':nDone?nDone+'/'+rows.length:'›'}</span></button></article>`;
  const last=h0.length?h0[h0.length-1].sets.map(t=>`${fmt(t.kg)}×${t.reps}`).join('  '):null;
  return `<article class="ex">${isDuo()?`<button class="excl" data-a="exopen" data-e="${e.id}" aria-label="Einklappen">⌃</button>`:''}<div class="exhead"><div class="pic">${svg(picOf(e))}</div><div><h3>${esc(e.n)}</h3><p class="tgt">${tmp?'<span class="tagtmp">Nur heute · </span>':''}${e.sets} Sätze · ${e.min}–${e.max} Wdh.</p>
  ${e.vars.length>1?`<div class="vars">${e.vars.map(v=>`<button data-a="var" data-e="${e.id}" data-v="${esc(v)}" aria-pressed="${v===e.v}">${esc(v)}</button>`).join('')}</div>`:''}</div></div>
@@ -190,7 +191,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-a]');if(
  else if(a==='var'){const pe=S.plan[day].find(x=>x.id===eid)||(drafts[day]&&drafts[day].extra.find(x=>x.id===eid));if(pe){pe.v=b.dataset.v;if(S.plan[day].includes(pe))savePlan();else saveDrafts()}}
  else if(a==='done'){const dr=draftFor(day),r=dr.ex[eid][i],ins=b.closest('.row').querySelectorAll('input');
   if(!r.done){if(r.kg==='')r.kg=ins[0].placeholder==='–'?'':ins[0].placeholder;if(r.reps==='')r.reps=ins[1].placeholder==='–'?'':ins[1].placeholder;if(r.reps===''){note('Erst Wiederholungen eintragen');return}r.done=true;r.at=Date.now();startT(S.rest);const e=dayEx(day).find(x=>x.id===eid),k=vkey(e),b0=best(k),m=e1(num(r.kg)??0,num(r.reps)??0),prevSets=dr.ex[eid].filter((x,j)=>j!==i&&x.done).map(x=>e1(num(x.kg)??0,num(x.reps)??0));if(!isA(e.v)&&b0>0&&m>b0+0.01&&m>Math.max(0,...prevSets))cheer({title:'Neuer Bestwert!',sub:`${vname(e)}: ${fmt(num(r.kg))} kg × ${r.reps} · Kraftwert ${fmt(m)} kg`})}else r.done=false;saveDrafts()}
- else if(a==='exopen'){exOpen.has(eid)?exOpen.delete(eid):exOpen.add(eid)}
+ else if(a==='exopen'){const rows=draftFor(day).ex[eid]||[];if(exIsOpen(eid,rows)){exOpen.delete(eid);if(rows.some(r=>r.done))exShut.add(eid)}else{exOpen.add(eid);exShut.delete(eid)}}
  else if(a==='rpe'){const r=draftFor(day).ex[eid][i];r.rpe=r.rpe===b.dataset.r?'':b.dataset.r;saveDrafts()}
  else if(a==='cadd'){draftFor(day).cardio.push({type:lastCT(),min:'',km:'',lvl:'m'});saveDrafts()}
  else if(a==='crm'){draftFor(day).cardio.splice(i,1);saveDrafts()}

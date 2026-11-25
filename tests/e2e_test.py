@@ -146,6 +146,8 @@ try:
           const s=S.sessions[S.sessions.length-1],keep=drafts.legs&&drafts.legs.ex[dayEx('legs')[0].id][0].kg==='40',h=summary&&summary.co?'Cardio erledigt':'';
           S.sessions=S.sessions.filter(x=>x!==s);delete drafts.legs;saveDrafts();summary=null;day=d0;persist();render();return [s.day,keep,/Cardio erledigt/i.test(h),S.sessions.length===n0].join('/')})()""")
         check(r == "cardio/true/true/true", "Nur Cardio vor dem Training: zählt als Cardio, Legs bleibt offen (" + r + ")")
+        r = pg.evaluate("""(()=>{const e=dayEx('legs')[0],rows=[{done:true},{done:false}];const o=exOpen.has(e.id);exOpen.delete(e.id);exShut.delete(e.id);const a=exIsOpen(e.id,rows);exShut.add(e.id);const b=exIsOpen(e.id,rows);exShut.delete(e.id);if(o)exOpen.add(e.id);return a+'/'+b})()""")
+        check(r == "true/false", "Laufende Übung lässt sich trotzdem einklappen (" + r + ")")
         print("Erfolgs-Momente")
         pg.evaluate("cheerHide()")
         check(pg.evaluate("(()=>{const d=today(),dd=ND(d),o=dd.water;dd.water=0;const wb=cheerFrom(d);dd.water=waterGoal();cheerDiff(d,wb);dd.water=o;return document.getElementById('cheer').className})()") == "cheer on small" and "Wasserziel" in pg.text_content("#cheer"), "Wasserziel erreicht: kleine Einblendung mit Lob und Punkten")
@@ -250,10 +252,12 @@ try:
         pg.fill("#gkg", "49,2"); pg.click("[data-g=kg][data-d='1']"); check(pg.input_value("#gkg") == "52,5", "Plus/Minus rastet auf das Raster ein (49,2 → 52,5)")
         pg.fill("#gkg", "4600"); pg.fill("#grp", "8"); pg.evaluate("document.querySelector('[data-g=set]').click()"); pg.wait_for_timeout(100)
         check("Satz 1" in pg.text_content(".gok") and not pg.evaluate("drafts.push.ex.bank[0].done"), "Unmögliches Gewicht (4.600 kg) wird nicht gespeichert")
-        pg.wait_for_timeout(200); pg.fill("#gkg", "80")
-        try: pg.wait_for_function("(document.getElementById('gplate')||{}).textContent.includes('pro Seite 25 + 5')", timeout=3000); ok=True
-        except Exception: ok=False
-        check(ok, "Scheiben pro Seite bei Langhantel")
+        ok = False
+        for _ in range(3):  # CI ist langsamer: nach dem abgewiesenen Satz kann die Ansicht noch einmal neu aufgebaut werden
+            pg.wait_for_timeout(300); pg.fill("#gkg", "80")
+            try: pg.wait_for_function("(document.getElementById('gplate')||{}).textContent.includes('pro Seite 25 + 5')", timeout=2000); ok = True; break
+            except Exception: pass
+        check(ok, "Scheiben pro Seite bei Langhantel (" + str(pg.text_content("#gplate")) + ")")
         pg.evaluate("renderGym()"); check(pg.input_value("#gkg") == "80", "Eingetipptes Gewicht bleibt nach Neuaufbau (z. B. Pausenende)")
         pg.fill("#grp", "8")
         pg.evaluate("document.getElementById('gbody').scrollTop=150"); sc0 = pg.evaluate("document.getElementById('gbody').scrollTop")
