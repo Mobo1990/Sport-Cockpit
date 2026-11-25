@@ -1074,3 +1074,4 @@ html.kbopen .nav{display:none}
 >>>>>>> main
 .awkind{display:flex;gap:6px;margin:0 0 8px}.awkind button{flex:1;min-height:40px;font-size:15px}.awkind button[aria-pressed=true]{background:var(--dark,#3E5A4C);color:#fff}.awhb{display:flex;flex-direction:column;gap:6px}.awhb .ghost{min-height:36px;font-size:13px}
 .awkrow{display:flex;align-items:center;gap:8px;margin:10px 0 0;font-size:14px;color:var(--mute)}.awkrow .awkind{flex:1;margin:0}.awkrow .awkind button{min-height:34px;font-size:13px;padding:4px 8px}.away.form .awkind{margin:6px 0 4px}p.awsee{margin:8px 0 0}
+.btrip{display:inline-block;margin-top:4px;padding:2px 8px;border-radius:999px;background:var(--d-sagel,#E3ECE6);color:var(--d-saged,#3E5A4C);font-size:12px;font-weight:700}
