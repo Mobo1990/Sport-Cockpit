@@ -56,7 +56,7 @@ function renderNut(){if(!nDate)nDate=today();const d=nDate,g=goals(d),t=totals(d
  <section class="nsum"><div class="nbig"><b class="cond">${fmt(Math.abs(left))}</b><span>${left>=0?'kcal übrig':'kcal drüber'}</span><small>${GOAL_N[goalAt(today())]||''}${g.trained?' · Trainingstag, Protein +5 %':''}${g.cx?` · Walking Pad +${fmt(g.cx)} kcal`:''}</small>${kbandHtml(nDate||today(),g)}${g.h&&(g.h.st||g.h.ak)?`<p class="hl">Apple Health: ${g.h.st?fmt(g.h.st)+' Schritte':''}${g.h.ak?' · '+fmt(g.h.ak)+' aktive kcal':''}${g.h.tm?' · '+fmt(g.h.tm)+' min Training':''}${g.bonus?` · <b>+${fmt(g.bonus)} kcal</b> extra (mehr bewegt als dein Alltag-Faktor annimmt)`:''}</p>`:''}</div>
  <div class="nbars">${bar('Kalorien',t.kcal,g.kcal,'kcal')}${bar('Protein',t.p,g.p,'g')}${bar('Kohlenhydrate',t.c,g.c,'g')}${bar('Zucker',t.z,g.z,'g')}${bar('Fett',t.f,g.f,'g')}</div></section>`;
  h+=MEALS.map(([m,l])=>{const its=day.items.filter(i=>i.meal===m),mk=its.reduce((a,i)=>a+i.kcal,0);
-  return `<section class="meal"><header><h3>${l}</h3><span>${mk?fmt(mk)+' kcal':''}</span></header>${its.map(i=>`<div class="it"><div><b>${esc(i.name)}</b><small>${fmt(i.g)} g · ${fmt(i.p)} g Protein</small></div><span>${fmt(i.kcal)}</span><button data-n="rm" data-id="${i.id}" aria-label="Entfernen">✕</button></div>`).join('')}
+  return `<section class="meal" data-meal="${m}"><header${its.length?` data-mvm="${m}"`:''}><h3>${l}</h3><span>${mk?fmt(mk)+' kcal':''}</span></header>${mvMenuHtml(m)}${its.map(i=>`<div class="it" data-mvi="${i.id}"><div><b>${esc(i.name)}</b><small>${fmt(i.g)} g · ${fmt(i.p)} g Protein</small></div><span>${fmt(i.kcal)}</span><button data-n="rm" data-id="${i.id}" aria-label="Entfernen">✕</button></div>${mvMenuHtml(m,i.id)}`).join('')}
   <div class="mfoot"><button data-n="add" data-m="${m}">+ Hinzufügen</button>${its.length?`<button class="ghost" data-n="tpl" data-m="${m}">Als Vorlage speichern</button>`:''}${shareMealBtn(m,its)}</div></section>`}).join('');
  const ws=Object.keys(S.nut.days).filter(k=>S.nut.days[k].w).sort();
  h+=`<section class="meal"><header><h3>Körpergewicht & Wasser</h3><span>${day.w?fmt(day.w)+' kg':''}</span></header>
@@ -244,3 +244,32 @@ document.addEventListener('input',ev=>{const t=ev.target,a=t.dataset.n;if(!a)ret
  else if(a==='maint'){S.nut.maint=Math.round(num(t.value)||0);S.metaT=Date.now();persist()}
  else if(a==='gkg'){const v=num(t.value);if(v&&v>0.5&&v<4){S.nut.gkg=v;S.metaT=Date.now();persist()}}});
 
+
+/* Essen verschieben: Finger auf einem Eintrag (oder der Überschrift = ganze Mahlzeit) halten,
+   dann auf eine andere Mahlzeit ziehen. Nur halten und loslassen öffnet „Verschieben nach …“. */
+let mvMenu=null,mvS=null,mvTouchT=0,mvSwallow=0;
+function mvMenuHtml(m,id){if(!mvMenu||mvMenu.m!==m||(mvMenu.id||null)!==(id||null))return '';
+ return `<div class="mvmenu"><span>${id?'Verschieben nach':'Ganze Mahlzeit nach'}</span>${MEALS.filter(x=>x[0]!==m).map(([k,l])=>`<button data-n="mvto" data-m="${k}">${l}</button>`).join('')}<button class="ghost" data-n="mvx" aria-label="Abbrechen">✕</button></div>`}
+function mvDo(src,to){const d=nDate||today(),its=ND(d).items.filter(i=>src.id?i.id===src.id:i.meal===src.m);if(!its.length||to===src.m)return;
+ its.forEach(i=>i.meal=to);touch(d);mvMenu=null;render();note(`${its.length>1?its.length+' Einträge':'„'+its[0].name+'“'} nach ${MEALS.find(x=>x[0]===to)[1]} verschoben`)}
+function mvStart(t,x,y){if(view!=='nut'||t.closest('button,input,a'))return;const el=t.closest('[data-mvi],[data-mvm]');if(!el)return;
+ const sec=el.closest('[data-meal]');mvS={el,x,y,on:false,src:{m:sec.dataset.meal,id:el.dataset.mvi||null},tm:setTimeout(()=>mvLift(),450)}}
+function mvLift(){if(!mvS)return;mvS.on=true;try{navigator.vibrate&&navigator.vibrate(25)}catch(e){}const r=mvS.el.getBoundingClientRect(),g=mvS.el.cloneNode(true);
+ g.className=(mvS.el.classList.contains('it')?'it ':'')+'mvghost';g.style.cssText=`left:${r.left}px;top:${r.top}px;width:${r.width}px`;document.body.appendChild(g);mvS.g=g;mvS.dy=mvS.y-r.top;mvS.el.classList.add('mvsrc');document.documentElement.classList.add('mving')}
+function mvOver(x,y){const e=document.elementFromPoint(x,y),s=e&&e.closest('[data-meal]');document.querySelectorAll('.meal.mvdrop').forEach(q=>q!==s&&q.classList.remove('mvdrop'));if(s&&s.dataset.meal!==mvS.src.m)s.classList.add('mvdrop');return s&&s.dataset.meal}
+function mvMove(x,y,ev){if(!mvS)return;if(!mvS.on){if(Math.hypot(x-mvS.x,y-mvS.y)>10){clearTimeout(mvS.tm);mvS=null}return}
+ if(ev&&ev.cancelable)ev.preventDefault();mvS.g.style.top=(y-mvS.dy)+'px';mvS.lx=x;mvS.ly=y;mvS.to=mvOver(x,y);
+ /* am Rand weiterscrollen, auch wenn der Finger stillhält */
+ if(!mvS.auto)mvS.auto=setInterval(()=>{if(!mvS||!mvS.on)return;const v=mvS.ly<90?-10:mvS.ly>innerHeight-120?10:0;if(v){scrollBy(0,v);mvS.to=mvOver(mvS.lx,mvS.ly)}},30)}
+function mvEnd(){if(!mvS)return;clearTimeout(mvS.tm);clearInterval(mvS.auto);const s=mvS;mvS=null;if(!s.on)return;mvSwallow=Date.now();
+ s.g.remove();s.el.classList.remove('mvsrc');document.documentElement.classList.remove('mving');document.querySelectorAll('.meal.mvdrop').forEach(q=>q.classList.remove('mvdrop'));
+ if(s.to&&s.to!==s.src.m)mvDo(s.src,s.to);else{mvMenu=s.src;render()}}
+document.addEventListener('touchstart',ev=>{mvTouchT=Date.now();if(ev.touches.length===1)mvStart(ev.target,ev.touches[0].clientX,ev.touches[0].clientY)},{passive:true});
+document.addEventListener('touchmove',ev=>{if(mvS)mvMove(ev.touches[0].clientX,ev.touches[0].clientY,ev)},{passive:false});
+document.addEventListener('touchend',mvEnd);document.addEventListener('touchcancel',mvEnd);
+document.addEventListener('mousedown',ev=>{if(Date.now()-mvTouchT>800&&ev.button===0)mvStart(ev.target,ev.clientX,ev.clientY)});
+document.addEventListener('mousemove',ev=>{if(mvS&&Date.now()-mvTouchT>800)mvMove(ev.clientX,ev.clientY,ev)});
+document.addEventListener('mouseup',()=>{if(Date.now()-mvTouchT>800)mvEnd()});
+document.addEventListener('contextmenu',ev=>{if(ev.target.closest&&ev.target.closest('[data-mvi],[data-mvm]'))ev.preventDefault()});
+document.addEventListener('click',ev=>{if(Date.now()-mvSwallow<300){mvSwallow=0;ev.stopPropagation();ev.preventDefault();return}/* nur der Klick direkt nach dem Loslassen */
+ const b=ev.target.closest('[data-n=mvto],[data-n=mvx]');if(!b)return;ev.stopPropagation();if(b.dataset.n==='mvx'){mvMenu=null;render();return}if(mvMenu)mvDo(mvMenu,b.dataset.m)},true);
