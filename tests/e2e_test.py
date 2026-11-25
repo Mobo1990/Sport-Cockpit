@@ -246,7 +246,10 @@ try:
         pg.fill("#gkg", "49,2"); pg.click("[data-g=kg][data-d='1']"); check(pg.input_value("#gkg") == "52,5", "Plus/Minus rastet auf das Raster ein (49,2 → 52,5)")
         pg.fill("#gkg", "4600"); pg.fill("#grp", "8"); pg.evaluate("document.querySelector('[data-g=set]').click()"); pg.wait_for_timeout(100)
         check("Satz 1" in pg.text_content(".gok") and not pg.evaluate("drafts.push.ex.bank[0].done"), "Unmögliches Gewicht (4.600 kg) wird nicht gespeichert")
-        pg.fill("#gkg", "80"); check("pro Seite 25 + 5" in pg.text_content("#gplate"), "Scheiben pro Seite bei Langhantel")
+        pg.wait_for_timeout(200); pg.fill("#gkg", "80")
+        try: pg.wait_for_function("(document.getElementById('gplate')||{}).textContent.includes('pro Seite 25 + 5')", timeout=3000); ok=True
+        except Exception: ok=False
+        check(ok, "Scheiben pro Seite bei Langhantel")
         pg.evaluate("renderGym()"); check(pg.input_value("#gkg") == "80", "Eingetipptes Gewicht bleibt nach Neuaufbau (z. B. Pausenende)")
         pg.fill("#grp", "8")
         pg.evaluate("document.getElementById('gbody').scrollTop=150"); sc0 = pg.evaluate("document.getElementById('gbody').scrollTop")
