@@ -50,11 +50,11 @@ function recSeen(r){const p=recPref();p.seen=p.seen||{};if(!p.seen[r.id]){p.seen
 const REC_HOT=/chili|cayenne|scharf|sambal|harissa|wasabi|jalape|tabasco|wein|rum\b|likör/i;
 const recMild=r=>!r.ing.some(i=>REC_HOT.test(i.n))&&!REC_HOT.test(r.t);
 let recJust=null;/* gerade über die Karte eingetragen: {id,t,d} für „Rückgängig“ */
-function recLeft(){const sc=dayScore(today());return{need:Math.max(0,Math.round(sc.g.p-sc.t.p)),left:Math.max(0,Math.round(sc.g.kcal-sc.t.kcal))}}
+function recLeft(){const sc=dayScore(today());return{need:Math.max(0,Math.round(sc.g.p-sc.t.p)),left:sc.g.kcal?Math.max(0,Math.round(sc.g.kcal-sc.t.kcal)):null}}
 function recHomeHtml(){const last=S.sessions.filter(s=>iso(s.date)===today()&&s.ex.length).pop(),meal=recMeal(),{need,left}=recLeft();
  const done=`<div class="rdone"><i aria-hidden="true">✓</i><div><b>${esc(last&&last.ex[0]&&last.ex[0].home?last.ex[0].name:DAYS[last.day]?DAYS[last.day].n:'Training')} erledigt</b><span>Jetzt zählt das Essen.${need?` Noch ${need} g Eiweiß.`:''}</span></div></div>`;
  if(recJust&&recJust.d===today()&&ND(today()).items.some(i=>i.id===recJust.id))return `<section class="rcard rok"><div class="rbd"><small>Eingetragen · ${recMealN[meal]}</small><h3>${esc(recJust.t)}</h3>
-  <p>${recJust.txt}</p><p class="rfit ok">Jetzt noch frei: ${fmt(left)} kcal${need?` · es fehlen noch ${need} g Eiweiß`:' · Eiweiß-Ziel erreicht'}</p>
+  <p>${recJust.txt}</p><p class="rfit ok">${left==null?'':left?`Jetzt noch frei: ${fmt(left)} kcal · `:'Kalorien für heute erreicht · '}${need?`es fehlen noch ${need} g Eiweiß`:'Eiweiß-Ziel erreicht'}</p>
   <div class="rbtn"><button data-rec="undo">Rückgängig</button><button class="ghost" data-rec="view">Rezept ansehen</button></div></div></section>`;
  if(!HA.url||!HA.token||recHide===today())return done;
  if(!REC||REC.d!==today()||REC.meal!==meal){setTimeout(()=>recLoad(),0);return done+`<section class="rcard rload"><p>Duo sucht ein passendes Rezept bei Chefkoch …</p></section>`}
@@ -78,13 +78,13 @@ function recRender(){const r=recOpen;if(!r){recEl.classList.remove('on');recEl.i
  <section class="recb">${r.img?`<img src="${esc(r.img)}" alt="" referrerpolicy="no-referrer">`:''}
  <div class="rkpi r4"><span><b>${r.p} g</b>Eiweiß</span><span><b>${fmt(r.kcal)}</b>kcal</span><span><b>${r.c} g</b>Kohlenh.</span><span><b>${r.f} g</b>Fett</span></div>
  <p class="rnote">pro Teller, Nährwerte laut Chefkoch${recMild(r)?' · mild, auch für Kinder':''}</p>
- <h3>Ich koche für</h3><div class="rserv">${[1,2,3,4].map(n=>`<button data-rec="serv" data-v="${n}" aria-pressed="${sv===n}">${n} ${n===1?'Person':'Personen'}</button>`).join('')}</div>
+ <h3>Ich koche für</h3><div class="rserv rpor">${[1,2,3,4].map(n=>`<button data-rec="serv" data-v="${n}" aria-pressed="${sv===n}">${n}</button>`).join('')}<em>${sv===1?'Person':'Personen'}</em></div>
  ${sv>1&&pn?`<p class="rnote">Isst ${esc(pn)} mit? Unten „Auch bei ${esc(pn)} eintragen“ ist schon angehakt.</p>`:''}
  <h3>Zutaten <span>für ${sv} ${sv===1?'Person':'Personen'}</span></h3>
  <ul class="ring">${r.ing.map((i,k)=>`<li><label><input type="checkbox" data-rec="tick" data-i="${k}"><span><b>${i.a?fmt(recAmt(i.a,f))+' ':''}${esc(i.u)}</b> ${esc(i.n)}</span></label></li>`).join('')}</ul>
  <h3>So geht's</h3><ol class="rsteps">${r.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>
  <p class="rnote">Chefkoch nennt keine Zeiten pro Schritt – insgesamt ${r.min?'ca. '+r.min+' Minuten':'schnell gemacht'}.</p>
- <p class="rsrc">Rezept von Chefkoch.de · <a href="${esc(r.url)}" target="_blank" rel="noopener">Original mit Fotos ansehen ↗</a><br><span>öffnet Chefkoch im Browser</span></p>
+ <p class="rsrc">Rezept von Chefkoch.de · <a href="${esc(r.url)}" target="_blank" rel="noopener">Original mit Fotos ansehen&nbsp;↗</a><br><span>öffnet Chefkoch im Browser</span></p>
  <button class="glink rveg" data-rec="veg" aria-pressed="${veg}">${veg?'Vegetarische Vorschläge: an ✓':'Lieber vegetarische Vorschläge'}</button></section>
  <footer class="gf rfoot"><div class="rpor"><em>Du isst</em>${[[.5,'½'],[1,'1'],[1.5,'1½'],[2,'2']].map(([v,l])=>`<button data-rec="por" data-v="${v}" aria-pressed="${P===v}">${l}</button>`).join('')}<em>${P===1?'Teller':'Teller'}</em></div>
  <p class="rprev">= <b>${fmt(Math.round(r.kcal*P))} kcal · ${Math.round(r.p*P)} g Eiweiß</b> <span>(1 Teller = 1 Person)</span></p>
