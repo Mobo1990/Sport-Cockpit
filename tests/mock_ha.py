@@ -23,6 +23,17 @@ async def h(ws):
             await ws.send(json.dumps({"id":m["id"],"type":"result","success":True,"result":st}))
         elif m["type"]=="call_service" and m.get("domain")=="rest_command":
             open("/tmp/calls.log","a").write(json.dumps(m)+"\n")
+            if m.get("service")=="sport_cockpit_rezepte":
+                rs=[{"recipe":{"id":str(900+i),"title":t,"rating":{"rating":r,"numVotes":v}}} for i,(t,r,v) in enumerate([("Hähnchen-Reis-Bowl",4.6,812),("Ofen-Lachs mit Gemüse",4.4,301),("Sahnetorte",4.8,2000)])]
+                await ws.send(json.dumps({"id":m["id"],"type":"result","success":True,"result":{"context":{},"response":{"status":200,"content":{"count":3,"results":rs}}}}))
+                continue
+            if m.get("service")=="sport_cockpit_rezept":
+                rid=(m.get("service_data") or {}).get("id","")
+                D={"900":("Hähnchen-Reis-Bowl",48,620),"901":("Ofen-Lachs mit Gemüse",38,540),"902":("Sahnetorte",6,480)}[rid]
+                rec={"id":rid,"title":D[0],"servings":2,"rating":{"rating":4.6,"numVotes":812},"preparationTime":25,"siteUrl":"https://www.chefkoch.de/rezepte/"+rid+"/x.html","previewImageUrlTemplate":"","nutrition":{"kCalories":D[2],"proteinContent":D[1],"fatContent":12,"carbohydrateContent":60},
+                     "ingredientGroups":[{"header":"","ingredients":[{"name":"Hähnchenbrust","unit":"g","amount":300},{"name":"Reis","unit":"g","amount":150},{"name":"Gurke","unit":"","amount":1}]}],"instructions":"Reis kochen.\n\nHähnchen anbraten.\n\nAlles anrichten."}
+                await ws.send(json.dumps({"id":m["id"],"type":"result","success":True,"result":{"context":{},"response":{"status":200,"content":rec}}}))
+                continue
             q=(m.get("service_data") or {}).get("q","")
             if q.lower() == "kinderriegel":
                 await ws.send(json.dumps({"id":m["id"],"type":"result","success":True,"result":{"context":{},"response":{"status":200,"content":{"hits":[]}}}}))
