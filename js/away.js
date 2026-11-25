@@ -38,7 +38,7 @@ function renderAway(){const l=AWAY.filter(a=>a.stop>=Date.now()),f=awayForm,td=t
   ${f.more?`<div><label for="awVt">ab Uhrzeit</label><input id="awVt" type="time" value="${esc(f.vt)}"></div><div><label for="awBt">bis Uhrzeit</label><input id="awBt" type="time" value="${esc(f.bt)}"></div>
   <div class="full"><label for="awWas">Anlass (freiwillig – ${esc(sharePartner()||'dein Partner')} sieht das)</label><input id="awWas" placeholder="z. B. Dienstreise" value="${esc(f.was)}"></div><div class="full"><label for="awOrt">Ort (freiwillig – ${esc(sharePartner()||'dein Partner')} sieht das)</label><input id="awOrt" placeholder="z. B. Köln" value="${esc(f.ort)}"></div>`:''}</div>
   <label class="awnight"><input type="checkbox" id="awN" ${f.nacht?'checked':''}> Mit Übernachtung</label>
-  ${f.more?'':'<button class="glink" data-aw="more">+ Uhrzeit, Anlass oder Ort (freiwillig)</button>'}
+  ${f.more?'':`<button class="glink" data-aw="more">+ Uhrzeit, Anlass oder Ort (freiwillig – ${esc(sharePartner()||'dein Partner')} sieht das)</button>`}
   <div class="actions"><button class="primary" data-aw="save">Eintragen</button></div></section>`
  :''}
  <section class="away list">${l.length?`<ul>${l.map(a=>awayRow(a,true)).join('')}</ul>`:'<p class="tip" style="padding:0">Gerade ist nichts eingetragen.</p>'}</section>
@@ -125,7 +125,7 @@ function renderCal(){const now=new Date();if(!calM)calM={y:now.getFullYear(),m:n
 function awayQuickHtml(){if(!HA.url||!HA.token)return '';const pn=sharePartner()||'Dein Partner';
  if(awayUndo)return `<section class="awok"><b>Eingetragen ✓</b><p>${esc(pn)} bekommt jetzt diese Nachricht:</p><q>${esc(awayUndo.msg)}</q>${awayUndo.goal<S.goal?`<p>Damit reichen diese Woche ${awayUndo.goal} statt ${S.goal} Trainings.</p>`:''}<button data-aw="undo">Rückgängig machen</button></section>`;
  return `<section class="awq"><b>Ich bin weg</b><div class="awkind" role="group" aria-label="Was ist los?">${AWAY_KINDS.map(([k,l])=>`<button data-aw="kind" data-v="${k}" aria-pressed="${awayKind===k}">${l}</button>`).join('')}</div><div class="awqb"><button class="primary" data-aw="quick" data-n="0">Heute</button><button class="primary" data-aw="quick" data-n="1">Morgen</button><button data-aw="quick" data-n="1" data-night="1">Morgen + Übernachtung</button><button data-aw="new">Anderer Zeitraum</button></div>
- <p class="awpriv">Ein Tipp genügt. ${esc(pn)} sieht nur den Zeitraum – kein Anlass, kein Ort, außer du trägst ihn selbst ein. Duo liest keinen Kalender von deinem Handy.</p></section>`}
+ <p class="awpriv">Ein Tipp genügt. ${esc(pn)} sieht nur „${esc(S.prof.name||'')} ist ${esc(awayKind)}“ und den Zeitraum – kein Anlass, kein Ort, außer du trägst ihn selbst ein. Duo liest keinen Kalender von deinem Handy.</p></section>`}
 async function awayQuick(von,night){const bis=night?iso(new Date(von+'T12:00').getTime()+864e5):von;awayForm={was:'',ort:'',von,vt:'',bis,bt:'',nacht:!!night,quick:true,kind:awayKind};await awaySave()}
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-cal],[data-calm]');if(!b)return;
  if(b.dataset.cal){calSel=b.dataset.cal}else{let mm=calM.m+(+b.dataset.calm),yy=calM.y;if(mm<0){mm=11;yy--}if(mm>11){mm=0;yy++}calM={y:yy,m:mm}}render()});
