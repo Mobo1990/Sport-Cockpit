@@ -1035,3 +1035,10 @@ html.kbopen .nav{display:none}
 .rsteps li{font-size:18px;line-height:1.5;margin-bottom:12px}
 .rfoot{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);background:var(--s1)}.rpor{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.rpor button{min-width:44px;min-height:40px;padding:4px 8px}.rpor span{font-size:14px;color:var(--mute)}.rpor b{color:var(--ink)}
 .rshare{display:flex;align-items:center;gap:8px;font-size:15px}.rshare input{width:20px;height:20px}
+/* Rezepte Runde 2 */
+.rcard img{aspect-ratio:16/9}.rkpi.r4{grid-template-columns:repeat(4,1fr)}.rkpi.r4 b{font-size:18px}
+.rlinks{gap:2px 18px}.rlinks .glink{font-size:15px;min-height:40px;color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.rnote{font-size:13px;color:var(--mute);margin:2px 0 10px}.recb h3 span{font:500 14px var(--fb,inherit);color:var(--mute);margin-left:6px}
+.ring li{padding:5px 0}.rsrc span{font-size:12px}.rveg{display:block;margin:12px 0 4px;min-height:40px;font-size:15px}
+.rpor em{font-style:normal;font-size:14px;color:var(--mute)}.rprev{margin:0;font-size:15px}.rprev span{color:var(--mute);font-size:13px}
+.rok .rbd>p{margin:4px 0 8px;font-size:15px}

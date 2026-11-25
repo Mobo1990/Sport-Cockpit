@@ -47,47 +47,65 @@ function recWhy(r){const sc=dayScore(today()),need=Math.max(0,Math.round(sc.g.p-
  if(r.fav)b.push(`du isst gern ${r.q}`);b.push(`${r.p} g Eiweiß${need?` – dir fehlen noch ${need} g`:''}`);if(left)b.push(`passt in deine ${fmt(left)} kcal`);return 'Passt: '+b.join(' · ')+'.'}
 /* Karte auf der Startseite (ersetzt „Als Nächstes“, wenn heute trainiert wurde) */
 function recSeen(r){const p=recPref();p.seen=p.seen||{};if(!p.seen[r.id]){p.seen[r.id]=today();recSavePref(p)}}
-function recHomeHtml(){const last=S.sessions.filter(s=>iso(s.date)===today()&&s.ex.length).pop(),meal=recMeal(),sc=dayScore(today()),need=Math.max(0,Math.round(sc.g.p-sc.t.p)),left=Math.max(0,Math.round(sc.g.kcal-sc.t.kcal));
+const REC_HOT=/chili|cayenne|scharf|sambal|harissa|wasabi|jalape|tabasco|wein|rum\b|likör/i;
+const recMild=r=>!r.ing.some(i=>REC_HOT.test(i.n))&&!REC_HOT.test(r.t);
+let recJust=null;/* gerade über die Karte eingetragen: {id,t,d} für „Rückgängig“ */
+function recLeft(){const sc=dayScore(today());return{need:Math.max(0,Math.round(sc.g.p-sc.t.p)),left:Math.max(0,Math.round(sc.g.kcal-sc.t.kcal))}}
+function recHomeHtml(){const last=S.sessions.filter(s=>iso(s.date)===today()&&s.ex.length).pop(),meal=recMeal(),{need,left}=recLeft();
  const done=`<div class="rdone"><i aria-hidden="true">✓</i><div><b>${esc(last&&last.ex[0]&&last.ex[0].home?last.ex[0].name:DAYS[last.day]?DAYS[last.day].n:'Training')} erledigt</b><span>Jetzt zählt das Essen.${need?` Noch ${need} g Eiweiß.`:''}</span></div></div>`;
+ if(recJust&&recJust.d===today()&&ND(today()).items.some(i=>i.id===recJust.id))return `<section class="rcard rok"><div class="rbd"><small>Eingetragen · ${recMealN[meal]}</small><h3>${esc(recJust.t)}</h3>
+  <p>${recJust.txt}</p><p class="rfit ok">Jetzt noch frei: ${fmt(left)} kcal${need?` · es fehlen noch ${need} g Eiweiß`:' · Eiweiß-Ziel erreicht'}</p>
+  <div class="rbtn"><button data-rec="undo">Rückgängig</button><button class="ghost" data-rec="view">Rezept ansehen</button></div></div></section>`;
  if(!HA.url||!HA.token||recHide===today())return done;
  if(!REC||REC.d!==today()||REC.meal!==meal){setTimeout(()=>recLoad(),0);return done+`<section class="rcard rload"><p>Duo sucht ein passendes Rezept bei Chefkoch …</p></section>`}
  if(recBusy)return done+`<section class="rcard rload"><p>Duo sucht ein passendes Rezept bei Chefkoch …</p></section>`;
  const L=REC.list||[],r=L[recIdx%Math.max(1,L.length)];
  if(!r)return done+`<section class="rcard rload"><p>${REC.err&&REC.err!=='nichts'?'Rezepte gerade nicht erreichbar.':'Gerade kein passendes schnelles Rezept gefunden.'}</p><button data-rec="reload">Nochmal suchen</button></section>`;
- recSeen(r);const pct=left?Math.round(r.kcal/left*100):0,ok=!left||r.kcal<=left;
+ recSeen(r);const ok=!left||r.kcal<=left,np=Math.max(0,need-r.p);
  return done+`<section class="rcard">${r.img?`<img src="${esc(r.img)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:''}<div class="rbd"><small>Dein ${recMealN[meal]} · Chefkoch</small><h3>${esc(r.t)}</h3>
   <div class="rkpi"><span><b>${r.p} g</b>Eiweiß</span><span><b>${fmt(r.kcal)}</b>kcal</span><span><b>${r.min||'–'}</b>Minuten</span></div>
-  <p class="rfit${ok?' ok':''}">${ok?`Passt zu deinem Ziel${left?` · ${pct} % deiner restlichen ${fmt(left)} kcal`:''}`:`Etwas über deinem Rest (${fmt(left)} kcal) – halbe Portion passt`}${need?` · deckt ${Math.min(100,Math.round(r.p/need*100))} % vom fehlenden Eiweiß`:''}</p>
-  <p class="rmeta">pro Portion · Rezept für ${fmt(r.serv)} · ${r.ing.length} Zutaten${r.r?` · ★ ${fmt(Math.round(r.r*10)/10)} (${fmt(r.v)})`:''}</p>
-  <div class="rbtn"><button class="primary" data-rec="open">So geht's</button><button data-rec="open" data-add="1">Eintragen</button>${L.length>1?'<button class="ghost" data-rec="next">Anderes ›</button>':''}</div>
-  <div class="rlinks"><button class="glink" data-rec="hide">Heute nicht</button><button class="glink" data-rec="no">Nicht mein Fall</button><button class="glink" data-rec="veg" aria-pressed="${!!recPref().veg}">${recPref().veg?'Vegetarisch ✓':'Lieber vegetarisch'}</button></div></div></section>`}
+  <p class="rfit${ok?' ok':''}">${ok?'Passt zu deinem Ziel':`Etwas über deinem Rest (${fmt(left)} kcal) – ein halber Teller passt`}${need?` · danach fehlen noch ${np?np+' g Eiweiß':'0 g – Eiweiß-Ziel erreicht'}`:''}</p>
+  <p class="rmeta">pro Teller · ${r.ing.length} Zutaten${recMild(r)?' · mild, auch für Kinder':''}${r.r?` · ★ ${fmt(Math.round(r.r*10)/10)} (${fmt(r.v)})`:''}</p>
+  <div class="rbtn"><button class="primary" data-rec="open">So geht's</button><button data-rec="quick">1 Teller eintragen</button></div>
+  <div class="rlinks">${L.length>1?'<button class="glink" data-rec="next">Anderes Rezept</button>':''}<button class="glink" data-rec="no">Nicht mein Fall</button><button class="glink" data-rec="hide">Heute nicht</button></div></div></section>`}
 /* Zubereitung in der App: Portionen umrechnen, Zutaten abhaken, große Schritte, Bildschirm bleibt an. Eintragen mit Menge + Vorschau. */
 const recEl=(()=>{const d=document.createElement('div');d.id='recv';d.className='recv';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');d.setAttribute('aria-label','Rezept');document.body.appendChild(d);return d})();
 const recAmt=(a,f)=>{const v=a*f;return v>=10?Math.round(v):Math.round(v*4)/4};
 function recRender(){const r=recOpen;if(!r){recEl.classList.remove('on');recEl.innerHTML='';try{recLock&&recLock.release()}catch(e){}recLock=null;return}recEl.classList.add('on');
  if(!recLock){try{navigator.wakeLock&&navigator.wakeLock.request('screen').then(l=>recLock=l).catch(()=>{})}catch(e){}}
- const sv=recServ||r.serv,f=sv/r.serv,pn=typeof sharePartner==='function'?sharePartner():null,P=recPor;
- recEl.innerHTML=`<header class="gh"><button class="gx" data-rec="close" aria-label="Schließen">✕</button><div><b>${esc(r.t)}</b><span>Chefkoch · ${r.min?r.min+' min · ':''}Bildschirm bleibt an</span></div></header>
+ const sv=recServ||1,f=sv/r.serv,pn=typeof sharePartner==='function'?sharePartner():null,P=recPor,veg=!!recPref().veg;
+ recEl.innerHTML=`<header class="gh"><button class="gx" data-rec="close" aria-label="Schließen">✕</button><div><b>${esc(r.t)}</b><span>Chefkoch · ${r.min?'ca. '+r.min+' min · ':''}Bildschirm bleibt an</span></div></header>
  <section class="recb">${r.img?`<img src="${esc(r.img)}" alt="" referrerpolicy="no-referrer">`:''}
- <p class="rmac"><b>${r.p} g</b> Eiweiß · <b>${fmt(r.kcal)}</b> kcal · ${r.c} g Kohlenhydrate · ${r.f} g Fett <span>pro Portion (Nährwerte laut Chefkoch)</span></p>
- <h3>Zutaten</h3><div class="rserv">Für ${[1,2,4].map(n=>`<button data-rec="serv" data-v="${n}" aria-pressed="${sv===n}">${n} ${n===1?'Person':'Personen'}</button>`).join('')}</div>
+ <div class="rkpi r4"><span><b>${r.p} g</b>Eiweiß</span><span><b>${fmt(r.kcal)}</b>kcal</span><span><b>${r.c} g</b>Kohlenh.</span><span><b>${r.f} g</b>Fett</span></div>
+ <p class="rnote">pro Teller, Nährwerte laut Chefkoch${recMild(r)?' · mild, auch für Kinder':''}</p>
+ <h3>Ich koche für</h3><div class="rserv">${[1,2,3,4].map(n=>`<button data-rec="serv" data-v="${n}" aria-pressed="${sv===n}">${n} ${n===1?'Person':'Personen'}</button>`).join('')}</div>
+ ${sv>1&&pn?`<p class="rnote">Isst ${esc(pn)} mit? Unten „Auch bei ${esc(pn)} eintragen“ ist schon angehakt.</p>`:''}
+ <h3>Zutaten <span>für ${sv} ${sv===1?'Person':'Personen'}</span></h3>
  <ul class="ring">${r.ing.map((i,k)=>`<li><label><input type="checkbox" data-rec="tick" data-i="${k}"><span><b>${i.a?fmt(recAmt(i.a,f))+' ':''}${esc(i.u)}</b> ${esc(i.n)}</span></label></li>`).join('')}</ul>
  <h3>So geht's</h3><ol class="rsteps">${r.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>
- <p class="rsrc">Rezept von Chefkoch.de · <a href="${esc(r.url)}" target="_blank" rel="noopener">Original mit Fotos ansehen</a></p></section>
- <footer class="gf rfoot"><div class="rpor">${[[.5,'½'],[1,'1'],[1.5,'1½'],[2,'2']].map(([v,l])=>`<button data-rec="por" data-v="${v}" aria-pressed="${P===v}">${l}</button>`).join('')}<span>${P===1?'Portion':'Portionen'} · <b>${fmt(Math.round(r.kcal*P))} kcal · ${Math.round(r.p*P)} g Eiweiß</b></span></div>
- ${pn?`<label class="rshare"><input type="checkbox" id="recPa"> Auch bei ${esc(pn)} eintragen (gleiche Menge)</label>`:''}
+ <p class="rnote">Chefkoch nennt keine Zeiten pro Schritt – insgesamt ${r.min?'ca. '+r.min+' Minuten':'schnell gemacht'}.</p>
+ <p class="rsrc">Rezept von Chefkoch.de · <a href="${esc(r.url)}" target="_blank" rel="noopener">Original mit Fotos ansehen ↗</a><br><span>öffnet Chefkoch im Browser</span></p>
+ <button class="glink rveg" data-rec="veg" aria-pressed="${veg}">${veg?'Vegetarische Vorschläge: an ✓':'Lieber vegetarische Vorschläge'}</button></section>
+ <footer class="gf rfoot"><div class="rpor"><em>Du isst</em>${[[.5,'½'],[1,'1'],[1.5,'1½'],[2,'2']].map(([v,l])=>`<button data-rec="por" data-v="${v}" aria-pressed="${P===v}">${l}</button>`).join('')}<em>${P===1?'Teller':'Teller'}</em></div>
+ <p class="rprev">= <b>${fmt(Math.round(r.kcal*P))} kcal · ${Math.round(r.p*P)} g Eiweiß</b> <span>(1 Teller = 1 Person)</span></p>
+ ${pn?`<label class="rshare"><input type="checkbox" id="recPa"${recPa?' checked':''}> Auch bei ${esc(pn)} eintragen – ${esc(pn)} bestätigt es bei sich</label>`:''}
  <button class="primary" data-rec="add">Eintragen</button></footer>`}
-function recAdd(r){const d=today(),meal=recMeal(),P=recPor,g=Math.round((r.g||400)*P),it={id:'i'+Date.now().toString(36),name:r.t+' (Chefkoch)',g,meal,kcal:Math.round(r.kcal*P),p:Math.round(r.p*P),c:Math.round(r.c*P),f:Math.round(r.f*P),z:0,rid:r.id},wb=cheerFrom(d);
- const pa=$('recPa')&&$('recPa').checked;ND(d).items.push(it);touch(d);recOpen=null;recPor=1;recServ=0;recRender();render();
- if(pa&&typeof shareSend==='function')shareSend([{...it,pg:g}],meal,d);
- note(`Eingetragen: ${P===1?'1 Portion':fmt(P)+' Portionen'} · ${fmt(it.kcal)} kcal · ${it.p} g Eiweiß${pa?' – auch für '+sharePartner():''}`);cheerDiff(d,wb)}
+let recPa=false;
+function recAdd(r,P,pa){const d=today(),meal=recMeal(),g=Math.round((r.g||400)*P),it={id:'i'+Date.now().toString(36),name:r.t+' (Chefkoch)',g,meal,kcal:Math.round(r.kcal*P),p:Math.round(r.p*P),c:Math.round(r.c*P),f:Math.round(r.f*P),z:0,rid:r.id},wb=cheerFrom(d);
+ ND(d).items.push(it);touch(d);recOpen=null;recPor=1;recServ=0;recPa=false;
+ recJust={id:it.id,t:r.t,d,txt:`${P===1?'1 Teller':fmt(P)+' Teller'} · ${fmt(it.kcal)} kcal · ${it.p} g Eiweiß${pa?' – auch an '+esc(sharePartner())+' geschickt':''}`};
+ recRender();render();if(pa&&typeof shareSend==='function')shareSend([{...it,pg:g}],meal,d);
+ note(`Eingetragen: ${P===1?'1 Teller':fmt(P)+' Teller'} · ${fmt(it.kcal)} kcal · ${it.p} g Eiweiß`);cheerDiff(d,wb)}
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-rec]');if(!b)return;const a=b.dataset.rec,L=(REC&&REC.list)||[],r=L[recIdx%Math.max(1,L.length)];
  if(a==='tick')return;
- if(a==='open'&&r){recOpen=r;recPor=1;recServ=0;recRender();if(b.dataset.add)setTimeout(()=>{const f=recEl.querySelector('.rfoot');f&&f.scrollIntoView({block:'end'})},50)}
+ if(a==='open'&&r){recOpen=r;recPor=1;recServ=0;recPa=false;recRender()}
+ else if(a==='view'){const x=recJust&&((REC&&REC.list)||[]).find(y=>String(y.id)===String((ND(today()).items.find(i=>i.id===recJust.id)||{}).rid));recJust=null;if(x){recOpen=x;recPor=1;recServ=0;recRender()}render()}
+ else if(a==='quick'&&r){recAdd(r,1,false)}
+ else if(a==='undo'&&recJust){const d=recJust.d;ND(d).items=ND(d).items.filter(i=>i.id!==recJust.id);touch(d);recJust=null;render();note('Wieder entfernt')}
  else if(a==='close'){recOpen=null;recRender()}
- else if(a==='serv'){recServ=+b.dataset.v;recRender()}else if(a==='por'){recPor=+b.dataset.v;const k=$('recPa')&&$('recPa').checked;recRender();if(k&&$('recPa'))$('recPa').checked=true}
- else if(a==='add'){if(recOpen)recAdd(recOpen)}
+ else if(a==='serv'){recServ=+b.dataset.v;if(recServ>1)recPa=true;else recPa=false;recRender()}else if(a==='por'){recPa=!!($('recPa')&&$('recPa').checked);recPor=+b.dataset.v;recRender()}
+ else if(a==='add'){if(recOpen)recAdd(recOpen,recPor,!!($('recPa')&&$('recPa').checked))}
  else if(a==='next'){recIdx++;render()}else if(a==='reload'){recLoad(true)}
  else if(a==='hide'){recHide=today();render()}
  else if(a==='no'&&r){const p=recPref();p.no=[...(p.no||[]),r.id];recSavePref(p);REC.list=L.filter(x=>x.id!==r.id);recIdx=0;if(!REC.list.length)recLoad(true);else render();note('Kommt nicht wieder')}
- else if(a==='veg'){const p=recPref();p.veg=p.veg?0:1;recSavePref(p);recLoad(true)}});
+ else if(a==='veg'){const p=recPref();p.veg=p.veg?0:1;recSavePref(p);recOpen=null;recRender();recLoad(true);note(p.veg?'Ab jetzt vegetarische Vorschläge':'Wieder alle Vorschläge')}});
