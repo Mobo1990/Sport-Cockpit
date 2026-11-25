@@ -246,6 +246,10 @@ try:
         check(pg.is_visible(".awok") and "Pauline" in pg.text_content(".awok"), "Bestätigung: Eingetragen, Pauline bekommt eine Nachricht")
         pg.click("[data-aw=undo]"); pg.wait_for_timeout(1200)
         check(pg.locator(".away.list .awr").count() == 0 and sum(1 for l in open("/tmp/calls.log") if json.loads(l).get("type") == "calendar/event/delete") == 2, "Rückgängig nimmt den Eintrag wieder raus")
+        pg.click("[data-aw=kind][data-v='im Urlaub']"); pg.click("[data-aw=quick][data-n='1']:not([data-night])"); pg.wait_for_timeout(1500)
+        ce = [json.loads(l) for l in open("/tmp/calls.log")]; ce = [c for c in ce if c.get("service") == "create_event"]
+        check(ce[-1]["service_data"]["summary"] == "Michell: im Urlaub", "Art wählbar: 'Urlaub' statt 'unterwegs'")
+        pg.click("[data-aw=undo]"); pg.wait_for_timeout(1200); pg.click("[data-aw=kind][data-v='unterwegs']")
         r = pg.evaluate("""(()=>{const o=partners;partners=[{name:'Pauline',td:{d:today(),k:(2).toString(36),c:(4).toString(36)}}];const f=tdPartner(),y=iso(Date.now()-864e5),v=iso(Date.now()-2*864e5),r=[f(y),f(v),f(today())].join('/');partners=o;return r})()""")
         check(r == "k/c/", "Partner-Trainingstage aus HA: Kraft gestern, Cardio vorgestern")
         r = pg.evaluate("""(()=>{const o=AWAY,mon=wk(Date.now()),d0=iso(mon+12*36e5),d1=iso(mon+36*36e5);AWAY=[{wer:S.prof.name,s:d0,start:new Date(d0+'T00:00').getTime(),stop:new Date(d1+'T23:59').getTime()}];const g=weekGoal(mon);AWAY=o;return g})()""")
