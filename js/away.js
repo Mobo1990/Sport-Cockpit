@@ -30,40 +30,47 @@ const awayNext=days=>AWAY.filter(a=>a.stop>=Date.now()&&a.start<=Date.now()+days
 function awayHomeHtml(){if(!HA.url||!HA.token)return '';const l=awayNext(14);if(!l.length)return '';
  return `<section class="away"><div class="awh"><b>Unterwegs</b><button data-a="view" data-v="cal">Kalender ›</button></div><ul>${l.slice(0,3).map(a=>awayRow(a,false)).join('')}</ul>${l.length>3?`<p class="awmore">+ ${l.length-3} weitere</p>`:''}</section>`}
 /* Eigene Seite: Liste + Eintragen */
+/* Formular „Genauer eintragen“: alles auf einen Blick – was, wo, wann, wie lange */
+function awayFormHtml(){const f=awayForm,pn=esc(sharePartner()||'Dein Partner'),k=f.kind||awayKind;
+ return `<section class="away form" id="awForm"><div class="awh"><b>Ich bin weg – genauer</b><button data-aw="cancel">Abbrechen</button></div>
+  <p class="awlab">Was ist los?</p><div class="awkind" role="group" aria-label="Was ist los?">${AWAY_KINDS.map(([x,l])=>`<button data-aw="kind" data-v="${x}" aria-pressed="${k===x}">${l}</button>`).join('')}</div>
+  <div class="cform">
+  <div class="full"><label for="awWas">Was machst du? <i>freiwillig</i></label><input id="awWas" placeholder="z. B. Dienstreise, Messe, Familie" value="${esc(f.was)}"></div>
+  <div class="full"><label for="awOrt">Wo? <i>freiwillig</i></label><input id="awOrt" placeholder="z. B. Köln" value="${esc(f.ort)}"></div>
+  <div><label for="awVon">Von (Tag)</label><input id="awVon" type="date" value="${esc(f.von)}"></div><div><label for="awVt">ab Uhrzeit <i>freiwillig</i></label><input id="awVt" type="time" value="${esc(f.vt)}"></div>
+  <div><label for="awBis">Bis (Tag)</label><input id="awBis" type="date" value="${esc(f.bis)}"></div><div><label for="awBt">bis Uhrzeit <i>freiwillig</i></label><input id="awBt" type="time" value="${esc(f.bt)}"></div></div>
+  <label class="awnight"><input type="checkbox" id="awN" ${f.nacht?'checked':''}> Mit Übernachtung</label>
+  <p class="awsee">${pn} sieht den Zeitraum und das, was du bei „Was“ und „Wo“ einträgst. Leer lassen = nur „${esc(S.prof.name||'')} ist ${esc(k)}“.</p>
+  <div class="actions"><button class="primary" data-aw="save">Eintragen</button></div></section>`}
 function renderAway(){const l=AWAY.filter(a=>a.stop>=Date.now()),f=awayForm,td=today();
  if(!HA.url||!HA.token)return `<section class="meal"><header><h3>Unterwegs</h3></header><p class="tip" style="padding:0">Dafür muss die App mit Home Assistant verbunden sein (Mehr → Home Assistant).</p></section>`;
  return `<h3 class="calh">Demnächst unterwegs</h3>
- ${f?`<section class="away form"><div class="awh"><b>${esc((AWAY_KINDS.find(x=>x[0]===(f.kind||awayKind))||AWAY_KINDS[0])[1])} eintragen</b><button data-aw="cancel">Abbrechen</button></div><div class="awkind" role="group" aria-label="Was ist los?">${AWAY_KINDS.map(([k,l])=>`<button data-aw="kind" data-v="${k}" aria-pressed="${(f.kind||awayKind)===k}">${l}</button>`).join('')}</div>
-  <div class="cform"><div><label for="awVon">Von</label><input id="awVon" type="date" value="${esc(f.von)}"></div><div><label for="awBis">Bis</label><input id="awBis" type="date" value="${esc(f.bis)}"></div>
-  ${f.more?`<div><label for="awVt">ab Uhrzeit</label><input id="awVt" type="time" value="${esc(f.vt)}"></div><div><label for="awBt">bis Uhrzeit</label><input id="awBt" type="time" value="${esc(f.bt)}"></div>
-  <div class="full"><label for="awWas">Anlass (freiwillig – ${esc(sharePartner()||'dein Partner')} sieht das)</label><input id="awWas" placeholder="z. B. Dienstreise" value="${esc(f.was)}"></div><div class="full"><label for="awOrt">Ort (freiwillig – ${esc(sharePartner()||'dein Partner')} sieht das)</label><input id="awOrt" placeholder="z. B. Köln" value="${esc(f.ort)}"></div>`:''}</div>
-  <label class="awnight"><input type="checkbox" id="awN" ${f.nacht?'checked':''}> Mit Übernachtung</label>
-  ${f.more?'':`<p class="awsee">${esc(sharePartner()||'Dein Partner')} sieht: nur den Zeitraum</p><button class="glink" data-aw="more">+ Uhrzeit, Anlass oder Ort (freiwillig – ${esc(sharePartner()||'dein Partner')} sieht das)</button>`}
-  <div class="actions"><button class="primary" data-aw="save">Eintragen</button></div></section>`
- :''}
  <section class="away list">${l.length?`<ul>${l.map(a=>awayRow(a,true)).join('')}</ul>`:'<p class="tip" style="padding:0">Gerade ist nichts eingetragen.</p>'}</section>
  `}
+function awayFocus(id){setTimeout(()=>{const e=$('awForm');if(e)e.scrollIntoView({block:'start',behavior:'smooth'});const i=id&&$(id);if(i)try{i.focus({preventScroll:true})}catch(x){}},60)}
 function awayRead(){const g=(id,k)=>{const e=$(id);return e?e.value:(awayForm[k]||'')};if(awayForm){Object.assign(awayForm,{was:g('awWas','was'),ort:g('awOrt','ort'),von:g('awVon','von'),vt:g('awVt','vt'),bis:g('awBis','bis'),bt:g('awBt','bt')});const n=$('awN');if(n)awayForm.nacht=n.checked}}
 async function awaySave(){if(!awayForm.quick)awayRead();const f=awayForm,was=f.was.trim(),ort=f.ort.trim();
  if(!f.von){note('Startdatum angeben');return}const bis=f.bis||f.von;if(bis<f.von){note('Ende liegt vor dem Start');return}
  const timed=!!(f.vt||f.bt),sd={summary:`${S.prof.name}: ${was||f.kind||'unterwegs'}`};if(ort)sd.location=ort;if(f.nacht)sd.description='Übernachtung';
  if(timed){const st=new Date(f.von+'T'+(f.vt||'00:00')),en=new Date(bis+'T'+(f.bt||'23:59'));if(en<=st){note('Ende liegt vor dem Start');return}sd.start_date_time=f.von+' '+(f.vt||'00:00')+':00';sd.end_date_time=bis+' '+(f.bt||'23:59')+':00'}
  else{sd.start_date=f.von;sd.end_date=iso(new Date(bis+'T12:00').getTime()+864e5)}
- note('Trage ein …');
+ note('Trage ein …');const repl=f.repl;
  try{const r=await haCall([{type:'call_service',domain:'calendar',service:'create_event',target:{entity_id:AWAY_E},service_data:sd}]);if(!r[0]||!r[0].success)throw new Error((r[0]&&r[0].error&&r[0].error.message)||'Kalender fehlt');
   const a=awayParse({summary:sd.summary,location:ort,description:sd.description,start:timed?f.von+'T'+(f.vt||'00:00'):f.von,end:timed?bis+'T'+(f.bt||'23:59'):sd.end_date});
   tell(`${S.prof.name}: ${f.kind&&f.kind!=='unterwegs'?f.kind:'unterwegs'}`,`${was?was+(ort?' in '+ort:'')+'\n':ort?'in '+ort+'\n':''}${awayWhen(a)}${f.nacht?' · über Nacht weg':''}`);
-  awayForm=null;await awayFetch();const nu=AWAY.filter(x=>x.s===a.s&&calMe(x)).pop();awayUndo=nu?{uid:nu.uid,goal:weekGoal(wk(Date.now())),msg:`${S.prof.name} ist ${f.kind&&f.kind!=='unterwegs'?f.kind:'unterwegs'}: ${was?was+(ort?' in '+ort:'')+', ':ort?'in '+ort+', ':''}${awayWhen(a)}${f.nacht?', über Nacht weg':''}`}:null;clearTimeout(awayUndoT);awayUndoT=setTimeout(()=>{awayUndo=null;if(view==='cal')render()},15000);note('Eingetragen');render()}catch(e){note('Nicht eingetragen: '+e.message)}}
+  if(repl&&AWAY.some(x=>x.uid===repl)){try{await haCall([{type:'calendar/event/delete',entity_id:AWAY_E,uid:repl}])}catch(e){}}
+  awayForm=null;await awayFetch();const nu=AWAY.filter(x=>x.s===a.s&&calMe(x)).pop();awayUndo=nu?{uid:nu.uid,goal:weekGoal(wk(Date.now())),f:{von:f.von,bis,nacht:!!f.nacht,kind:f.kind||awayKind,vt:f.vt,bt:f.bt},was,ort,msg:`${S.prof.name} ist ${f.kind&&f.kind!=='unterwegs'?f.kind:'unterwegs'}: ${was?was+(ort?' in '+ort:'')+', ':ort?'in '+ort+', ':''}${awayWhen(a)}${f.nacht?', über Nacht weg':''}`}:null;clearTimeout(awayUndoT);awayUndoT=setTimeout(()=>{awayUndo=null;if(view==='cal')render()},30000);note('Eingetragen');render()}catch(e){note('Nicht eingetragen: '+e.message)}}
 async function awayRemove(uid,quiet){const a=AWAY.find(x=>x.uid===uid);if(!a)return;note('Lösche …');
  try{const r=await haCall([{type:'calendar/event/delete',entity_id:AWAY_E,uid}]);if(!r[0]||!r[0].success)throw new Error('nicht gefunden');
   if(!quiet&&a.stop>=Date.now())tell(`${a.wer}: Termin fällt weg`,`${a.was}${a.ort?' in '+a.ort:''} · ${awayWhen(a)} ist gestrichen.`);
   AWAY=AWAY.filter(x=>x.uid!==uid);try{localStorage.setItem('sc.away',JSON.stringify(AWAY))}catch(e){}awayDel='';note('Gelöscht');render()}catch(e){note('Löschen nicht möglich: '+e.message)}}
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-aw]');if(!b)return;const a=b.dataset.aw;
- if(a==='new'){const t=today();awayForm={was:'',ort:'',von:t,vt:'',bis:t,bt:'',nacht:false,kind:awayKind};awayDel='';render()}
+ if(a==='new'){const t=today();awayForm={was:'',ort:'',von:t,vt:'',bis:t,bt:'',nacht:false,kind:awayKind};awayDel='';awayUndo=null;render();awayFocus()}
+ else if(a==='detail'){const u=awayUndo;if(!u)return;awayUndo=null;clearTimeout(awayUndoT);awayForm={was:'',ort:'',vt:'',bt:'',...u.f,repl:u.uid};render();awayFocus('awWas')}
  else if(a==='cancel'){awayForm=null;render()}
+ else if(a==='more'){}
  else if(a==='hoteloff'){awayHotelOff=today();render()}
  else if(a==='kind'){awayKind=b.dataset.v;if(awayForm){awayRead();awayForm.kind=awayKind}render()}
- else if(a==='more'){awayRead();awayForm.more=true;render()}
  else if(a==='night'){awayRead();awayForm.nacht=!!b.dataset.v;if(awayForm.nacht&&awayForm.bis===awayForm.von)awayForm.bis=iso(new Date(awayForm.von+'T12:00').getTime()+864e5);render()}
  else if(a==='save')awaySave();
  else if(a==='quick')awayQuick(b.dataset.d||iso(Date.now()+(+b.dataset.n)*864e5),!!b.dataset.night);
@@ -96,7 +103,7 @@ function calHead(){const mon=wk(Date.now()),mine=S.sessions.filter(s=>wk(s.date)
  let both=0;if(pf){const t=new Date();for(let k=1;k<=t.getDate();k++){const d=iso(new Date(t.getFullYear(),t.getMonth(),k,12));if(pf(d)&&calSess(d).length)both++}}
  const ok=mine>=g,ad=awayDaysWeek(mon),pw=(typeof partners!=='undefined'?partners:[]).find(x=>x.name),wp=typeof weekScore==='function'?weekScore():0;
  const aw=AWAY.filter(a=>calMe(a)&&a.stop>=mon&&a.start<mon+7*864e5).map(awayWhen).join(', ');
- return `<section class="calsum"><div class="cs1"><span class="cst${ok?' ok':''}">${ok?'Wochenziel geschafft':'Noch '+(g-mine)+' Training bis zum Wochenziel'}</span><b class="cond">${mine} von ${g}</b><span>Krafteinheiten diese Woche${g<S.goal?` · Ziel diesmal ${g} statt ${S.goal}`:''}</span></div>
+ return `<section class="calsum"><div class="cs1"><span class="cst${ok?' ok':''}">${ok?'Wochenziel geschafft':'Noch '+(g-mine)+(g-mine===1?' Training':' Trainings')+' bis zum Wochenziel'}</span><b class="cond">${mine} von ${g}</b><span>Krafteinheiten diese Woche${g<S.goal?` · Ziel diesmal ${g} statt ${S.goal}`:''}</span></div>
  ${pn?`<div class="cs2"><p><i class="cd me"></i>Du: <b>${mk}×</b> trainiert${wp?` · ${fmt(wp)} Punkte`:''}</p><p><i class="cd pa"></i>${esc(pn)}: <b>${pk}×</b> trainiert${pw&&pw.wp!=null?` · ${fmt(pw.wp)} Punkte`:''}</p>${both?`<p class="csw">Diesen Monat ${both}× am selben Tag trainiert</p>`:''}</div>`:''}</section>
  ${g<S.goal?`<p class="calfair"><b>${ad} Tage weg (${esc(aw)}) → diese Woche reichen ${g}.</b> Gilt für euch beide gleich.</p>`:''}`}
 function calDayHtml(d){const ss=calSess(d),aw=calAway(d),dt=new Date(d+'T12:00'),pf=tdPartner(),pt=pf?pf(d):'',pn=sharePartner()||'Partner';
@@ -123,10 +130,11 @@ function renderCal(){const now=new Date();if(!calM)calM={y:now.getFullYear(),m:n
  ${renderAway()}`}
 /* Unterwegs mit einem Tipp */
 function awayQuickHtml(){if(!HA.url||!HA.token)return '';const pn=sharePartner()||'Dein Partner';
- if(awayUndo)return `<section class="awok"><b>Eingetragen ✓</b><p>${esc(pn)} bekommt jetzt diese Nachricht:</p><q>${esc(awayUndo.msg)}</q>${awayUndo.goal<S.goal?`<p>Damit reichen diese Woche ${awayUndo.goal} statt ${S.goal} Trainings.</p>`:''}<button data-aw="undo">Rückgängig machen</button></section>`;
- return `<section class="awq"><b>Ich bin weg</b><div class="awqb"><button class="primary" data-aw="quick" data-n="0">Heute</button><button class="primary" data-aw="quick" data-n="1">Morgen</button><button data-aw="quick" data-n="1" data-night="1">Morgen + Übernachtung</button><button data-aw="new">Anderer Zeitraum</button></div>
+ if(awayForm&&!awayForm.quick)return awayFormHtml();
+ if(awayUndo)return `<section class="awok"><b>Eingetragen ✓</b><p>${esc(pn)} bekommt jetzt diese Nachricht:</p><q>${esc(awayUndo.msg)}</q>${awayUndo.goal<S.goal?`<p>Damit reichen diese Woche ${awayUndo.goal} statt ${S.goal} Trainings.</p>`:''}<div class="awokb">${awayUndo.was||awayUndo.ort?'':'<button class="primary" data-aw="detail">Wo, was, Uhrzeit ergänzen</button>'}<button data-aw="undo">Rückgängig machen</button></div></section>`;
+ return `<section class="awq"><b>Ich bin weg</b><div class="awqb"><button class="primary" data-aw="quick" data-n="0">Heute</button><button class="primary" data-aw="quick" data-n="1">Morgen</button><button data-aw="quick" data-n="1" data-night="1">Morgen + Übernachtung</button><button data-aw="new">Genauer: wo, was, wie lange</button></div>
  <div class="awkrow"><span>Was ist los?</span><div class="awkind" role="group" aria-label="Was ist los?">${AWAY_KINDS.map(([k,l])=>`<button data-aw="kind" data-v="${k}" aria-pressed="${awayKind===k}">${l}</button>`).join('')}</div></div>
- <p class="awpriv">Ein Tipp genügt. ${esc(pn)} sieht nur „${esc(S.prof.name||'')} ist ${esc(awayKind)}“ und den Zeitraum – kein Anlass, kein Ort, außer du trägst ihn selbst ein. Unterwegs, Urlaub und Krank zählen gleich fürs Wochenziel. Duo liest keinen Kalender von deinem Handy.</p></section>`}
+ <p class="awpriv">Ein Tipp genügt – Ort und Anlass kannst du danach ergänzen. ${esc(pn)} sieht nur, was du einträgst. Duo liest keinen Kalender von deinem Handy.</p></section>`}
 async function awayQuick(von,night){const bis=night?iso(new Date(von+'T12:00').getTime()+864e5):von;awayForm={was:'',ort:'',von,vt:'',bis,bt:'',nacht:!!night,quick:true,kind:awayKind};await awaySave()}
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-cal],[data-calm]');if(!b)return;
  if(b.dataset.cal){calSel=b.dataset.cal}else{let mm=calM.m+(+b.dataset.calm),yy=calM.y;if(mm<0){mm=11;yy--}if(mm>11){mm=0;yy++}calM={y:yy,m:mm}}render()});
