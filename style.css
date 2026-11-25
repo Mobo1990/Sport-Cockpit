@@ -1114,3 +1114,14 @@ html.kbopen .nav{display:none}
 .rtim{display:block;margin:6px 0 0;min-height:38px;padding:4px 12px;border-radius:999px;font-size:15px;font-variant-numeric:tabular-nums}
 .rfoot{gap:6px}.rfoot .rpv{flex:1 1 100%;font-size:14px}.rshare{font-size:14px}.rshare span{color:var(--mute)}.rshare input,.ring input{accent-color:var(--d-saged,#3E5A4C)}
 .rfoot{padding-top:8px!important}.rfoot .rpor button{min-height:36px}.rfoot .rpv{margin:-2px 0 0}.rshare{min-height:32px}.rfoot .primary{min-height:48px}.ring label{font-size:16px}
+/* Koch-Modus: Schale für mehrere */
+.bwtip{padding:0!important;margin:4px 0 10px}.bwlast{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 10px;font-size:14px;color:var(--mute)}.bwlast button{min-height:36px;padding:4px 12px;border-radius:999px;font-size:14px}
+.bwname{display:flex;flex-direction:column;gap:4px;margin:0 0 8px;font-size:14px;color:var(--mute)}.bwname input{font-size:17px}
+.bwlist{list-style:none;margin:0;padding:0}.bwlist li{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line)}.bwlist li:first-child{border-top:0}.bwlist li span{flex:1;font-size:16px}
+.bwlist input{width:76px;text-align:right;font-size:16px}.bwlist em{font-style:normal;color:var(--mute)}.bwlist button{min-height:36px;width:36px;padding:0;border:0;background:none;color:var(--mute)}
+.bwadd{display:block;width:100%;min-height:48px;margin:8px 0;border-radius:var(--r);border:1.5px dashed var(--line);background:var(--s1);font:700 17px var(--fh);color:var(--ink)}
+.bwtot{font-size:14px;color:var(--mute);margin:6px 0}.bwtot b{color:var(--ink)}
+.bwpct{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0}.bwpct span{font-size:14px;color:var(--mute)}.bwpct button{min-height:38px;padding:4px 10px;font-size:15px}.bwpct button[aria-pressed=true]{background:var(--dark,#3E5A4C);color:#fff}
+.bwme{display:flex;gap:8px;margin:8px 0}.bwme>div{flex:1;background:var(--s2);border-radius:14px;padding:10px 12px}.bwme small{display:block;font-size:12px;color:var(--mute);font-weight:700;text-transform:uppercase;letter-spacing:.05em}.bwme b{display:block;font:800 20px var(--fh)}.bwme span{font-size:13px;color:var(--mute)}
+.bwbar{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--d-sagel,#E3ECE6);border-radius:14px;padding:8px 8px 8px 14px;margin:0 0 10px;font-weight:600}.bwbar button{min-height:38px;padding:4px 14px}
+.bwz{font-size:12px;color:var(--mute);margin-top:2px}.bwz summary{cursor:pointer}
