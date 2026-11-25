@@ -13,8 +13,8 @@ function renderHome(){weeklyCheck();const d=today(),sc=dayScore(d),g=sc.g,t=sc.t
  ${sc.why.length?`<div class="chips">${sc.why.map(w=>`<span>${esc(w)}</span>`).join('')}</div>`:'<p class="tip" style="padding:0 0 12px">Noch keine Punkte heute: Trainieren, im Kalorienziel bleiben und Protein schaffen bringt am meisten.</p>'}
  ${typeof awayHotelHtml==='function'?awayHotelHtml():''}${rwInboxHtml()}${shareInboxHtml()}${sayInboxHtml()}${awayHomeHtml()}
  <section class="tiles">
-  <button class="tile big" data-gym="1" data-d="${run?run[0]:nx}"><small>${run?'Training läuft':'Als Nächstes'}</small><b>${DAYS[run?run[0]:nx].n}</b><span>${run?runSets+' Sätze erledigt – weiter':DAYS[nx].sub}</span><em>${run?'Fortsetzen':'Training starten'} ›</em></button>
-  </section>
+  <button class="tile big" data-gym="1" data-d="${run?run[0]:nx}"><small>${run?'Training läuft':'Als Nächstes'}</small><b>${typeof homeDayName==='function'?homeDayName(run?run[0]:nx):DAYS[run?run[0]:nx].n}</b><span>${run?runSets+' Sätze erledigt – weiter':typeof isHome==='function'&&isHome()&&HOME[nx]?HOME[nx].sub+' · ca. '+homeBuild(nx).min+' min':DAYS[nx].sub}</span><em>${run?'Fortsetzen':'Training starten'} ›</em></button>
+  </section>${typeof isHome==='function'&&isHome()&&HOME[nx]&&!run?homeLenHtml(nx):''}
  ${advHtml()}
  <section class="todaybox"><div class="tbh"><b>Heute</b><span>${sc.pt} Punkte</span></div>
  ${isDuo()?duoTodayHtml(sc):` <button class="eatday" data-a="view" data-v="nut" aria-label="Essen heute, zum Essen-Tab"><div class="trow">
