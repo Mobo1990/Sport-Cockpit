@@ -220,7 +220,9 @@ try:
         check(pg.is_visible(".awadd") and "Gerade ist nichts eingetragen" in pg.text_content(".away.list"), "Unterwegs-Seite: leer, Knopf zum Eintragen")
         pg.click("[data-aw=new]"); pg.fill("#awWas", "tecis Workshop"); pg.fill("#awOrt", "Köln")
         tm = (datetime.date.today() + datetime.timedelta(days=1)).isoformat(); pg.fill("#awVon", tm); pg.dispatch_event("#awVon", "change"); pg.fill("#awVt", "08:00")
-        pg.click("[data-aw=night][data-v='1']"); pg.wait_for_timeout(100)
+        pg.click("[data-aw=night][data-v='1']")
+        try: pg.wait_for_function("(document.getElementById('awBis')||{}).value===%r" % (datetime.date.today() + datetime.timedelta(days=2)).isoformat(), timeout=3000)
+        except Exception: pass
         check(pg.input_value("#awWas") == "tecis Workshop" and pg.input_value("#awBis") == (datetime.date.today() + datetime.timedelta(days=2)).isoformat(), "Übernachtung: Ende springt auf den Folgetag, Eingaben bleiben")
         pg.fill("#awBt", "18:00"); pg.click("[data-aw=save]"); pg.wait_for_timeout(1500)
         calls = [json.loads(l) for l in open("/tmp/calls.log")]
