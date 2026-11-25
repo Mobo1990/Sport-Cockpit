@@ -51,7 +51,7 @@ function rwLineHtml(){if(!HA.token)return '';const b=rwBalance(),next=REW.filter
  return `<button class="rwline" data-a="view" data-v="rew"><div><span>Paar-Konto</span><b class="cond">${fmt(b.bal)}</b>${next?`<small>→ ${esc(next.name)} · ${fmt(next.cost)}</small>`:'<small>Belohnungen festlegen ›</small>'}</div>${next?`<i><s style="width:${Math.min(b.bal/next.cost,1)*100}%"></s></i>`:''}</button>`}
 /* Gemeinsames Konto: beide Profilbilder, Summe, Anteile */
 function rwAccHtml(b,p){const me=S.prof.name||'Ich',tot=Math.max(1,b.me+b.pa),sm=b.me/tot*100;
- return `<section class="rwacc"><div class="rwduo">${avaHtml(me,true)}${p?avaHtml(p.name,false):''}</div><span>Unser Punktekonto</span><b class="cond">${fmt(b.bal)}</b>
+ return `<section class="rwacc"><div class="rwduo">${avaHtml(me,true)}${p?avaHtml(p.name,false):''}</div><span>Unser Punktekonto · alle Punkte seit Start</span><b class="cond">${fmt(b.bal)}</b>
  ${p?`<div class="rwsplit"><i style="width:${sm.toFixed(1)}%"></i><s></s></div><div class="rwwho"><span><i class="dot me"></i>${esc(me)} ${fmt(b.me)}</span><span><i class="dot pa"></i>${esc(p.name)} ${fmt(b.pa)}</span></div>`:'<small>Partner noch nicht verbunden</small>'}
  ${b.spent?`<small>Schon eingelöst: ${fmt(b.spent)} Punkte</small>`:''}</section>`}
 function renderRewards(){const b=rwBalance(),p=rwPartner(),me=meSlug(),act=REW.filter(r=>r.st==='active'||r.st==='redeem').sort((a,c)=>a.cost-c.cost),prop=REW.filter(r=>r.st==='proposed'),done=REW.filter(r=>r.st==='done').sort((a,c)=>(c.at||'').localeCompare(a.at||''));

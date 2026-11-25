@@ -48,12 +48,12 @@ function renderGym0(){if(!gym.open){gymEl.innerHTML='';gymEl.classList.remove('o
  <div class="gstep"><label>Wiederholungen</label><div><button data-g="rp" data-d="-1" aria-label="weniger">−</button><input id="grp" aria-label="Wiederholungen" inputmode="numeric" value="${reps!=null?reps:''}"><button data-g="rp" data-d="1" aria-label="mehr">+</button></div></div>
  <div class="glast"><span>Wie war der Satz?</span>${rpeBtns(e,k,rows[k])}</div>
  ${k===rows.length-1?`<p class="gch"><b>Letzter Satz – Challenge:</b> Halte die letzte Wiederholung 3 Sekunden in der angespannten Position.</p>`:''}
- <button class="primary gok" data-g="set">Satz ${k+1} fertig ✓</button>`}
+`}
  <div class="gsets">${rows.map((r,j)=>`<span data-g="edit" data-i="${j}" role="button" tabindex="0" class="${r.done?'ok':''}${j===k?' cur':''}${j===ed?' ed':''}">${j+1}: ${r.done?fmt(num(r.kg)||0)+'×'+r.reps:'–'}</span>`).join('')}</div>
  ${ed!=null?(rows[ed].done?`<div class="gedit"><b>Satz ${ed+1} ändern</b><div class="gerow"><label>${A?'kg Hilfe':'kg'}<input id="gekg" inputmode="decimal" value="${fmt(num(rows[ed].kg)||0)}"></label><label>Wdh.<input id="gerp" inputmode="numeric" value="${esc(rows[ed].reps)}"></label></div>
   <div class="gnav"><button class="primary" data-g="esave">Speichern</button><button data-g="edel">Satz löschen</button><button data-g="ecancel">Abbrechen</button></div></div>`
   :`<div class="gedit"><b>Satz ${ed+1} ist noch offen</b><div class="gnav"><button data-g="edel">Satz entfernen</button><button data-g="ecancel">Abbrechen</button></div></div>`):`<p class="gtap">Tipp: Auf einen Satz tippen, um ihn zu ändern oder zu löschen.</p>`}</section>
- <footer class="gf"><button data-g="prev"${gym.i===0?' disabled':''}>‹ Zurück</button>${allDone?`<button class="primary" data-g="finish">Training abschließen</button>`:`<button class="primary" data-g="next"${gym.i>=list.length-1?' disabled':''}>Weiter ›</button>`}</footer>`}
+ <footer class="gf g3"><button class="gnavb" data-g="prev"${gym.i===0?' disabled':''} aria-label="Vorige Übung">‹</button>${allDone?`<button class="primary" data-g="finish">Training abschließen</button>`:!done?`<button class="primary gok" data-g="set">Satz ${k+1} fertig ✓</button>`:nx!=null?`<button class="primary" data-g="go" data-i="${nx}">Nächste Übung ›</button>`:`<button class="primary" data-g="more">+ Noch ein Satz</button>`}<button class="gnavb" data-g="next"${gym.i>=list.length-1?' disabled':''} aria-label="Nächste Übung">›</button></footer>`}
 const rpeBtns=(e,i,r)=>`<div class="vars grpe">${[['l','leicht'],['m','passt'],['h','hart']].map(([k,l])=>`<button data-g="rpe" data-e="${e.id}" data-i="${i}" data-r="${k}" aria-pressed="${!!r&&r.rpe===k}">${l}</button>`).join('')}</div>`;
 function openGym(){gym.open=true;gym.last=null;gym.edit=null;gym.fin=null;const dr=draftFor(day),list=dayEx(day);const j=list.findIndex(x=>dr.ex[x.id].some(r=>!r.done));gym.i=j<0?0:j;renderGym()}
 /* Eingaben sofort in den Entwurf schreiben – sonst setzt ein Neuaufbau (Pausenende, „hart“, Sync) sie zurück */
@@ -61,7 +61,7 @@ function gymStore(){if(!gym.open||gym.fin)return;const dr=draftFor(day),e=dayEx(
  const a=$('gkg'),b=$('grp');if(a){const v=num(a.value);rows[k].kg=v!=null?String(v).replace('.',','):'';const pl=$('gplate');if(pl)pl.textContent=plateTxt(e,v)}if(b){const v=num(b.value);rows[k].reps=v!=null?String(Math.round(v)):''}saveDrafts()}
 gymEl.addEventListener('input',ev=>{if(ev.target.id==='gkg'||ev.target.id==='grp')gymStore()});
 /* Tastatur: Eingabefeld sichtbar halten */
-gymEl.addEventListener('focusin',ev=>{const t=ev.target;if(t.tagName!=='INPUT')return;gymEl.classList.add('kb');setTimeout(()=>{const gb=$('gbody'),el=document.activeElement;if(!gb||!el||!gb.contains(el))return;
+gymEl.addEventListener('focusin',ev=>{const t=ev.target;if(t.tagName!=='INPUT')return;setTimeout(()=>{try{t.select()}catch(e){}},0);gymEl.classList.add('kb');setTimeout(()=>{const gb=$('gbody'),el=document.activeElement;if(!gb||!el||!gb.contains(el))return;
  const top=el.getBoundingClientRect().top-gb.getBoundingClientRect().top;gb.scrollTo({top:gb.scrollTop+top-90,behavior:'smooth'})},320)});
 gymEl.addEventListener('focusout',()=>setTimeout(()=>{const el=document.activeElement;if(!el||!gymEl.contains(el)||el.tagName!=='INPUT')gymEl.classList.remove('kb')},200));
 gymEl.addEventListener('click',ev=>{const b=ev.target.closest('[data-g]');if(!b)return;const a=b.dataset.g;
@@ -73,8 +73,8 @@ gymEl.addEventListener('click',ev=>{const b=ev.target.closest('[data-g]');if(!b)
  else if(a==='busy'){const j=gymNextOpen(list,dr,gym.i);if(j==null)return;note(`${e.n} machst du später – jetzt erst ${list[j].n}`);gym.i=j;gym.edit=null}
  else if(a==='anim'){gym.anim=!gym.anim}else if(a==='how'){gym.how=!gym.how}
  else if(a==='skip'){stopT()}
- else if(a==='kg'||a==='rp'){const inp=$(a==='kg'?'gkg':'grp'),st=a==='kg'?(e.step||2.5):1;inp.value=fmt(Math.max(0,(num(inp.value)||0)+(+b.dataset.d)*st));gymStore();return}
- else if(a==='set'){const {rows,k}=gymRow(e,dr);if(k<0)return;const kg=num($('gkg').value),rp=Math.round(num($('grp').value)||0);if(!rp){note('Wiederholungen eintragen');return}
+ else if(a==='kg'||a==='rp'){const inp=$(a==='kg'?'gkg':'grp'),st=a==='kg'?(e.step||2.5):1;inp.value=fmt(Math.max(0,Math.round(((num(inp.value)||0)+(+b.dataset.d)*st)/st)*st));gymStore();return}
+ else if(a==='set'){const {rows,k}=gymRow(e,dr);if(k<0)return;const kg=num($('gkg').value),rp=Math.round(num($('grp').value)||0);if(!rp){note('Wiederholungen eintragen');return}if(kg>400||rp>100){note(`${fmt(kg||0)} kg × ${rp}? Bitte prüfen – Feld antippen und neu eingeben.`);return}
   if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();const r=rows[k];r.kg=kg!=null?String(kg).replace('.',','):'0';r.reps=String(rp);r.done=true;r.at=Date.now();gym.last=k;gym.edit=null;startT(S.rest);
   const key=vkey(e),b0=best(key),m=e1(kg||0,rp);if(!isA(e.v)&&b0>0&&m>b0+0.01&&m>Math.max(0,...rows.filter((x,j)=>j!==k&&x.done).map(x=>e1(num(x.kg)||0,num(x.reps)||0))))cheer({title:'Neuer Bestwert!',sub:`${vname(e)}: ${fmt(kg)} kg × ${rp}`});saveDrafts()}
  else if(a==='rpe'){gymStore();const r=dr.ex[b.dataset.e][+b.dataset.i];r.rpe=r.rpe===b.dataset.r?'':b.dataset.r;saveDrafts()}

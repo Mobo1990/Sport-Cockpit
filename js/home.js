@@ -23,8 +23,8 @@ function renderHome(){weeklyCheck();const d=today(),sc=dayScore(d),g=sc.g,t=sc.t
   <div class="tf"><span>${g.kcal-t.kcal>=0?fmt(Math.round(g.kcal-t.kcal))+' kcal frei':fmt(Math.round(t.kcal-g.kcal))+' kcal drüber'}</span><em>Details ›</em></div></button>`}
  <div class="tmeals">${MEALS.map(([m,l])=>{const k=(S.nut.days[d]||{items:[]}).items.filter(i=>i.meal===m).reduce((a,i)=>a+i.kcal,0);return `<button data-h="meal" data-m="${m}"${m===mealNow()?' class="now"':''}><b>+ ${l}</b>${k?`<span>${fmt(k)} kcal</span>`:''}</button>`}).join('')}</div>
  ${isDuo()?'':goalsHtml()}
- ${afHtml()}
  ${chHtml()}
+ ${afHtml()}
  </section>
  ${woQuickHtml()}
  <section class="weekbox">${weeklyHtml()}${rwLineHtml()}</section>`}
@@ -37,6 +37,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-h]');if(
  else if(a==='wmlok'){const v=Math.round(num($('wMl').value)||0);if(v<10||v>3000){note('Menge in ml eingeben (10–3000)');return}const dd=ND(d);dd.water=(dd.water||0)+v;dd.wlast=v;wml=false;touch(d)}
  else if(a==='wundo'){const dd=ND(d);if(!dd.wlast)return;dd.water=Math.max(0,(dd.water||0)-dd.wlast);dd.wlast=0;touch(d)}
  else if(a==='steps'){const v=num($('hSt').value);if(v==null||v<0||v>100000){note('Schritte als Zahl eingeben');return}ND(d).stm=Math.round(v);stepEd=false;touch(d)}
+ else if(a==='ptsinfo'){ptsOpen=!ptsOpen;render();return}
  else if(a==='stepin'){stepEd=!stepEd;render();if(stepEd)setTimeout(()=>{const i=$('hSt');if(i)i.focus()},30);return}
  else if(a==='cardio'){day='cardio';view='train'}
  else if(a==='rec'){view='rec'}

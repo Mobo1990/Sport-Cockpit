@@ -53,7 +53,7 @@ const waterGoal=()=>Math.round((num(S.prof.wgoal)||2)*1000),stepGoal=()=>Math.ro
 const daySteps=d=>{const x=S.nut.days[d]||{};return Math.max((x.h||{}).st||0,x.stm||0)};
 /* ===== Neue Karte „Heute“ im Duo-Design: Kalorien-Tacho mit Punkte-Zone, drei Ringe, Wasser als Gläser ===== */
 const isDuo=()=>document.documentElement.classList.contains('th-duo');
-let stepEd=false;
+let stepEd=false,ptsOpen=false;
 function dArc(cx,cy,r,a0,a1){const p=a=>[cx+r*Math.cos(a*Math.PI/180),cy-r*Math.sin(a*Math.PI/180)],[x0,y0]=p(a0),[x1,y1]=p(a1);return `M${x0.toFixed(1)} ${y0.toFixed(1)} A${r} ${r} 0 ${Math.abs(a0-a1)>180?1:0} 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`}
 function dGauge(eaten,goal,zone){const mx=Math.max(goal*1.25,eaten*1.05,1),ang=v=>180-180*Math.min(Math.max(v,0),mx)/mx,cx=150,cy=150,r=118,left=Math.round(goal-eaten);
  let s=`<svg viewBox="0 0 300 186" role="img" aria-label="${fmt(Math.round(eaten))} von ${fmt(goal)} kcal gegessen"><path d="${dArc(cx,cy,r,180,0)}" fill="none" stroke="#F1E4DC" stroke-width="22" stroke-linecap="round"/>`;
@@ -70,14 +70,15 @@ let dRec={d:'',v:0};
 function dRecord(d){if(dRec.d===d)return dRec.v;let v=0;for(let i=1;i<=60;i++){const x=dayShift(d,-i);if(S.nut.days[x]||S.sessions.some(s=>iso(s.date)===x))v=Math.max(v,dayScore(x).pt)}dRec={d,v};return v}
 function duoTodayHtml(sc){const d=today(),g=sc.g,t=sc.t,day=S.nut.days[d]||{},G=goalAt(d),band=(typeof KCAL_BANDS!=='undefined'&&d>=KCAL_NEW_AB)?(KCAL_BANDS[G]||KCAL_BANDS.halten)[0]:null,m=g.kcal-(GOAL_ADD[G]||0);
  const zone=band?[m+band[0],m+band[1]]:null,meals=new Set((day.items||[]).map(i=>i.meal)).size;
- let zh='';if(zone){zh=t.kcal<zone[0]?`Noch ${fmt(Math.round(zone[0]-t.kcal))} kcal bis zur Punkte-Zone`:t.kcal<=zone[1]?(meals>=2?`In der Punkte-Zone · +${band[2]}`:`In der Punkte-Zone · +${band[2]} ab 2 Mahlzeiten`):`Über der Punkte-Zone`}
+ let zh='';if(zone){zh=!t.kcal?`Punkte-Zone heute: ${fmt(Math.round(zone[0]/10)*10)}–${fmt(Math.round(zone[1]/10)*10)} kcal`:t.kcal<zone[0]?`Noch ${fmt(Math.round(zone[0]-t.kcal))} kcal bis zur Punkte-Zone`:t.kcal<=zone[1]?(meals>=2?`In der Punkte-Zone · +${band[2]}`:`In der Punkte-Zone · +${band[2]} ab 2 Mahlzeiten`):`Über der Punkte-Zone`}
  const pDone=t.p>=g.p,st=daySteps(d),sg=stepGoal(),hs=(day.h||{}).st,rec=dRecord(d),w=day.water||0,wg=waterGoal(),n=Math.max(1,Math.ceil(wg/300)),wDone=w>=wg;
  const glasses=Array.from({length:n},(_,i)=>`<button class="wg" data-h="water" data-v="300" aria-label="Glas Wasser, 300 ml">${dGlass(w/300-i)}</button>`).join('');
  return `<div class="dh"><button class="gw" data-a="view" data-v="nut" aria-label="Essen heute, zum Essen-Tab" style="background:none;border:0;box-shadow:none;padding:0;min-height:0">${dGauge(t.kcal,g.kcal,zone)}</button>
  ${zh?`<p class="zh${zone&&t.kcal>=zone[0]&&t.kcal<=zone[1]&&meals>=2?' ok':''}"><i></i>${zh}</p>`:''}
  <div class="mr"><button class="mi" data-a="view" data-v="nut">${dRing(g.p?t.p/g.p:0,'#6F8F7E',fmt(Math.round(t.p)),pDone)}<b>Protein</b><small>${pDone?'geschafft · +20':`noch ${fmt(Math.round(g.p-t.p))} g`}</small></button>
  <button class="mi" data-h="stepin">${dRing(sg?st/sg:0,'#D29A4E',fmt(Math.round(st)),st>=sg)}<b>Schritte</b><small>${st>=sg?'geschafft · +10':`noch ${fmt(Math.round(sg-st))}`}</small></button>
- <div class="mi">${dRing(rec?sc.pt/Math.max(rec,1):sc.pt?1:0,'#E2725B',sc.pt,false)}<b>Punkte</b><small>${sc.pt>rec&&rec?'neuer Rekord!':rec?`Rekord ${rec}`:'heute'}</small></div></div>
+ <button class="mi" data-h="ptsinfo" aria-expanded="${ptsOpen}">${dRing(rec?sc.pt/Math.max(rec,1):sc.pt?1:0,'#E2725B',sc.pt,false)}<b>Punkte</b><small>${ptsOpen?'ausblenden':'woher? ›'}</small></button></div>
+ ${ptsOpen?`<div class="ptsl"><b>Heute ${sc.pt} Punkte${rec?` · Rekord ${rec}`:''}</b>${sc.why.length?`<ul>${sc.why.map(w=>`<li>${esc(w)}</li>`).join('')}</ul>`:'<p>Noch keine Punkte heute.</p>'}<p>Punkte gibt es für: Training +30 · Protein +20 · Wasser +10 · Schritte +10 · Kalorien in der Zone +10 · Challenges +5 bis +15 · alkoholfrei +5 · Wiegen +5 · Cardio +15.</p></div>`:''}
  ${stepEd?`<div class="stin"><input id="hSt" inputmode="numeric" placeholder="Schritte heute" value="${day.stm||''}" aria-label="Schritte heute">${hs!=null?'':''}<button class="primary" data-h="steps">OK</button></div><p class="zh">${hs!=null?'Kommt aus Apple Health – eigener Wert zählt, wenn er höher ist.':'Ohne Apple Health hier eintragen.'}</p>`:''}
  <div class="wa"><div class="wh"><b>Wasser</b><span class="${wDone?'ok':''}">${fmt(w/1000)} / ${fmt(wg/1000)} l${wDone?' · geschafft +10':` · noch ${fmt((wg-w)/1000)} l`}</span></div>
  <div class="gl">${glasses}</div>
@@ -131,7 +132,7 @@ function dayScore(d){const g=goals(d),t=totals(d),day=S.nut.days[d]||{},ss=S.ses
  const chp=chPoints(d);if(chp){pt+=chp;why.push((chDone(d).length===3?'Alle Challenges +':'Challenges +')+chp)}
  /* Kurz-Workout ohne Challenge: das erste am Tag gibt +10, weitere nichts (Gym-Training bleibt mit +30 klar vorn) */
  {const ids=dayCh(d).map(c=>c.id);if(d>=WO_FREE_AB&&(day.ch||[]).some(id=>/^wo_/.test(id)&&!ids.includes(id))){pt+=WO_FREE;why.push('Kurz-Workout +'+WO_FREE)}}
- if(day.w){pt+=5;why.push('Gewogen +5')}if((day.water||0)>=waterGoal()){pt+=10;why.push('Wasserziel +10')}
+ if(day.w&&day.wsrc!=='prof'){pt+=5;why.push('Gewogen +5')}if((day.water||0)>=waterGoal()){pt+=10;why.push('Wasserziel +10')}
  if(day.wkc){pt+=WK_PTS;why.push('Wochen-Challenge +'+WK_PTS)}if(day.cpc){pt+=CP_PTS;why.push('Paar-Challenge +'+CP_PTS)}
  {const ap=advPoints(d);if(ap){pt+=ap;why.push('Adventstürchen +'+ap)}}
  const prn=ss.reduce((a,s)=>a+(s.prn||0),0);if(prn){pt+=10*prn;why.push(prn+'× Bestwert +'+10*prn)}

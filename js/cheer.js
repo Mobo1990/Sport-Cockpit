@@ -12,7 +12,7 @@ function cheer(o){o=o||{};if(cheerEl.classList.contains('on')&&cheerBig&&!o.big)
  clearTimeout(cheerT);cancelAnimationFrame(cheerRaf);cheerBig=!!o.big;
  cheerEl.className='cheer on '+(o.big?'big':'small');cheerEl.querySelector('b').textContent=o.title||cheerWord();cheerEl.querySelector('span').textContent=o.sub||'';
  const em=cheerEl.querySelector('em'),pts=Math.round(o.pts||0);em.textContent=pts?'+0':'';
- if(pts){const t0=performance.now(),run=t=>{const k=Math.min(1,(t-t0)/700);em.textContent='+'+Math.round(pts*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(run)};requestAnimationFrame(run)}
+ if(pts){const t0=performance.now(),run=t=>{const k=Math.min(1,(t-t0)/350);em.textContent='+'+Math.round(pts*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(run)};requestAnimationFrame(run)}
  try{navigator.vibrate&&navigator.vibrate(o.big?[40,60,40,60,120]:[30,40,60])}catch(e){}
  if(!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches))confetti(o.big?150:45,!o.big);
  cheerT=setTimeout(cheerHide,o.big?2600:1700)}

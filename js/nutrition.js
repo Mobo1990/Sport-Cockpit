@@ -42,6 +42,8 @@ const fzTol=w=>w.length>=7?2:w.length>=4?1:0;
 function fuzzyFoods(q,max=6){const t=normQ(q).split(/\s+/).filter(w=>w.length>=3);if(!t.length)return[];const m=fm(),out=[];
  for(let i=0;i<m.all.length;i++){const ws=m.norm[i].split(/[^a-z0-9]+/).filter(Boolean);let d=0,ok=true;for(const w of t){const tol=fzTol(w);let best=99;for(const x of ws){const v=x.startsWith(w)?0:lev(w,x.length>w.length+2?x.slice(0,w.length+1):x,tol);if(v<best)best=v;if(!best)break}if(best>tol){ok=false;break}d+=best}if(ok)out.push([d,i])}
  return out.sort((a,b)=>a[0]-b[0]||a[1]-b[1]).slice(0,max).map(x=>m.all[x[1]])}
+/* Vorgeschlagene Menge: was du sonst nimmst, sonst eine Portion – aber keine ganze Großpackung (Becher 450 g → 150 g) */
+function defG(f){const u=usual(f);if(u)return u;if(f.por&&f.por.g<=250)return f.por.g;return f.por&&f.por.g>250?150:100}
 function remember(food){const N=S.nut;if(food.src==='off'||food.src==='own'){if(!N.foods.some(x=>x.id===food.id))N.foods.unshift(food)}N.recent=[food.id,...N.recent.filter(x=>x!==food.id)].slice(0,30)}
 function nutLine(){const d=today(),g=goals(d),t=totals(d);if(!t.kcal&&!lastWeight())return '';return `<p class="nline" data-a="view" data-v="nut">Ernährung heute: <b>${fmt(t.kcal)}</b> / ${fmt(g.kcal)} kcal · <b>${fmt(Math.round(t.p))}</b> / ${g.p} g Protein${g.trained?' · Trainingstag':''}</p>`}
 /* Farbverlaufs-Balken: kind 'eat' = Grün→Rot (Kalorien, Limit), 'goal' = Rot→Grün (Protein, Ziel erreichen) */
@@ -182,7 +184,7 @@ async function offFetch(code){const u=`https://world.openfoodfacts.org/api/v2/pr
 let scanBusy=false;
 async function offCode(code){if(!sheet)return;scanBusy=true;scanMsg('Suche '+code+' …');
  try{const j=await offFetch(code);const f=j&&j.status===1&&mapOFF({...j.product,code});
-  if(f){stopScan();sheet.food=f;sheet.g=f.por?String(f.por.g):'100';sheet.step='amount';sheet.msg='';render()}
+  if(f){stopScan();sheet.food=f;sheet.g=String(defG(f));sheet.step='amount';sheet.msg='';render()}
   else scanMsg(`Produkt ${code} nicht gefunden oder ohne Nährwerte – nochmal scannen oder als eigenes Produkt anlegen.`)}
  catch(e){scanMsg('Open Food Facts nicht erreichbar – gleich nochmal versuchen.')}
  setTimeout(()=>{scanBusy=false},1500)}
@@ -217,7 +219,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-n]');if(
  else if(a==='close'){stopScan();sheet=null}
  else if(a==='back'){stopScan();sheet.step='search';sheet.msg=''}
  else if(a==='rm'){const dd=ND(d);dd.items=dd.items.filter(i=>i.id!==b.dataset.id);touch(d)}
- else if(a==='pick'){const f=foodById(b.dataset.id)||(sheet.results||[]).find(x=>x.id===b.dataset.id);if(!f)return;sheet.food=f;if(f.part&&f.code)offComplete(f);const u=usual(f);sheet.g=u?String(u):f.por?String(f.por.g):'100';sheet.step='amount'}
+ else if(a==='pick'){const f=foodById(b.dataset.id)||(sheet.results||[]).find(x=>x.id===b.dataset.id);if(!f)return;sheet.food=f;if(f.part&&f.code)offComplete(f);const u=usual(f);sheet.g=String(defG(f));sheet.step='amount'}
  else if(a==='setmeal'){sheet.meal=b.dataset.m}
  else if(a==='gq'){sheet.g=b.dataset.v}
  else if(a==='addit'){if(sheet.food.part&&sheet.food.code&&!sheet.food.tried){offComplete(sheet.food).then(()=>b.click());return}const g=num(sheet.g);if(!g||g<=0){note('Menge eingeben');return}const it=itemFrom(sheet.food,g,sheet.meal),wb=d===today()?cheerFrom(d):null;ND(d).items.push(it);setTimeout(()=>cheerDiff(d,wb),0);remember(sheet.food);touch(d);shareOnAdd(sheet,it,d);sheet=null}

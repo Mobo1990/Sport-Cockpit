@@ -21,7 +21,7 @@ function health(m){if(!m||!m.success||!S.prof.name)return;const me='input_text.s
 function syncLater(){clearTimeout(syncT);if(HA.url&&HA.token)syncT=setTimeout(syncNow,1500)}
 function metaOf(){return{t:S.metaT,prof:S.prof,plan:S.plan,goal:S.goal,rest:S.rest,cgoal:S.cgoal,nut:{goal:S.nut.goal,gh:S.nut.gh||[],maint:S.nut.maint,gkg:S.nut.gkg,foods:S.nut.foods,meals:S.nut.meals,recent:S.nut.recent},drafts,draftT}}
 function merge(R){let changed=false;const m=R.sc_meta;
- if(m&&(m.t||0)>(S.metaT||0)){if(m.prof)S.prof=m.prof;Object.assign(S,{plan:m.plan||S.plan,goal:m.goal||S.goal,rest:m.rest||S.rest,cgoal:m.cgoal||S.cgoal,metaT:m.t});if(m.nut)Object.assign(S.nut,m.nut);changed=true}
+ if(m&&(m.t||0)>(S.metaT||0)){if(m.prof){S.prof=m.prof;if(profOK())obOpen=false}Object.assign(S,{plan:m.plan||S.plan,goal:m.goal||S.goal,rest:m.rest||S.rest,cgoal:m.cgoal||S.cgoal,metaT:m.t});if(m.nut)Object.assign(S.nut,m.nut);changed=true}
  if(m&&(m.draftT||0)>draftT){drafts=m.drafts||{};draftT=m.draftT;changed=true}
  const rs=R.sc_sessions;if(rs){const del=new Set([...(S.del||[]),...(rs.del||[])]),map=new Map();for(const s of [...(rs.list||[]),...S.sessions]){const o=map.get(s.id);if(!o||(s.t||0)>(o.t||0))map.set(s.id,s)}
   const list=[...map.values()].filter(s=>!del.has(s.id));if(list.length!==S.sessions.length||del.size!==(S.del||[]).length)changed=true;S.sessions=list;S.del=[...del]}

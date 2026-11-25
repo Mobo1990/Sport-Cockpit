@@ -931,3 +931,18 @@ input.sw:checked{background:var(--d-sage,#2f9e6e)}input.sw:checked::after{transf
 .wd:not(.on) .wdc{background:var(--acc)}
 .tri{width:.7em;height:.8em;vertical-align:-.05em;margin-right:.25em}
 b small.unit{font-size:.55em;font-weight:600;color:var(--mute);display:inline}
+/* Nutzertest: im Gym Mode Gewicht UND Wiederholungen ohne Scrollen sichtbar */
+.th-duo .gbody .gpic{width:72px}
+.th-duo .gbody h2{font-size:26px;margin:6px 0 4px}
+.th-duo .gtools{margin-top:6px}.th-duo .gtools button{min-height:34px}
+.th-duo .ghow{padding:8px 12px;margin:6px 0 4px}
+.th-duo .gsg{margin:4px 0}.th-duo .gwarm{margin:4px 0;padding:6px 10px}
+.th-duo .gset{margin:4px 0}.th-duo .gstep{margin:6px 0}
+.th-duo .gstep button{min-height:54px}.th-duo .gstep input{min-height:54px;font-size:34px}
+.th-duo .gplate{margin:0 0 2px}
+/* Gym Mode: eine Hauptaktion unten (Satz fertig / Nächste Übung), Übung wechseln mit ‹ › */
+.gf.g3{display:grid;grid-template-columns:56px minmax(0,1fr) 56px;gap:8px}
+.gf.g3 .gnavb{padding:0;font-size:24px}
+.th-duo .hlink.stale{background:var(--s1);color:var(--ink);box-shadow:var(--sh)}
+.dh .ptsl{margin-top:10px;background:var(--s2);border-radius:14px;padding:10px 12px;font-size:13px}
+.dh .ptsl b{font:700 15px var(--fh)}.dh .ptsl ul{margin:6px 0;padding-left:18px}.dh .ptsl p{margin:4px 0 0;color:var(--mute)}

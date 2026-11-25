@@ -154,7 +154,7 @@ function sheetRestore(p){const el=document.querySelector('.sheet:not(.ob) .sheet
  el.parentNode.classList.add('noanim');if(p.step===el.dataset.step)el.scrollTop=p.top;
  if(p.id){const i=document.getElementById(p.id);if(i&&document.activeElement!==i){i.focus({preventScroll:true});try{if(p.s!=null)i.setSelectionRange(p.s,p.e)}catch(x){}}}}
 function render(){const p=sheetSnap();renderCore();sheetRestore(p)}
-function renderCore(){memoReset();renderHead();const v=$('view');if(!profOK()){v.innerHTML=renderOnboarding();return}v.innerHTML=view==='home'?renderHome():view==='train'?renderTrain():view==='hist'?renderHist():view==='rec'?renderRec():view==='nut'?renderNut():view==='review'?renderReview():view==='rew'?renderRewards():renderPlan()+`<div class="actions"><button data-a="view" data-v="hist">Verlauf aller Einheiten</button><button data-a="view" data-v="review">Rückblick</button><button data-a="view" data-v="rew">Belohnungen</button></div>`+renderSettings()+renderAISettings();if(view==='nut')afterNut();
+function renderCore(){memoReset();renderHead();const v=$('view');if(!profOK()||obOpen){if(!profOK())obOpen=true;v.innerHTML=renderOnboarding();return}v.innerHTML=view==='home'?renderHome():view==='train'?renderTrain():view==='hist'?renderHist():view==='rec'?renderRec():view==='nut'?renderNut():view==='review'?renderReview():view==='rew'?renderRewards():renderPlan()+`<div class="actions"><button data-a="view" data-v="hist">Verlauf aller Einheiten</button><button data-a="view" data-v="review">Rückblick</button><button data-a="view" data-v="rew">Belohnungen</button></div>`+renderSettings()+renderAISettings();if(view==='nut')afterNut();
  if(view==='rec'){const s=$('chart');if(s){if(ro)ro.disconnect();ro=new ResizeObserver(drawChart);ro.observe(s)}}}
 
 function finish(){const dr=draftFor(day),ex=[],p0=dayScore(today()).pt;
@@ -219,3 +219,5 @@ document.addEventListener('input',ev=>{const t=ev.target,a=t.dataset.a;
 document.addEventListener('change',ev=>{const t=ev.target;if(t.dataset.a==='rec'){recEx=t.value;drawChart()}
  if(t.dataset.a==='pl'&&t.dataset.f!=='name'){const e=S.plan[day][+t.dataset.i];if(e.max<e.min)e.max=e.min;const d=t.closest('details');const sm=d&&d.querySelector('small');if(sm){const x=info(e);sm.textContent=`${x.sets} Sätze · ${x.min}–${x.max} Wdh. · +${fmt(x.step)} kg${x.vars.length>1?' · '+x.v:''}`}}});
 
+/* Zahlenfelder: beim Antippen alles markieren, damit neue Eingabe die alte ersetzt (Nutzertest: „2155 kg“) */
+document.addEventListener('focusin',ev=>{const t=ev.target;if(t.tagName==='INPUT'&&/^(decimal|numeric)$/.test(t.inputMode||t.getAttribute('inputmode')||''))setTimeout(()=>{try{t.select()}catch(e){}},0)});
