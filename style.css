@@ -925,3 +925,9 @@ input.sw:checked{background:var(--d-sage,#2f9e6e)}input.sw:checked::after{transf
 .exst{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--s2);font:700 14px var(--fh);color:var(--mute)}
 .exst.ok{background:var(--d-sage);color:#fff}
 .ex{position:relative}.excl{position:absolute;right:10px;top:10px;width:34px;height:34px;min-height:0;padding:0;border-radius:50%;background:var(--s2);border:0;box-shadow:none;font-size:16px;color:var(--mute);z-index:1}
+/* Wochenleiste im Training: lesbare Kürzel statt PLLEC */
+.wd b{font-size:13px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;display:flex;align-items:center;justify-content:center;gap:3px}
+.wdc{display:inline-block;width:6px;height:6px;border-radius:50%;background:#fff;opacity:.9;flex:0 0 6px}
+.wd:not(.on) .wdc{background:var(--acc)}
+.tri{width:.7em;height:.8em;vertical-align:-.05em;margin-right:.25em}
+b small.unit{font-size:.55em;font-weight:600;color:var(--mute);display:inline}

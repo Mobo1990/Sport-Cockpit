@@ -47,12 +47,12 @@ function renderHead(){document.body.className='v-'+view;document.documentElement
  document.querySelectorAll('[data-a=day]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.d===day));
  const mon=wk(Date.now()),todayK=new Date().toDateString();let w='';
  for(let i=0;i<7;i++){const d=new Date(mon);d.setDate(d.getDate()+i);const ss=S.sessions.filter(s=>new Date(s.date).toDateString()===d.toDateString());
-  w+=`<div class="wd${ss.length?' on':''}${d.toDateString()===todayK?' today':''}"><b>${ss.length?[...new Set(ss.flatMap(s=>[({push:'PU',pull:'PL',legs:'LE'})[s.day],(s.cardio&&s.cardio.length)?'C':''].filter(Boolean)))].join(''):'·'}</b><small>${['Mo','Di','Mi','Do','Fr','Sa','So'][i]}</small></div>`}
+  w+=`<div class="wd${ss.length?' on':''}${d.toDateString()===todayK?' today':''}"><b>${(()=>{if(!ss.length)return '·';const st=[...new Set(ss.filter(s=>s.ex&&s.ex.length).map(s=>({push:'Push',pull:'Pull',legs:'Legs'})[s.day]).filter(Boolean))],ca=ss.some(s=>s.cardio&&s.cardio.length);return (st.length>1?st.length+'×':st[0]||'Cardio')+(ca&&st.length?'<i class="wdc" aria-label="und Cardio"></i>':'')})()}</b><small>${['Mo','Di','Mi','Do','Fr','Sa','So'][i]}</small></div>`}
  $('week').innerHTML=w;
  const cnt={};S.sessions.forEach(s=>{if(!s.ex.length)return;const k=wk(s.date);cnt[k]=(cnt[k]||0)+1});
  let k=mon,st=0;if((cnt[k]||0)<S.goal)k=prevWk(k);while((cnt[k]||0)>=S.goal){st++;k=prevWk(k)}
  const wv=S.sessions.filter(s=>wk(s.date)===mon).reduce((a,s)=>a+vol(s),0),cmin=Math.round(S.sessions.filter(s=>wk(s.date)===mon).reduce((a,s)=>a+(s.cardio||[]).reduce((b,c)=>b+(+c.min||0),0),0));
- $('stats').innerHTML=`<div><b>${cnt[mon]||0} / ${S.goal}</b><small>Krafteinheiten diese Woche</small></div><div><b>${st}</b><small>Wochen in Folge im Ziel</small></div><div><b>${fmt(wv/1000)} t</b><small>bewegt diese Woche</small></div><div><b>${cmin} / ${S.cgoal} min</b><small>Cardio diese Woche</small></div>`;
+ $('stats').innerHTML=`<div><b>${cnt[mon]||0} / ${S.goal}</b><small>Krafteinheiten diese Woche</small></div><div><b>${st}</b><small>Wochen in Folge im Ziel</small></div><div><b>${fmt(wv/1000)}<small class="unit"> t</small></b><small>bewegt diese Woche</small></div><div><b>${cmin} / ${S.cgoal}<small class="unit"> min</small></b><small>Cardio diese Woche</small></div>`;
  document.querySelectorAll('[data-a=view]').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===view));{const nb=$('rwBadge');if(nb&&typeof rwOpen==='function')nb.hidden=!rwOpen()}
 }
 let exOpen=new Set();

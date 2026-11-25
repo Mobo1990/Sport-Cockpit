@@ -196,8 +196,12 @@ try:
         check(pg.is_visible(".board") and "Pauline" in pg.text_content(".board") and "Woche" in pg.text_content(".board"), "Anzeigetafel oben: du und Pauline mit Wochenpunkten")
         import base64
         open("/tmp/sc_face.png", "wb").write(base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAFklEQVR4nGNkYGBgYGBgYGBgYGBgAAAABQABkJ8yHQAAAABJRU5ErkJggg=="))
-        from PIL import Image as _Im
-        _i = _Im.new("RGB", (400, 200), (220, 40, 40)); _i.paste((40, 60, 220), (200, 0, 400, 200)); _i.save("/tmp/sc_face2.png")
+        import zlib, struct
+        def _png(w, h, px):
+            raw = b"".join(b"\x00" + b"".join(bytes(px(x, y)) for x in range(w)) for y in range(h))
+            ch = lambda t, d: struct.pack(">I", len(d)) + t + d + struct.pack(">I", zlib.crc32(t + d) & 0xffffffff)
+            return b"\x89PNG\r\n\x1a\n" + ch(b"IHDR", struct.pack(">IIBBBBB", w, h, 8, 2, 0, 0, 0)) + ch(b"IDAT", zlib.compress(raw)) + ch(b"IEND", b"")
+        open("/tmp/sc_face2.png", "wb").write(_png(400, 200, lambda x, y: (220, 40, 40) if x < 200 else (40, 60, 220)))
         pg.set_input_files(".board input[data-pic=file]", "/tmp/sc_face2.png"); pg.wait_for_timeout(600)
         check(pg.is_visible("#crop.on #cstage") and pg.is_visible("#czoom"), "Foto gewählt: Ausschnitt wählen (verschieben, zoomen)")
         bx = pg.locator("#cstage").bounding_box(); pg.mouse.move(bx["x"]+200, bx["y"]+140); pg.mouse.down(); pg.mouse.move(bx["x"]+20, bx["y"]+140, steps=8); pg.mouse.up()

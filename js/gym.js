@@ -33,7 +33,7 @@ function renderGym0(){if(!gym.open){gymEl.innerHTML='';gymEl.classList.remove('o
  ${S.prof.gnx!==false&&!allDone?`<div class="gnx"><small>Als Nächstes</small><b>${nx!=null?esc(list[nx].n):'Letzte Übung'}</b></div>`:''}
  <div class="gdots">${list.map((x,j)=>`<i class="${j===gym.i?'cur':''}${dr.ex[x.id].every(r=>r.done)?' ok':''}"></i>`).join('')}</div></header>
  <section class="gbody" id="gbody">${gym.anim&&mv?moveSvg(mv,'wofig gymfig',e.n):`<div class="gpic">${svg(picOf(e))}</div>`}
- <div class="gtools">${mv?`<button data-g="anim" aria-pressed="${!!gym.anim}">${gym.anim?'Bild zeigen':'▶ Bewegungsablauf'}</button>`:''}${!done&&nx!=null?`<button data-g="busy">Gerät besetzt</button>`:''}</div>
+ <div class="gtools">${mv?`<button data-g="anim" aria-pressed="${!!gym.anim}">${gym.anim?'Bild zeigen':'<svg class="tri" viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0L10 6L0 12z" fill="currentColor"/></svg> Bewegungsablauf'}</button>`:''}${!done&&nx!=null?`<button data-g="busy">Gerät besetzt</button>`:''}</div>
  <h2>${esc(e.n)}</h2>
  ${e.vars.length>1?`<div class="vars gv">${e.vars.map(v=>`<button data-a="var" data-e="${e.id}" data-v="${esc(v)}" aria-pressed="${v===e.v}">${esc(v)}</button>`).join('')}</div>`:''}
  <div class="ghow">${g?`<p class="gmu"><b>Trainiert:</b> ${esc(g.m)}</p>`:''}${gym.how&&e.t?`<p class="gtip">${esc(e.t)}</p>`:''}${gym.how&&g&&g.k?`<p class="gknee"><b>Knie schonen:</b> ${esc(g.k)}</p>`:''}
@@ -93,4 +93,4 @@ gymEl.addEventListener('touchend',ev=>{if(gx0==null)return;const dx=ev.changedTo
 setInterval(()=>{if(!gym.open)return;const el=$('grest'),l=Math.max(0,Math.round((tEnd-Date.now())/1000));if(el){el.textContent=`${Math.floor(l/60)}:${String(l%60).padStart(2,'0')}`;if(l<=0)renderGym()}},500);
 /* Einstieg: Knopf im Training-Tab und auf der Startseite */
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-gym]');if(!b)return;if(b.dataset.d)day=b.dataset.d;view='train';render();openGym()});
-const _renderBase=render;render=function(){_renderBase();if(view==='train'){const v=$('view');if(v){if(day!=='cardio'&&!v.querySelector('.gymgo'))v.insertAdjacentHTML('afterbegin',`<button class="primary gymgo" data-gym="1">▶ Gym Mode starten</button>`);}}renderGym()};
+const _renderBase=render;render=function(){_renderBase();if(view==='train'){const v=$('view');if(v){if(day!=='cardio'&&!v.querySelector('.gymgo'))v.insertAdjacentHTML('afterbegin',`<button class="primary gymgo" data-gym="1"><svg class="tri" viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0L10 6L0 12z" fill="currentColor"/></svg> Gym Mode starten</button>`);}}renderGym()};
