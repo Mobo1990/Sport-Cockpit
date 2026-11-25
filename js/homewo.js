@@ -51,21 +51,24 @@ const isHome=()=>!!S.prof&&S.prof.loc==='home';
    leichte Last wirkt, wenn die letzten Wiederholungen schwer werden): drei Ganzkörper-Einheiten A/B/C,
    jede mit Beinen/Po, Drücken, Ziehen und Rumpf. Schlüssel push/pull/legs bleiben für Wochenstreifen und Punkte. */
 const HOME_HOLD=/stütz$/;/* Halteübungen: keine Wiederholungen */
-const RUCK='Rucksack mit ca. 5 kg (5 volle 1-l-Flaschen)';
+const RUCK='Rucksack, wenn du magst (bis ca. 5 kg = 5 volle 1-l-Flaschen),';
 /* Deutsche Namen (Tester-Wunsch) → Strichmännchen aus der Bibliothek */
 {const M=MOVES,A={'Kniebeugen mit Rucksack':'Rucksack-Kniebeugen','Rudern an der Stange':'Stangen-Rudern','Po-Heben am Sofa':'Hip Thrust am Sofa','Band zum Gesicht ziehen':'Band-Face-Pull',
  'Ausfallschritt, Fuß auf dem Sofa':'Bulgarische Split-Squats','Band nach unten ziehen':'Band-Latzug','Band über Kopf drücken':'Band-Schulterdrücken','Fersen ranziehen (Handtuch)':'Handtuch-Beinbeuger',
  'Arme beugen mit Band':'Band-Bizepscurl','Auf die Stufe steigen':'Step-ups','Rudern mit Band':'Band-Rudern','Stuhl-Stütz':'Trizeps-Dips am Stuhl','Po-Heben am Boden':'Glute Bridges',
  'Seitschritte mit Band':'Band-Seitschritte','Rücken heben in Bauchlage':'Superman','Seitschritte im Stand':'Step-Jacks','Arme heben in Bauchlage':'Superman','Rudern mit Wasserflaschen':'gym:rudern',
  'Arme beugen mit Flaschen':'gym:curl','Liegestütze mit Po hoch':'Pike-Liegestütze','Kniebeugen bis zum Stuhl':'Stuhl-Kniebeugen'};for(const [n,k] of Object.entries(A))if(M[k])M[n]=M[k]}
+MOVES['Seitliches Beinheben']=MOVES['Seitliches Beinheben']||{dur:2.2,poses:[
+ {head:[46,108],neck:[58,112],hip:[100,116],elbowL:[60,120],handL:[50,121],elbowR:[80,112],handR:[96,114],kneeL:[126,118],footL:[152,119],kneeR:[126,116],footR:[152,116]},
+ {head:[46,108],neck:[58,112],hip:[100,116],elbowL:[60,120],handL:[50,121],elbowR:[80,112],handR:[96,114],kneeL:[126,118],footL:[152,119],kneeR:[124,104],footR:[148,92]}]};
 /* Übung: [Name, Kurz-Anleitung (1 Satz), Leichter]. Standard: ohne Geräte – Band und Stange nur, wenn vorhanden. */
 const WARM_Q=['Seitschritte im Stand',40,'Leise warm werden, Arme mit.'];
 const HOME={
  push:{n:'Ganzkörper A',k:'A',sub:'Beine · Rücken · Brust · Po · Bauch',warm:[WARM_Q,['Katze-Kuh',40,'Rücken rund und hohl.']],
-  circ:[['Kniebeugen mit Rucksack',`${RUCK} vor die Brust, Po nach hinten.`,'Ohne Rucksack, nur bis zum Stuhl.'],
+  circ:[['Kniebeugen mit Rucksack',`${RUCK} vor die Brust. Po nach hinten.`,'Ohne Rucksack, nur bis zum Stuhl.'],
    ['Rudern mit Wasserflaschen','Vorgebeugt, Rücken gerade, volle Flaschen zum Bauch ziehen.','Kleinere Flaschen.'],
    ['Liegestütze','Körper eine Linie, Brust Richtung Boden.','Hände aufs Sofa oder Knie ab.'],
-   ['Po-Heben am Sofa','Schultern ans Sofa, Rucksack auf die Hüfte, Hüfte hoch.','Ohne Rucksack.'],
+   ['Po-Heben am Sofa','Schultern ans Sofa, Hüfte hoch – mit Rucksack auf der Hüfte, wenn du magst.','Ohne Rucksack.'],
    ['Arme heben in Bauchlage','Bauchlage, Arme als Y anheben, kurz halten.','Nur ein Arm.'],
    ['Unterarmstütz','Körper eine Linie, Bauch fest.','Knie auf den Boden.']],
   cool:[['Brustdehnung links',30,'Unterarm an die Wand, Oberkörper wegdrehen.'],['Brustdehnung rechts',30,'Unterarm an die Wand, Oberkörper wegdrehen.'],['Kindhaltung',40,'Arme weit nach vorn, ruhig atmen.']]},
@@ -78,7 +81,7 @@ const HOME={
    ['Seitstütz','Hüfte hoch. Halbe Zeit je Seite.','Unteres Knie auf den Boden.']],
   cool:[['Quadrizepsdehnung links',30,'Ferse zum Po, an der Wand festhalten.'],['Quadrizepsdehnung rechts',30,'Ferse zum Po, an der Wand festhalten.'],['Trizepsdehnung links',25,'Ellbogen sanft nach hinten ziehen.'],['Trizepsdehnung rechts',25,'Ellbogen sanft nach hinten ziehen.']]},
  legs:{n:'Ganzkörper C',k:'C',sub:'Beine · Rücken · Arme · Po · Bauch',warm:[WARM_Q,['Schulterkreisen',40,'Große Kreise vor und zurück.']],
-  circ:[['Auf die Stufe steigen','Unterste Treppenstufe, ganz aufrichten, Seiten wechseln.','Am Geländer festhalten.'],
+  circ:[['Auf die Stufe steigen','Unterste Treppenstufe, langsam und leise, ganz aufrichten, Seiten wechseln.','Am Geländer festhalten.'],
    ['Rudern mit Wasserflaschen','Vorgebeugt, Rücken gerade, volle Flaschen zum Bauch ziehen.','Kleinere Flaschen.'],
    ['Stuhl-Stütz','Hände an die Kante eines festen Stuhls, Ellbogen nach hinten beugen.','Knie gebeugt, Füße näher.'],
    ['Po-Heben am Boden','Rückenlage, Füße nah am Po, Hüfte hoch.','Kleinere Bewegung.'],
@@ -122,7 +125,7 @@ function homeFinish(k){const d=k.slice(5);if(!HOME[d])return;const date=Date.now
 /* Abschluss: Punkte + Wochenstand zuerst, dann eine Frage „Wie war's?“, Wiederholungen nur auf Wunsch */
 let homeRepOpen=false;
 function homeDoneHtml(){if(!homeLast)return '';const s=S.sessions.find(x=>x.id===homeLast.id),pts=dayScore(today()).pt-homeLast.p0,w=homeWeek(),C=homeCirc(homeLast.d).slice(0,homeLen().e).filter(([n])=>!HOME_HOLD.test(n));
- return `<div class="hwsum"><b class="cond">+${Math.max(30,pts)}</b><span>Punkte · zählt wie Studio-Training</span><span>Diese Woche ${w.n} von ${w.g} – ${w.txt}</span></div>
+ return `<div class="hwsum"><b class="cond">+${Math.max(30,pts)}</b><span>Punkte · zählt wie Studio-Training</span><span>Diese Woche ${w.n} von ${w.g} – ${w.txt}</span>${typeof sharePartner==='function'&&sharePartner()?`<span>${esc(sharePartner())} sieht: „${esc(S.prof.name||'')} hat ${esc(HOME[homeLast.d].n)} (zu Hause) trainiert“</span>`:''}</div>
  <div class="hwfeel"><b>Wie war's?</b><div>${[['l','Zu leicht'],['m','Passt'],['h','Zu schwer']].map(([k,l])=>`<button data-hw="feel" data-v="${k}" aria-pressed="${s&&s.feel===k}">${l}</button>`).join('')}</div>
  ${s&&s.feel?`<small>${s.feel==='l'?'Gut – beim nächsten Mal wird es schneller etwas länger.':s.feel==='h'?'Okay – wir steigern langsamer. Nimm ruhig die leichtere Variante.':'Prima, genau richtig.'}</small>`:''}</div>
  ${homeRepOpen?`<div class="hwrep"><b>Wiederholungen der letzten Runde</b><small>Freiwillig. Leer lassen, was du nicht weißt.</small>
@@ -141,12 +144,12 @@ const homeLenHtml=d=>`<div class="hwlen" role="group" aria-label="Länge">${Obje
 /* Training-Tab für Heim-Training: kurz und übersichtlich */
 function homeTrainHtml(){const d=HOME[day]?day:'push',P=HOME[d],w=homeBuild(d),lv=homeLv(d),[ws,rs]=HOME_LV[lv],C=homeCirc(d).slice(0,homeLen().e),eq=homeEq(),wk_=homeWeek(),nx=homeNext();
  const all=C.map(c=>c[0]+c[1]).join(),need=[];if(/Rucksack/.test(all))need.push('Rucksack (ca. 5 kg)');if(/Flasche/.test(all))need.push('2 volle Wasserflaschen');if(/Sofa/.test(all))need.push('Sofa');if(/Stuhl/.test(all))need.push('fester Stuhl');if(/Handtuch/.test(all))need.push('Handtuch');if(/Stufe/.test(all))need.push('Treppenstufe');if(/Band/.test(all))need.push('Band');if(/Stange/.test(all))need.push('Stange');
- return `<section class="hwo"><p class="hwwk"><b>Diese Woche ${wk_.n} von ${wk_.g}</b> – ${wk_.txt}${nx!==d?` · laut Plan als Nächstes: <button class="glink" data-a="day" data-d="${nx}">${esc(HOME[nx].n)}</button>`:' · heute dran'}</p>
+ return `<section class="hwo"><p class="hwwk"><b>Diese Woche ${wk_.n} von ${wk_.g}</b> – ${wk_.txt}${nx!==d?`<br>Du hast ${esc(P.n)} gewählt – laut Plan wäre <button class="glink" data-a="day" data-d="${nx}">${esc(HOME[nx].n)}</button> dran. Beides ist okay.`:`<br>Heute dran: ${esc(P.n)}`}</p>
  <small>Zu Hause · ohne Studio · leise</small><h2>${esc(P.n)}</h2><p>${esc(P.sub)}</p>
  ${homeLenHtml(d)}
- <ol class="hwl">${C.map(([x,h])=>{const r=homeReps(x);return `<li>${moveSvg(x,'hwfig',x)}<div><b>${esc(x)}</b><span>${esc(h)}</span>${r.best?`<i class="hwrec">Rekord: ${r.best} Wiederholungen</i>`:''}</div></li>`}).join('')}</ol>
+ <ol class="hwl">${C.map(([x,h])=>{const r=homeReps(x);return `<li>${moveSvg(x,'hwfig',x)}<div><b>${esc(x)}</b><span>${esc(h)}</span>${HOME_HOLD.test(x)?'':r.best?`<i class="hwrec">Rekord: ${r.best} Wiederholungen</i>`:'<i class="hwnew">Neu – noch kein Rekord</i>'}</div></li>`}).join('')}</ol>
  <p class="hwnote"><b>Heute brauchst du:</b> Matte${need.length?', '+need.join(', '):''}.</p>
- <p class="hwnote">Die letzten 2–3 Wiederholungen jeder Übung sollen schwer sein. Bei Schmerz: aufhören. Jetzt ${ws} s pro Übung, ${rs} s Pause – nach 3 Trainings wird's etwas länger.</p>
+ <p class="hwnote">Die letzten 2–3 Wiederholungen jeder Übung sollen schwer sein. Bei Schmerz: aufhören. Jetzt ${ws} s pro Übung, ${rs} s Pause – nach 3 Trainings wird's etwas länger. Fortschritt misst Duo über deine Wiederholungen, nicht übers Rucksack-Gewicht.</p>
  <div class="hweq"><span>Hast du auch:</span><button data-hw="eq" data-v="band" aria-pressed="${eq.band}">Fitnessband</button><button data-hw="eq" data-v="pole" aria-pressed="${eq.pole}">feste Stange</button><button data-hw="say" aria-pressed="${homeSayOn()}">Übungen ansagen</button></div>
  <button class="primary hwgo" data-home="${d}">Training starten · ${w.min} min</button></section>`}
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-hw]');if(!b)return;const a=b.dataset.hw;
@@ -164,4 +167,7 @@ const homeDayName=d=>isHome()&&HOME[d]?HOME[d].n:DAYS[d].n;
 const _renderHeadHome=renderHead;renderHead=function(){_renderHeadHome();if(!isHome())return;
  document.querySelectorAll('[data-a=day]').forEach(b=>{const d=b.dataset.d;if(HOME[d])b.textContent=HOME[d].n.replace('Ganzkörper ','Tag ')});
  if(HOME[day]){$('dayName').textContent=HOME[day].n;$('daySub').textContent=HOME[day].sub}
- const nx=document.getElementById('nextDay');if(nx){const n=homeNext();nx.textContent=n===day?'Heute dran laut Plan':`Laut Plan als Nächstes: ${HOME[n].n}`}};
+ const nx=document.getElementById('nextDay');if(nx){const n=homeNext();nx.textContent=n===day?'Heute dran':`Laut Plan wäre ${HOME[n].n} dran`}};
+
+/* Training-Tab öffnen: zu Hause direkt den Tag, der laut Plan dran ist */
+document.addEventListener('click',ev=>{const b=ev.target.closest('[data-a=view][data-v=train]');if(b&&isHome()&&HOME[homeNext()])day=homeNext()},true);

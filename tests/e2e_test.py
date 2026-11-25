@@ -518,7 +518,7 @@ try:
           homeStart('legs');woFinish();const sum=/Punkte/.test(woEl.textContent)&&/Diese Woche/.test(woEl.textContent);homeRepOpen=true;woRender();const html=sum&&woEl.innerHTML.includes('data-hrep');document.querySelectorAll('[data-hrep]').forEach(i=>i.value='9');homeSaveReps();
           const last=homeReps('Po-Heben am Boden').last;homeStart('legs');const st=woSteps(),i=st.findIndex(x=>x[0]==='Po-Heben am Boden');wo.i=i;woRender();const t=woEl.textContent;woClose();
           S.sessions=S.sessions.slice(0,n0);S.prof=P;persist();render();
-          return [len[0]<=12,len[1]>=20&&len[1]<=26,len[2]>=28,!c.some(x=>/Band|Stange/.test(x))&&c.includes('Arme heben in Bauchlage')&&c2.includes('Rudern an der Stange')&&c2.includes('Band zum Gesicht ziehen'),html,last===9,/Letztes Mal 9 Wdh/.test(t)&&/Leichter:/.test(t)].join('|')})()""")
+          return [len[0]<=12,len[1]>=20&&len[1]<=26,len[2]>=28,!c.some(x=>/Band|Stange/.test(x))&&c.includes('Arme heben in Bauchlage')&&c2.includes('Rudern an der Stange')&&c2.includes('Band zum Gesicht ziehen'),html,last===9,/Letztes Mal 9 Wiederholungen/.test(t)&&/Leichter:/.test(t)].join('|')})()""")
         check(r == "true|true|true|true|true|true|true", "Zu Hause: kurz/normal/lang, Ersatz ohne Band und Stange, Wiederholungen eintragen → 'Letztes Mal' + 'Leichter' im Training (" + r + ")")
         print("Rückblick & Coach")
         pg.click(".nav >> text=Mehr"); pg.click("text=Rückblick"); pg.wait_for_timeout(200)

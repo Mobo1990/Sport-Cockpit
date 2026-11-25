@@ -1009,3 +1009,7 @@ html.kbopen .nav{display:none}
 .hwok{width:100%;margin-top:8px}.hwl li{padding:6px 0}.hwl .hwfig{flex-basis:84px;width:84px;height:60px}
 .tiles+.hwlen{margin:-4px 0 14px}
 .hwrec{display:block!important}.tiles+.hwlen{margin:8px 0 16px!important}
+/* Abschluss und lange Inhalte: im Overlay scrollen statt überlappen */
+.wo .wobody{overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0}.wo .wobody:has(.hwsum){justify-content:flex-start}
+.hwl b{font-size:17px}.hwl span{font-size:14px}.hwnew{display:block;font-style:normal;font-size:12px;font-weight:700;color:var(--mute);margin-top:3px}
+.woring b{white-space:nowrap}.wonx{text-wrap:balance}

@@ -9,10 +9,11 @@ function renderOnboarding(){const P=S.prof,f=(k,l,ph,mode='decimal')=>`<div><lab
  return `<div class="sheet ob"><div class="sheetin"><h2>Willkommen bei Duo</h2>
  <div class="obxfer"><b>Du hattest Duo schon?</b><p>Füge deinen Verbindungscode ein – Profil, Training und Essen kommen dann aus Home Assistant zurück.</p><div class="obrow"><input id="obCode" placeholder="duo-ha:…" autocapitalize="off" autocorrect="off" aria-label="Verbindungscode"><button class="primary" data-s="hapaste">Einfügen</button></div></div>
  <p class="tip" style="padding:0 0 12px">Bevor es losgeht, brauchen wir ein paar Angaben. Daraus berechnet die App deinen Kalorienbedarf und dein Proteinziel. Alles kannst du später unter „Mehr“ ändern.</p>
- <div class="cform">${f('name','Dein Name','z. B. Michell','text')}<div><label>Geschlecht</label><div class="vars">${[['m','Mann'],['w','Frau']].map(([k,l])=>`<button data-ps="sex" data-v="${k}" aria-pressed="${P.sex===k}">${l}</button>`).join('')}</div></div>
+ <div class="cform"><div class="full obloc"><label>Wo trainierst du?</label><div class="vars">${[['','Im Studio'],['home','Zu Hause']].map(([k,l])=>`<button data-obloc="${k}" aria-pressed="${S.prof&&S.prof.loc!=null&&S.prof.loc===k}">${l}</button>`).join('')}</div></div>
+ <div class="full"><label>Knie oder Rücken empfindlich?</label><div class="vars">${[['','Nein'],['1','Ja, schonend bitte']].map(([k,l])=>`<button data-obknee="${k}" aria-pressed="${S.prof&&S.prof.knee!=null&&(S.prof.knee||'')===k}">${l}</button>`).join('')}</div></div>
+ ${f('name','Dein Name','z. B. Michell','text')}<div><label>Geschlecht</label><div class="vars">${[['m','Mann'],['w','Frau']].map(([k,l])=>`<button data-ps="sex" data-v="${k}" aria-pressed="${P.sex===k}">${l}</button>`).join('')}</div></div>
  ${f('year','Geburtsjahr','z. B. 1990','numeric')}${f('height','Größe (cm)','z. B. 182','numeric')}${f('weight','Gewicht (kg)','z. B. 85')}
  <div class="full"><label>Dein Alltag</label><div class="vars">${[[1.4,'Büro, wenig Bewegung'],[1.55,'Büro + Training 3–4×'],[1.7,'Aktiv / Training 5–6×'],[1.85,'Körperlich harte Arbeit']].map(([v,l])=>`<button data-ps="act" data-v="${v}" aria-pressed="${P.act==v}">${l}</button>`).join('')}</div></div>
- <div class="full"><label>Wo trainierst du?</label><div class="vars">${[['','Im Studio'],['home','Zu Hause']].map(([k,l])=>`<button data-obloc="${k}" aria-pressed="${((S.prof&&S.prof.loc)||'')===k}">${l}</button>`).join('')}</div></div>
  <div class="full"><label>Dein Ziel</label><div class="vars">${[['aufbau','Muskeln aufbauen'],['fit','Fitter werden'],['halten','Gewicht halten'],['defi','Abnehmen']].map(([k,l])=>`<button data-n="goal" data-v="${k}" aria-pressed="${S.nut.goal===k}">${l}</button>`).join('')}</div></div></div>
  <div class="calc" id="pcalc">${pcalc()}</div>
  <button class="primary" data-ob="go" style="width:100%">Los geht’s</button><p class="tip" id="obmsg" style="padding:8px 0 0"></p></div></div>`}
@@ -21,3 +22,4 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-ob]');if
 
 
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-obloc]');if(!b)return;S.prof=S.prof||{};S.prof.loc=b.dataset.obloc;if(b.dataset.obloc==='home'&&S.goal===4)S.goal=3;/* Ganzkörper: 3× pro Woche reicht */b.parentNode.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
+document.addEventListener('click',ev=>{const b=ev.target.closest('[data-obknee]');if(!b)return;S.prof=S.prof||{};S.prof.knee=b.dataset.obknee;b.parentNode.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
