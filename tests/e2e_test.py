@@ -218,10 +218,10 @@ try:
         print("Unterwegs")
         pg.click(".nav >> text=Kalender"); pg.wait_for_timeout(200)
         check(pg.is_visible(".cgrid") and pg.locator(".cgrid .cc.tdy").count() == 1 and pg.locator(".cgrid .cc .cdots .cd.me").count() == pg.evaluate("new Set(S.sessions.map(s=>iso(s.date)).filter(d=>d.slice(0,7)===today().slice(0,7))).size"), "Kalender-Tab: Monat mit heute, Trainingstage markiert")
-        check(pg.is_visible(".awq [data-aw=quick]") and "Gerade ist nichts eingetragen" in pg.text_content(".away.list") and "liest keinen Kalender" in pg.text_content(".calpriv"), "Kalender: Schnellwahl 'Ich bin unterwegs', Hinweis zur Privatsphäre")
-        pg.click("[data-aw=new]"); pg.fill("#awWas", "tecis Workshop"); pg.fill("#awOrt", "Köln")
+        check(pg.is_visible(".awq [data-aw=quick]") and "Gerade ist nichts eingetragen" in pg.text_content(".away.list") and "liest keinen Kalender" in pg.text_content(".awpriv"), "Kalender: Schnellwahl 'Ich bin unterwegs', Hinweis zur Privatsphäre")
+        pg.click("[data-aw=new]"); pg.click("[data-aw=more]"); pg.fill("#awWas", "tecis Workshop"); pg.fill("#awOrt", "Köln")
         tm = (datetime.date.today() + datetime.timedelta(days=1)).isoformat(); pg.fill("#awVon", tm); pg.dispatch_event("#awVon", "change"); pg.fill("#awVt", "08:00")
-        pg.click("[data-aw=night][data-v='1']"); pg.wait_for_timeout(100)
+        pg.check("#awN"); pg.wait_for_timeout(100)
         check(pg.input_value("#awWas") == "tecis Workshop" and pg.input_value("#awBis") == (datetime.date.today() + datetime.timedelta(days=2)).isoformat(), "Übernachtung: Ende springt auf den Folgetag, Eingaben bleiben")
         pg.fill("#awBt", "18:00"); pg.click("[data-aw=save]"); pg.wait_for_timeout(1500)
         calls = [json.loads(l) for l in open("/tmp/calls.log")]

@@ -23,7 +23,7 @@ function awayTag(a){const now=Date.now(),td=today(),tm=iso(Date.now()+864e5);if(
  const sd=iso(a.start);return sd===td?['heute','Heute']:sd===tm?['morgen','Morgen']:['',''];}
 function awayRow(a,del){const me=slugN(a.wer)===slugN(S.prof.name||''),[tc,tl]=awayTag(a);
  return `<li class="awr${tc?' '+tc:''}">${avaHtml(a.wer||'?',me,'sm')}<div><b>${esc(a.wer||'?')}${a.ort?` · ${esc(a.ort)}`:''}</b><span>${esc(a.was)}</span><small>${esc(awayWhen(a))}</small></div>
- <div class="awm">${tl?`<em>${tl}</em>`:''}${a.nacht?'<i>Über Nacht</i>':''}${del?`<button class="awx${awayDel===a.uid?' danger':''}" data-aw="del" data-uid="${esc(a.uid)}" aria-label="Löschen">${awayDel===a.uid?'Löschen?':'×'}</button>`:''}</div></li>`}
+ <div class="awm">${tl?`<em>${tl}</em>`:''}${a.nacht?'<i>Über Nacht</i>':''}${del?`<button class="awx${awayDel===a.uid?' danger':''}" data-aw="del" data-uid="${esc(a.uid)}" aria-label="Löschen">${awayDel===a.uid?'Wirklich löschen?':'Löschen'}</button>`:''}</div></li>`}
 const awayNext=days=>AWAY.filter(a=>a.stop>=Date.now()&&a.start<=Date.now()+days*864e5);
 /* Karte auf der Startseite – nur sichtbar, wenn in den nächsten 14 Tagen jemand weg ist */
 function awayHomeHtml(){if(!HA.url||!HA.token)return '';const l=awayNext(14);if(!l.length)return '';
@@ -31,19 +31,18 @@ function awayHomeHtml(){if(!HA.url||!HA.token)return '';const l=awayNext(14);if(
 /* Eigene Seite: Liste + Eintragen */
 function renderAway(){const l=AWAY.filter(a=>a.stop>=Date.now()),f=awayForm,td=today();
  if(!HA.url||!HA.token)return `<section class="meal"><header><h3>Unterwegs</h3></header><p class="tip" style="padding:0">Dafür muss die App mit Home Assistant verbunden sein (Mehr → Home Assistant).</p></section>`;
- return `<h3 class="calh">Unterwegs</h3>
- ${f?`<section class="away form"><div class="awh"><b>Neuer Eintrag</b><button data-aw="cancel">Abbrechen</button></div>
-  <div class="cform"><div class="full"><label for="awWas">Was (freiwillig)</label><input id="awWas" placeholder="z. B. Dienstreise" value="${esc(f.was)}"></div>
-  <div class="full"><label for="awOrt">Wo (freiwillig)</label><input id="awOrt" placeholder="z. B. Köln" value="${esc(f.ort)}"></div>
-  <div><label for="awVon">Von</label><input id="awVon" type="date" value="${esc(f.von)}"></div><div><label for="awVt">Uhrzeit</label><input id="awVt" type="time" value="${esc(f.vt)}"></div>
-  <div><label for="awBis">Bis</label><input id="awBis" type="date" value="${esc(f.bis)}"></div><div><label for="awBt">Uhrzeit</label><input id="awBt" type="time" value="${esc(f.bt)}"></div>
-  <div class="full"><label>Über Nacht weg?</label><div class="vars"><button data-aw="night" data-v="1" aria-pressed="${!!f.nacht}">Ja, Übernachtung</button><button data-aw="night" data-v="" aria-pressed="${!f.nacht}">Nein</button></div></div></div>
-  <small class="pknee">Ohne Uhrzeit gilt der ganze Tag. ${esc(sharePartner()||'Dein Partner')} bekommt sofort eine Nachricht und am Vorabend eine Erinnerung.</small>
+ return `<h3 class="calh">Demnächst unterwegs</h3>
+ ${f?`<section class="away form"><div class="awh"><b>Unterwegs eintragen</b><button data-aw="cancel">Abbrechen</button></div>
+  <div class="cform"><div><label for="awVon">Von</label><input id="awVon" type="date" value="${esc(f.von)}"></div><div><label for="awBis">Bis</label><input id="awBis" type="date" value="${esc(f.bis)}"></div>
+  ${f.more?`<div><label for="awVt">ab Uhrzeit</label><input id="awVt" type="time" value="${esc(f.vt)}"></div><div><label for="awBt">bis Uhrzeit</label><input id="awBt" type="time" value="${esc(f.bt)}"></div>
+  <div class="full"><label for="awWas">Anlass (freiwillig)</label><input id="awWas" placeholder="z. B. Dienstreise" value="${esc(f.was)}"></div><div class="full"><label for="awOrt">Ort (freiwillig)</label><input id="awOrt" placeholder="z. B. Köln" value="${esc(f.ort)}"></div>`:''}</div>
+  <label class="awnight"><input type="checkbox" id="awN" ${f.nacht?'checked':''}> Mit Übernachtung</label>
+  ${f.more?'':'<button class="glink" data-aw="more">+ Uhrzeit, Anlass oder Ort (freiwillig)</button>'}
   <div class="actions"><button class="primary" data-aw="save">Eintragen</button></div></section>`
  :''}
  <section class="away list">${l.length?`<ul>${l.map(a=>awayRow(a,true)).join('')}</ul>`:'<p class="tip" style="padding:0">Gerade ist nichts eingetragen.</p>'}</section>
- <section class="calpriv"><b>Was ${esc(sharePartner()||'dein Partner')} sieht</b><p>Duo liest keinen Kalender von deinem Handy. ${esc(sharePartner()||'Dein Partner')} sieht nur, was du hier einträgst – Anlass und Ort sind freiwillig.</p><p>Eine Nachricht beim Eintragen und eine Erinnerung am Vorabend um 19 Uhr. Sonst nichts.</p></section>`}
-function awayRead(){const g=id=>($(id)||{}).value||'';if(awayForm)Object.assign(awayForm,{was:g('awWas'),ort:g('awOrt'),von:g('awVon'),vt:g('awVt'),bis:g('awBis'),bt:g('awBt')})}
+ `}
+function awayRead(){const g=(id,k)=>{const e=$(id);return e?e.value:(awayForm[k]||'')};if(awayForm){Object.assign(awayForm,{was:g('awWas','was'),ort:g('awOrt','ort'),von:g('awVon','von'),vt:g('awVt','vt'),bis:g('awBis','bis'),bt:g('awBt','bt')});const n=$('awN');if(n)awayForm.nacht=n.checked}}
 async function awaySave(){if(!awayForm.quick)awayRead();const f=awayForm,was=f.was.trim(),ort=f.ort.trim();
  if(!f.von){note('Startdatum angeben');return}const bis=f.bis||f.von;if(bis<f.von){note('Ende liegt vor dem Start');return}
  const timed=!!(f.vt||f.bt),sd={summary:`${S.prof.name}: ${was||'unterwegs'}`};if(ort)sd.location=ort;if(f.nacht)sd.description='Übernachtung';
@@ -53,21 +52,23 @@ async function awaySave(){if(!awayForm.quick)awayRead();const f=awayForm,was=f.w
  try{const r=await haCall([{type:'call_service',domain:'calendar',service:'create_event',target:{entity_id:AWAY_E},service_data:sd}]);if(!r[0]||!r[0].success)throw new Error((r[0]&&r[0].error&&r[0].error.message)||'Kalender fehlt');
   const a=awayParse({summary:sd.summary,location:ort,description:sd.description,start:timed?f.von+'T'+(f.vt||'00:00'):f.von,end:timed?bis+'T'+(f.bt||'23:59'):sd.end_date});
   tell(`${S.prof.name} ist unterwegs`,`${was?was+(ort?' in '+ort:'')+'\n':ort?'in '+ort+'\n':''}${awayWhen(a)}${f.nacht?' · über Nacht weg':''}`);
-  awayForm=null;await awayFetch();const nu=AWAY.filter(x=>x.s===a.s&&calMe(x)).pop();awayUndo=nu?{uid:nu.uid,txt:awayWhen(a)+(f.nacht?' · über Nacht':'')}:null;clearTimeout(awayUndoT);awayUndoT=setTimeout(()=>{awayUndo=null;if(view==='cal')render()},15000);note('Eingetragen');render()}catch(e){note('Nicht eingetragen: '+e.message)}}
+  awayForm=null;await awayFetch();const nu=AWAY.filter(x=>x.s===a.s&&calMe(x)).pop();awayUndo=nu?{uid:nu.uid,msg:`${S.prof.name} ist unterwegs: ${was?was+(ort?' in '+ort:'')+', ':ort?'in '+ort+', ':''}${awayWhen(a)}${f.nacht?', über Nacht weg':''}`}:null;clearTimeout(awayUndoT);awayUndoT=setTimeout(()=>{awayUndo=null;if(view==='cal')render()},15000);note('Eingetragen');render()}catch(e){note('Nicht eingetragen: '+e.message)}}
 async function awayRemove(uid,quiet){const a=AWAY.find(x=>x.uid===uid);if(!a)return;note('Lösche …');
  try{const r=await haCall([{type:'calendar/event/delete',entity_id:AWAY_E,uid}]);if(!r[0]||!r[0].success)throw new Error('nicht gefunden');
   if(!quiet&&a.stop>=Date.now())tell(`${a.wer}: Termin fällt weg`,`${a.was}${a.ort?' in '+a.ort:''} · ${awayWhen(a)} ist gestrichen.`);
   AWAY=AWAY.filter(x=>x.uid!==uid);try{localStorage.setItem('sc.away',JSON.stringify(AWAY))}catch(e){}awayDel='';note('Gelöscht');render()}catch(e){note('Löschen nicht möglich: '+e.message)}}
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-aw]');if(!b)return;const a=b.dataset.aw;
- if(a==='new'){const t=today();awayForm={was:'',ort:'',von:t,vt:'',bis:t,bt:'',nacht:false};awayDel='';render();setTimeout(()=>{const i=$('awWas');if(i)i.focus()},30)}
+ if(a==='new'){const t=today();awayForm={was:'',ort:'',von:t,vt:'',bis:t,bt:'',nacht:false};awayDel='';render()}
  else if(a==='cancel'){awayForm=null;render()}
+ else if(a==='more'){awayRead();awayForm.more=true;render()}
  else if(a==='night'){awayRead();awayForm.nacht=!!b.dataset.v;if(awayForm.nacht&&awayForm.bis===awayForm.von)awayForm.bis=iso(new Date(awayForm.von+'T12:00').getTime()+864e5);render()}
  else if(a==='save')awaySave();
  else if(a==='quick')awayQuick(b.dataset.d||iso(Date.now()+(+b.dataset.n)*864e5),!!b.dataset.night);
  else if(a==='undo'){const u=awayUndo;awayUndo=null;if(u)awayRemove(u.uid,true).then(()=>tell(`${S.prof.name}: doch nicht unterwegs`,'Der eben gemeldete Eintrag ist zurückgenommen.'))}
  else if(a==='del'){if(awayDel===b.dataset.uid)awayRemove(b.dataset.uid);else{awayDel=b.dataset.uid;render()}}});
 /* Von-Datum geändert: Bis mitziehen, wenn es davor läge */
-document.addEventListener('change',ev=>{if(ev.target.id!=='awVon'||!awayForm)return;awayRead();if(!awayForm.bis||awayForm.bis<awayForm.von){awayForm.bis=awayForm.von;const b=$('awBis');if(b)b.value=awayForm.von}});
+document.addEventListener('change',ev=>{if(ev.target.id==='awN'&&awayForm){awayRead();if(awayForm.nacht&&awayForm.bis<=awayForm.von){awayForm.bis=iso(new Date(awayForm.von+'T12:00').getTime()+864e5);const b=$('awBis');if(b)b.value=awayForm.bis}return}
+ if(ev.target.id==='awBis'&&awayForm){awayRead();if(awayForm.bis>awayForm.von){awayForm.nacht=true;const n=$('awN');if(n)n.checked=true}return}if(ev.target.id!=='awVon'||!awayForm)return;awayRead();if(!awayForm.bis||awayForm.bis<awayForm.von){awayForm.bis=awayForm.von;const b=$('awBis');if(b)b.value=awayForm.von}});
 
 /* ===================== KALENDER: Trainingstage beider + Unterwegs in einem Monat =====================
    Wünsche aus der Tester-Befragung: beide auf einen Blick, Wochenstand in Klartext, Unterwegs mit einem Tipp,
@@ -87,10 +88,14 @@ function tdPartner(){const p=(typeof partners!=='undefined'?partners:[]).find(x=
 function awayDaysWeek(mon,me=true){let n=0;for(let i=0;i<7;i++){const d=iso(mon+i*864e5+12*36e5);if(calAway(d).some(a=>calMe(a)===me))n++}return n}
 function weekGoal(mon){return Math.max(1,S.goal-(awayDaysWeek(mon)>=2?1:0))}
 function calHead(){const mon=wk(Date.now()),mine=S.sessions.filter(s=>wk(s.date)===mon&&s.ex.length).length,g=weekGoal(mon),pf=tdPartner(),pn=sharePartner();
- let pk=0,both=0;for(let i=0;i<7;i++){const d=iso(mon+i*864e5+12*36e5);if(d>today())break;const pt=pf?pf(d):'',mt=calSess(d).length>0;if(pt==='k')pk++;if(pt&&mt)both++}
- const ad=awayDaysWeek(mon);
- return `<div class="calsum"><div><b class="cond">${mine} / ${g}</b><span>deine Krafteinheiten diese Woche</span></div>${pf?`<div class="pa"><b class="cond">${pk}</b><span>${esc(pn)}</span></div><div class="we"><b class="cond">${both}</b><span>Tage zusammen trainiert</span></div>`:''}</div>
- ${g<S.goal?`<p class="calfair">Ziel diese Woche ${g} statt ${S.goal} – du bist ${ad} Tage unterwegs. Deine Serie bleibt so fair.</p>`:''}`}
+ let pk=0,mk=0;for(let i=0;i<7;i++){const d=iso(mon+i*864e5+12*36e5);if(d>today())break;if(pf&&pf(d))pk++;if(calSess(d).length)mk++}
+ /* gemeinsam: Tage im laufenden Monat, an denen beide trainiert haben */
+ let both=0;if(pf){const t=new Date();for(let k=1;k<=t.getDate();k++){const d=iso(new Date(t.getFullYear(),t.getMonth(),k,12));if(pf(d)&&calSess(d).length)both++}}
+ const ok=mine>=g,ad=awayDaysWeek(mon),pw=(typeof partners!=='undefined'?partners:[]).find(x=>x.name),wp=typeof weekScore==='function'?weekScore():0;
+ const aw=AWAY.filter(a=>calMe(a)&&a.stop>=mon&&a.start<mon+7*864e5).map(awayWhen).join(', ');
+ return `<section class="calsum"><div class="cs1"><span class="cst${ok?' ok':''}">${ok?'Im Plan':'Noch '+(g-mine)}</span><b class="cond">${mine} von ${g}</b><span>Krafteinheiten diese Woche</span></div>
+ ${pn?`<div class="cs2"><p><i class="cd me"></i>Du: <b>${mk}×</b> trainiert${wp?` · ${fmt(wp)} Punkte`:''}</p><p><i class="cd pa"></i>${esc(pn)}: <b>${pk}×</b> trainiert${pw&&pw.wp!=null?` · ${fmt(pw.wp)} Punkte`:''}</p>${both?`<p class="csw">Diesen Monat ${both}× am selben Tag trainiert</p>`:''}</div>`:''}</section>
+ ${g<S.goal?`<p class="calfair"><b>Diese Woche reichen ${g} statt ${S.goal}.</b> Du bist ${ad} Tage unterwegs (${esc(aw)}). Regel für euch beide: Ab 2 Tagen unterwegs in einer Woche zählt eine Einheit weniger. Du verlierst nichts.</p>`:''}`}
 function calDayHtml(d){const ss=calSess(d),aw=calAway(d),dt=new Date(d+'T12:00'),pf=tdPartner(),pt=pf?pf(d):'',pn=sharePartner()||'Partner';
  const head=dt.toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'});
  const tr=ss.map(s=>{const sets=s.ex.reduce((a,x)=>a+x.sets.length,0),cm=(s.cardio||[]).reduce((a,c)=>a+(+c.min||0),0);
@@ -103,23 +108,24 @@ function calDayHtml(d){const ss=calSess(d),aw=calAway(d),dt=new Date(d+'T12:00')
 function renderCal(){const now=new Date();if(!calM)calM={y:now.getFullYear(),m:now.getMonth()};if(!calSel)calSel=today();
  const {y,m}=calM,first=new Date(y,m,1),off=(first.getDay()+6)%7,n=new Date(y,m+1,0).getDate(),td=today(),pf=tdPartner(),pn=sharePartner();
  let cells='';for(let i=0;i<off;i++)cells+='<span class="cc pad"></span>';
- for(let k=1;k<=n;k++){const d=iso(new Date(y,m,k,12)),ss=calSess(d),aw=calAway(d),mk=ss.some(s=>s.ex.length)?'k':ss.length?'c':'',pt=pf?pf(d):'';
+ for(let k=1;k<=n;k++){const d=iso(new Date(y,m,k,12)),ss=calSess(d),aw=calAway(d),mk=ss.length?'k':'',pt=pf?pf(d):'';
   const awMe=aw.some(calMe),awPa=aw.some(a=>!calMe(a)),nacht=aw.some(a=>a.nacht&&iso(a.start)!==iso(a.stop)&&d<iso(a.stop));
-  cells+=`<button class="cc${d===td?' tdy':''}${d===calSel?' sel':''}${mk&&pt?' both':''}${d>td?' fut':''}" data-cal="${d}" aria-label="${k}.${m+1}.${mk?', du trainiert':''}${pt?', '+esc(pn)+' trainiert':''}${awMe?', du unterwegs':''}${awPa?', '+esc(pn||'Partner')+' unterwegs':''}"><b>${k}</b><span class="cdots">${mk?`<i class="cd me${mk==='c'?' ring':''}"></i>`:''}${pt?`<i class="cd pa${pt==='c'?' ring':''}"></i>`:''}</span>${awMe||awPa?`<span class="cbar">${awMe?'<s class="me"></s>':''}${awPa?'<s class="pa"></s>':''}</span>`:''}${nacht?'<em class="cn" title="Übernachtung"></em>':''}</button>`}
+  cells+=`<button class="cc${d===td?' tdy':''}${d===calSel?' sel':''}${mk&&pt?' both':''}${d>td?' fut':''}" data-cal="${d}" aria-label="${k}.${m+1}.${mk?', du trainiert':''}${pt?', '+esc(pn)+' trainiert':''}${awMe?', du unterwegs':''}${awPa?', '+esc(pn||'Partner')+' unterwegs':''}"><b>${k}</b><span class="cdots">${mk?'<i class="cd me"></i>':''}${pt?'<i class="cd pa"></i>':''}</span>${awMe||awPa?`<span class="cbar">${awMe?'<s class="me"></s>':''}${awPa?'<s class="pa"></s>':''}</span>`:''}</button>`}
  return `<section class="hero2"><div><p class="hk">Training und Unterwegs</p><h2>Kalender</h2></div></section>
  ${calHead()}${awayQuickHtml()}
  <section class="away cal"><div class="calnav"><button data-calm="-1" aria-label="Vormonat">‹</button><b>${CALMON[m]} ${y}</b><button data-calm="1" aria-label="Nächster Monat">›</button></div>
  <div class="cgrid">${['Mo','Di','Mi','Do','Fr','Sa','So'].map(x=>`<span class="cwd">${x}</span>`).join('')}${cells}</div>
- <div class="clegend"><span><i class="cd me"></i>${esc(S.prof.name||'Du')} Kraft</span><span><i class="cd me ring"></i>Cardio</span>${pn?`<span><i class="cd pa"></i>${esc(pn)}</span>`:''}${pn?'<span><b class="cboth"></b>beide trainiert</span>':''}<span><s class="me"></s>du weg</span>${pn?`<span><s class="pa"></s>${esc(pn)} weg</span>`:''}<span><em class="cn"></em>über Nacht</span></div></section>
+ <div class="clegend"><span><i class="cd me"></i>Du hast trainiert</span>${pn?`<span><i class="cd pa"></i>${esc(pn)} hat trainiert</span>`:''}<span><s class="me"></s><s class="pa"></s>Strich = unterwegs</span></div><p class="cltap">Tag antippen für Einzelheiten.</p></section>
  ${calDayHtml(calSel)}
  ${renderAway()}`}
 /* Unterwegs mit einem Tipp */
 function awayQuickHtml(){if(!HA.url||!HA.token)return '';const pn=sharePartner()||'Dein Partner';
- if(awayUndo)return `<section class="awok"><b>Eingetragen</b><span>${esc(awayUndo.txt)} · ${esc(pn)} bekommt eine Nachricht.</span><button data-aw="undo">Rückgängig</button></section>`;
- return `<section class="awq"><b>Ich bin unterwegs</b><div class="awqb"><button data-aw="quick" data-n="0">Heute</button><button data-aw="quick" data-n="1">Morgen</button><button data-aw="quick" data-n="1" data-night="1">Morgen mit Übernachtung</button><button class="ghost" data-aw="new">Anderer Zeitraum …</button></div></section>`}
+ if(awayUndo)return `<section class="awok"><b>Eingetragen ✓</b><p>${esc(pn)} bekommt jetzt diese Nachricht:</p><q>${esc(awayUndo.msg)}</q><button data-aw="undo">Rückgängig machen</button></section>`;
+ return `<section class="awq"><b>Ich bin unterwegs</b><div class="awqb"><button class="primary" data-aw="quick" data-n="0">Heute</button><button class="primary" data-aw="quick" data-n="1">Morgen</button><button data-aw="quick" data-n="1" data-night="1">Morgen + Übernachtung</button><button data-aw="new">Anderer Zeitraum</button></div>
+ <p class="awpriv">Ein Tipp genügt. ${esc(pn)} sieht nur den Zeitraum – kein Anlass, kein Ort, außer du trägst ihn selbst ein. Duo liest keinen Kalender von deinem Handy.</p></section>`}
 async function awayQuick(von,night){const bis=night?iso(new Date(von+'T12:00').getTime()+864e5):von;awayForm={was:'',ort:'',von,vt:'',bis,bt:'',nacht:!!night,quick:true};await awaySave()}
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-cal],[data-calm]');if(!b)return;
  if(b.dataset.cal){calSel=b.dataset.cal}else{let mm=calM.m+(+b.dataset.calm),yy=calM.y;if(mm<0){mm=11;yy--}if(mm>11){mm=0;yy++}calM={y:yy,m:mm}}render()});
 /* Startseite an eigenen Unterwegs-Tagen: Hotel-Workout als Angebot (gleiche Punkte wie jedes erste Kurz-Workout) */
 function awayHotelHtml(){if(!calAway(today()).some(calMe))return '';const done=((S.nut.days[today()]||{}).ch||[]).some(x=>/^wo_/.test(x));if(done)return '';
- return `<section class="awhotel"><div><b>Unterwegs? 7 Minuten im Hotelzimmer</b><span>Ohne Geräte${kneeOn()?', knieschonend':''} · +${WO_FREE} Punkte wie jedes Kurz-Workout</span></div><button class="primary" data-wo="zirkel">Starten</button></section>`}
+ return `<section class="awhotel"><div><small>Du bist heute unterwegs</small><b>6 Minuten im Hotelzimmer</b><span>Ohne Geräte, ohne Sprünge – schont Knie und Rücken · +${WO_FREE} Punkte wie jedes Kurz-Workout</span></div><button class="primary" data-wo="core">Starten</button></section>`}

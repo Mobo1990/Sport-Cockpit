@@ -1026,3 +1026,17 @@ html.kbopen .nav{display:none}
 .calnone{margin:4px 0;color:var(--mute);font-size:15px}.calgo{width:100%;margin-top:10px;min-height:46px;font-size:16px}
 .calpriv{background:var(--s2);border-radius:16px;padding:12px 14px;margin:12px 0 24px}.calpriv b{font:800 17px var(--fh)}.calpriv p{margin:6px 0 0;font-size:15px;color:var(--mute)}
 .awhotel{display:flex;align-items:center;gap:12px;background:var(--s1);border-radius:18px;box-shadow:var(--sh);padding:14px;margin:0 0 12px}.awhotel div{flex:1}.awhotel b{display:block;font:800 17px var(--fh)}.awhotel span{font-size:14px;color:var(--mute)}
+/* Runde 2: einfacher, größer, Klartext */
+.calsum{flex-direction:column}.calsum .cs1{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}.calsum .cs1 b{font-size:30px}.calsum .cs1>span:last-child{font-size:16px;color:var(--mute)}
+.cst{order:-1;width:100%;font:700 14px var(--fh);color:var(--acc)}.cst.ok{color:var(--d-saged,#3E5A4C)}
+.cs2 p{margin:4px 0;font-size:16px;display:flex;align-items:center;gap:8px}.cs2 .cd{width:12px;height:12px}.csw{color:var(--d-saged,#3E5A4C);font-weight:600}
+.calfair{font-size:16px;line-height:1.45}
+.awqb{display:grid;grid-template-columns:1fr 1fr;gap:8px}.awqb button{min-height:54px;font-size:17px;padding:8px 10px}
+.awpriv{margin:10px 0 0;font-size:15px;color:var(--mute);line-height:1.45}
+.awok{display:block}.awok p{margin:6px 0 4px;font-size:15px}.awok q{display:block;quotes:none;background:var(--s1);border-radius:12px;padding:10px 12px;font-size:16px;margin-bottom:10px}.awok button{width:100%;min-height:48px;font-size:16px}
+.clegend{font-size:15px;gap:8px 16px}.clegend .cd{width:11px;height:11px}.clegend s{width:14px;height:5px}.cltap{margin:8px 0 0;font-size:14px;color:var(--mute)}
+.cdots .cd{width:9px;height:9px}
+.awnight{display:flex;align-items:center;gap:10px;font-size:17px;margin:12px 0 4px}.awnight input{width:24px;height:24px}
+.awx{min-height:40px!important;padding:6px 12px!important;font-size:14px!important;width:auto!important}
+.awhotel small{display:block;font:700 13px var(--fh);color:var(--acc);letter-spacing:.04em;text-transform:uppercase}
+.calsum .cs2 b{display:inline;font-size:inherit;line-height:inherit}.cs2 p{flex-wrap:wrap;gap:4px 8px}
