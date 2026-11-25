@@ -727,6 +727,8 @@ try:
         _bad = [f for f in ['index.html', 'style.css', 'sw.js'] + glob.glob(os.path.join(_root, 'js', '*.js')) if _re.search(r'^(<{7}|={7}|>{7})( |$)', open(os.path.join(_root, f), encoding='utf-8').read(), _re.M)]
         check(not _bad, "Keine Merge-Konfliktmarker in ausgelieferten Dateien" + ("" if not _bad else ": " + ", ".join(_bad)))
         check(pg.locator("main h1").count() == 1 and pg.locator("nav.nav[aria-label] [role=tablist] [role=tab]").count() == 6 and pg.locator("section[role=button]").count() == 0, "Barrierefreiheit: Seitenüberschrift, Navigation als Landmarke, Tabs in Tabliste")
+        r = pg.evaluate("""(()=>{const o=location.reload;let n=0;try{document.querySelector('#recv')&&document.querySelector('#recv').classList.add('on');const a=swAutoReload();document.querySelector('#recv').classList.remove('on');return [a,swPend].join(',')}catch(e){return 'err:'+e}})()""")
+        check(r == "false,true", "Update: neue Version lädt nicht mitten im Rezept/Workout neu, sondern beim nächsten Öffnen (" + r + ")")
         check(not errs, "Keine JavaScript-Fehler" + ("" if not errs else ": " + "; ".join(errs)))
         b.close()
 finally:
