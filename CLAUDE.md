@@ -17,7 +17,7 @@ Live: https://mobo1990.github.io/Sport-Cockpit/ (GitHub Pages, Branch `main`, Or
 - HA-Seite (nicht im Repo, in Michells HA angelegt): `input_text.sport_cockpit_<name>` (Tageswerte-JSON),
   `input_number.sport_cockpit_<name>_{schritte,aktiv_kcal,gewicht,trainingsminuten}` (Apple Health per Kurzbefehl),
   Skript `script.sport_cockpit_meldung` (Push an Partner), Liste `todo.sport_cockpit_geteiltes_essen` (geteiltes Essen, Beschreibung = JSON),
-  `rest_command.sport_cockpit_food_search` (Lebensmittelsuche), `script.sport_cockpit_health` (Apple-Health-Werte),
+  `rest_command.sport_cockpit_food_search` (Lebensmittelsuche), `rest_command.sport_cockpit_rezepte` / `sport_cockpit_rezept` (Chefkoch-Suche/-Rezept, `js/recipes.js`), `input_text.sport_cockpit_<name>_tage` (Trainingstage für den Partner-Kalender), Kalender `calendar.unterwegs` (Unterwegs-Einträge), `script.sport_cockpit_health` (Apple-Health-Werte),
   `script.sport_cockpit_sprache` (Siri-Diktat -> To-do-Liste, {kind:"say"}), Automation „Sport Cockpit – Tagesauswertung 22 Uhr“.
 - Service Worker `sw.js`: bei jeder Änderung an ausgelieferten Dateien `VERSION` hochzählen und neue Dateien in `SHELL` eintragen.
 
