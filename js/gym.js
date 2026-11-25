@@ -36,7 +36,7 @@ function renderGym0(){if(!gym.open){gymEl.innerHTML='';gymEl.classList.remove('o
  <div class="gtools">${mv?`<button data-g="anim" aria-pressed="${!!gym.anim}">${gym.anim?'Bild zeigen':'<svg class="tri" viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0L10 6L0 12z" fill="currentColor"/></svg> Bewegungsablauf'}</button>`:''}${!done&&nx!=null?`<button data-g="busy">Gerät besetzt</button>`:''}</div>
  <h2>${esc(e.n)}</h2>
  ${e.vars.length>1?`<div class="vars gv">${e.vars.map(v=>`<button data-a="var" data-e="${e.id}" data-v="${esc(v)}" aria-pressed="${v===e.v}">${esc(v)}</button>`).join('')}</div>`:''}
- <div class="ghow">${g?`<p class="gmu"><b>Trainiert:</b> ${esc(g.m)}</p>`:''}${gym.how&&e.t?`<p class="gtip">${esc(e.t)}</p>`:''}${gym.how&&g&&g.k?`<p class="gknee"><b>Knie schonen:</b> ${esc(g.k)}</p>`:''}
+ <div class="ghow">${g?`<p class="gmu"><b>Trainiert:</b> ${esc(g.m)}</p>`:''}${kneeOn()&&g&&g.k?`<p class="gknee on"><b>Knie schonen:</b> ${esc(g.k)}</p>`:''}${gym.how&&e.t&&!(kneeOn()&&g&&g.k)?`<p class="gtip">${esc(e.t)}</p>`:''}${gym.how&&g&&g.k&&!kneeOn()?`<p class="gknee"><b>Knie schonen:</b> ${esc(g.k)}</p>`:''}
  ${g?`<button class="glink" data-g="how" aria-expanded="${!!gym.how}">${gym.how?'Anleitung ausblenden':'Anleitung und Tipps'} ›</button>${gym.how?`<ol class="gsteps">${g.s.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}`:''}</div>
  <p class="gsg">${sg?esc(sg.txt):`Ziel: ${e.sets} × ${e.min}–${e.max} Wdh.`}${!sg&&first&&startKg(e)?` · Start ${fmt(startKg(e))} kg${/Kurzhantel/.test(e.v)?' je Hand':''}${isA(e.v)?' Hilfe':''}`:''}</p>
  ${warm?`<p class="gwarm"><b>Erst aufwärmen:</b> 10–12 Wdh. ${isBar(e)?'mit leerer Stange (20 kg)':`mit ${fmt(r25(kg/2))} kg`}, zählt nicht.</p>`:''}
@@ -78,7 +78,7 @@ gymEl.addEventListener('click',ev=>{const b=ev.target.closest('[data-g]');if(!b)
   if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();const r=rows[k];r.kg=kg!=null?String(kg).replace('.',','):'0';r.reps=String(rp);r.done=true;r.at=Date.now();gym.last=k;gym.edit=null;startT(S.rest);
   const key=vkey(e),b0=best(key),m=e1(kg||0,rp);if(!isA(e.v)&&b0>0&&m>b0+0.01&&m>Math.max(0,...rows.filter((x,j)=>j!==k&&x.done).map(x=>e1(num(x.kg)||0,num(x.reps)||0))))cheer({title:'Neuer Bestwert!',sub:`${vname(e)}: ${fmt(kg)} kg × ${rp}`});saveDrafts()}
  else if(a==='rpe'){gymStore();const r=dr.ex[b.dataset.e][+b.dataset.i];r.rpe=r.rpe===b.dataset.r?'':b.dataset.r;saveDrafts()}
- else if(a==='edit'){gymStore();const j=+b.dataset.i;gym.edit=gym.edit===j?null:j}
+ else if(a==='edit'){gymStore();const j=+b.dataset.i;gym.edit=gym.edit===j?null:j;setTimeout(()=>{const e2=gymEl.querySelector('.gedit');if(e2)e2.scrollIntoView({block:'center',behavior:'smooth'})},50)}
  else if(a==='ecancel'){gym.edit=null}
  else if(a==='esave'){const r=dr.ex[e.id][gym.edit];if(!r)return;const kg=num($('gekg').value),rp=Math.round(num($('gerp').value)||0);if(!rp){note('Wiederholungen eintragen');return}
   r.kg=kg!=null?String(kg).replace('.',','):'0';r.reps=String(rp);gym.edit=null;saveDrafts()}

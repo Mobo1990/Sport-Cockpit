@@ -31,7 +31,7 @@ function renderHome(){weeklyCheck();const d=today(),sc=dayScore(d),g=sc.g,t=sc.t
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-h]');if(!b)return;const a=b.dataset.h,d=today(),wb=/^(water|wmlok|steps)$/.test(a)?cheerFrom(d):null;
  if(a==='train'){day=b.dataset.d;view='train'}
  else if(a==='meal'){view='nut';nDate=d;sheet={meal:b.dataset.m,step:'search',q:'',focus:true}}
- else if(a==='w'){const w=num($('hW').value);if(w&&w>30&&w<300){ND(d).w=w;ND(d).wsrc='';touch(d)}else{note('Gewicht in kg eingeben');return}}
+ else if(a==='w'){const w=num($('hW').value);if(w&&w>30&&w<300){ND(d).w=w;ND(d).wsrc='';touch(d);note(`Gewicht gespeichert: ${fmt(w)} kg`)}else{note('Gewicht in kg eingeben');return}}
  else if(a==='water'){const dd=ND(d),v=+b.dataset.v;dd.water=Math.max(0,(dd.water||0)+v);if(v>0)dd.wlast=v;touch(d)}
  else if(a==='wml'){wml=!wml;render();if(wml)setTimeout(()=>{const i=$('wMl');if(i)i.focus()},30);return}
  else if(a==='wmlok'){const v=Math.round(num($('wMl').value)||0);if(v<10||v>3000){note('Menge in ml eingeben (10–3000)');return}const dd=ND(d);dd.water=(dd.water||0)+v;dd.wlast=v;wml=false;touch(d)}

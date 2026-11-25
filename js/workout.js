@@ -45,4 +45,4 @@ function woRender(){if(!wo){woEl.classList.remove('on');woEl.innerHTML='';return
  <div class="gfoot"><button data-wo-a="pause">${wo.paused?'Weiter':'Pause'}</button><button class="primary" data-wo-a="skip">Überspringen ›</button></div>`;woUpd()}
 document.addEventListener('click',ev=>{const s=ev.target.closest('[data-wo]');if(s){ev.stopPropagation();woStart(s.dataset.wo,s.dataset.woc);return}
  const b=ev.target.closest('[data-wo-a]');if(!b||!wo)return;const a=b.dataset.woA;
- if(a==='close')woClose();else if(a==='pause'){wo.paused=!wo.paused;wo.last=Date.now();woRender()}else if(a==='skip')woNext();else if(a==='knee'){wo.knee=!wo.knee;woRender()}},true);
+ if(a==='close'){if(!wo.done&&wo.i>0&&!confirm('Workout wirklich abbrechen? Es zählt dann nicht.'))return;woClose()}else if(a==='pause'){wo.paused=!wo.paused;wo.last=Date.now();woRender()}else if(a==='skip')woNext();else if(a==='knee'){wo.knee=!wo.knee;woRender()}},true);

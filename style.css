@@ -946,3 +946,9 @@ b small.unit{font-size:.55em;font-weight:600;color:var(--mute);display:inline}
 .th-duo .hlink.stale{background:var(--s1);color:var(--ink);box-shadow:var(--sh)}
 .dh .ptsl{margin-top:10px;background:var(--s2);border-radius:14px;padding:10px 12px;font-size:13px}
 .dh .ptsl b{font:700 15px var(--fh)}.dh .ptsl ul{margin:6px 0;padding-left:18px}.dh .ptsl p{margin:4px 0 0;color:var(--mute)}
+/* Nutzertest 2: Gewicht auf der Startseite, lesbarere Hinweise */
+.dh .wt{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:8px;align-items:center;margin-top:10px;background:var(--s2);border-radius:14px;padding:8px 10px}
+.dh .wt label{font:600 14px var(--fb)}.dh .wt input{min-height:40px;text-align:right;font:700 18px var(--fh);max-width:110px;justify-self:end}.dh .wt span{color:var(--mute)}.dh .wt button{min-height:40px;padding:0 14px}
+.chkn,.pknee,.gknee{font-size:13px!important}
+.th-duo .chkn,.th-duo .pknee,.th-duo .gknee{color:#5E534D}
+.gknee.on{background:#E3ECE6;border-radius:10px;padding:6px 10px;margin-top:6px}

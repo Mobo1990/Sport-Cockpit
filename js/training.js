@@ -43,7 +43,7 @@ function lastDay(){const s=[...S.sessions].filter(s=>s.day!=='cardio'&&DAYS[s.da
 
 function renderHead(){document.body.className='v-'+view;document.documentElement.classList.toggle('me-w',!!S.prof&&S.prof.sex==='w');const br=document.querySelector('.brand');if(br)br.textContent='DUO'+(S.prof&&S.prof.name?' · '+S.prof.name.toUpperCase():'');
  $('dayName').textContent=DAYS[day].n;$('daySub').textContent=DAYS[day].sub;
- const ld=lastDay();$('nextDay').textContent=ld?`Als Nächstes dran: ${DAYS[DAYS[ld].nx].n}`:'Los geht’s mit Push';
+ const ld=lastDay();$('nextDay').textContent=ld?`Als Nächstes dran: ${DAYS[DAYS[ld].nx].n}`:'Tipp: Starte mit Push';
  document.querySelectorAll('[data-a=day]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.d===day));
  const mon=wk(Date.now()),todayK=new Date().toDateString();let w='';
  for(let i=0;i<7;i++){const d=new Date(mon);d.setDate(d.getDate()+i);const ss=S.sessions.filter(s=>new Date(s.date).toDateString()===d.toDateString());
@@ -154,7 +154,7 @@ function sheetRestore(p){const el=document.querySelector('.sheet:not(.ob) .sheet
  el.parentNode.classList.add('noanim');if(p.step===el.dataset.step)el.scrollTop=p.top;
  if(p.id){const i=document.getElementById(p.id);if(i&&document.activeElement!==i){i.focus({preventScroll:true});try{if(p.s!=null)i.setSelectionRange(p.s,p.e)}catch(x){}}}}
 function render(){const p=sheetSnap();renderCore();sheetRestore(p)}
-function renderCore(){memoReset();renderHead();const v=$('view');if(!profOK()||obOpen){if(!profOK())obOpen=true;v.innerHTML=renderOnboarding();return}v.innerHTML=view==='home'?renderHome():view==='train'?renderTrain():view==='hist'?renderHist():view==='rec'?renderRec():view==='nut'?renderNut():view==='review'?renderReview():view==='rew'?renderRewards():renderPlan()+`<div class="actions"><button data-a="view" data-v="hist">Verlauf aller Einheiten</button><button data-a="view" data-v="review">Rückblick</button><button data-a="view" data-v="rew">Belohnungen</button></div>`+renderSettings()+renderAISettings();if(view==='nut')afterNut();
+function renderCore(){memoReset();renderHead();const v=$('view');if(!profOK()||obOpen){if(!profOK())obOpen=true;v.innerHTML=renderOnboarding();return}v.innerHTML=view==='home'?renderHome():view==='train'?renderTrain():view==='hist'?renderHist():view==='rec'?renderRec():view==='nut'?renderNut():view==='review'?renderReview():view==='rew'?renderRewards():renderSettings()+renderPlan()+`<div class="actions"><button data-a="view" data-v="hist">Verlauf aller Einheiten</button><button data-a="view" data-v="review">Rückblick</button><button data-a="view" data-v="rew">Belohnungen</button></div>`+renderAISettings();if(view==='nut')afterNut();
  if(view==='rec'){const s=$('chart');if(s){if(ro)ro.disconnect();ro=new ResizeObserver(drawChart);ro.observe(s)}}}
 
 function finish(){const dr=draftFor(day),ex=[],p0=dayScore(today()).pt;

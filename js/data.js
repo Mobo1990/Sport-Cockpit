@@ -96,7 +96,7 @@ const CAT={
  revfly:{n:'Reverse Flys',d:'pull',p:'lateral',v:['Maschine','Kabelzug','Kurzhantel'],t:'Hintere Schulter: Arme seitlich nach hinten, ohne Schwung.'},
  curl:{n:'Bizeps-Curls',d:'pull',p:'curl',v:['Langhantel','SZ-Stange','Kurzhantel','Kabelzug'],t:'Ellbogen fixiert, oben kurz anspannen, langsam ablassen.'},
  hammer:{n:'Hammer Curls',d:'pull',p:'curl',v:['Kurzhantel','Kabelzug Seil'],t:'Neutraler Griff, Daumen zeigen nach oben.'},
- squat:{n:'Kniebeugen',d:'legs',p:'squat',v:['Langhantel','Multipresse','Goblet Kurzhantel'],t:'Knie über die Zehen, mindestens bis Oberschenkel parallel.'},
+ squat:{n:'Kniebeugen',d:'legs',p:'squat',v:['Langhantel','Multipresse','Goblet Kurzhantel'],t:'Knie zeigen in Richtung Zehen, Fersen am Boden, mindestens bis Oberschenkel parallel.'},
  rdl:{n:'Rumänisches Kreuzheben',d:'legs',p:'hinge',v:['Langhantel','Kurzhantel'],t:'Hüfte nach hinten, Stange am Bein entlang, Rücken gerade.'},
  kreuz:{n:'Kreuzheben',d:'legs',p:'hinge',v:['Langhantel','Trap Bar'],t:'Stange über Mittelfuß, aus den Beinen drücken.'},
  presse:{n:'Beinpresse',d:'legs',p:'legpress',v:['45° Maschine','Horizontal'],t:'Füße schulterbreit, Knie nicht ganz durchstrecken.'},
@@ -110,7 +110,7 @@ const MAP={bank:{chest:1,triceps:.5,shoulders:.5},schraeg:{chest:1,shoulders:.5,
 const BIG=new Set(['bank','schraeg','schulter','rudern','squat','rdl','kreuz','presse','klimm']);
 const isA=k=>/assist/i.test(String(k));
 const r25=x=>Math.max(0,Math.round(x/2.5)*2.5);
-function plates(kg){let side=(kg-20)/2;if(side<=0)return null;const out=[];for(const p of [25,20,15,10,5,2.5,1.25]){while(side>=p-1e-9){out.push(p);side-=p}}return side>0.01?null:out.map(fmt).join(' + ')}
+function plates(kg){let side=(kg-20)/2;if(side<=0)return null;const out=[];for(const p of [25,20,15,10,5,2.5,1.25]){while(side>=p-1e-9){out.push(p);side-=p}}return side>0.01?null:out.map(x=>String(x).replace('.',',')).join(' + ')}
 const mk=(id,sets,min,max,step)=>({id,sets,min,max,step,v:CAT[id].v[0]});
 const DEF={push:[mk('bank',4,6,10,2.5),mk('schraeg',3,8,12,2),mk('schulter',3,8,12,2),mk('seit',3,12,15,1),mk('dips',3,8,12,2.5),mk('trizeps',3,10,15,2.5),mk('fly',3,12,15,2.5)],
  pull:[mk('klimm',4,6,10,2.5),mk('rudern',3,8,12,2.5),mk('latzug',3,10,12,2.5),mk('face',3,12,15,2.5),mk('curl',3,8,12,2.5),mk('hammer',3,10,12,1),mk('revfly',3,12,15,1)],

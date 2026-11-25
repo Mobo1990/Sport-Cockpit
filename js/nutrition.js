@@ -11,7 +11,7 @@ function lastWeight(before){const ks=Object.keys(S.nut.days).filter(k=>S.nut.day
 function bmr(w){const P=S.prof,a=P.year?new Date().getFullYear()-P.year:null;if(!P.height||!a)return null;return 10*w+6.25*P.height-5*a+(P.sex==='w'?-161:5)}
 /* Ziele: Kalorien-Zuschlag zum Erhaltungsbedarf. „Fitter werden“ = leichtes Defizit.
    Das Ziel gilt ab dem Tag, an dem es gewählt wurde (S.nut.gh) – frühere Tage behalten ihr altes Ziel und ihre Punkte. */
-const GOAL_ADD={aufbau:300,halten:0,fit:-250,defi:-450},GOAL_N={aufbau:'Aufbau',halten:'Halten',fit:'Fitter werden',defi:'Definieren'};
+const GOAL_ADD={aufbau:300,halten:0,fit:-250,defi:-450},GOAL_N={aufbau:'Muskeln aufbauen',halten:'Gewicht halten',fit:'Fitter werden',defi:'Abnehmen'};
 function goalAt(d){let g=null;for(const x of S.nut.gh||[])if(x.d<=d)g=x.g;return g||S.nut.goal}
 function setGoal(v){const N=S.nut,t=today();if(N.goal===v)return;N.gh=(N.gh||[]).filter(x=>x.d!==t);if(!N.gh.length)N.gh.push({d:'0000-00-00',g:N.goal});N.gh.push({d:t,g:v});N.goal=v;S.metaT=Date.now();persist()}
 /* Bereich für volle Kalorien-Punkte als Hinweis im Essen-Tab */
@@ -64,7 +64,7 @@ function renderNut(){if(!nDate)nDate=today();const d=nDate,g=goals(d),t=totals(d
  <div class="wrow"><span class="water">${fmt((day.water||0)/1000)} l Wasser</span><button data-n="water" data-v="250">+ 250 ml</button><button data-n="water" data-v="750">+ 0,75 l</button><button class="ghost" data-n="water" data-v="-250">−</button></div>
  ${ws.length>1?`<div class="fig" style="min-height:200px"><svg id="wchart" role="img" aria-label="Gewichtsverlauf"></svg></div>`:''}</section>
  <details class="meal nset"><summary><h3>Ziele einstellen</h3><span>${fmt(g.kcal)} kcal · ${g.p} g Protein</span></summary>
- <div class="vars" style="margin:8px 0">${[['aufbau','Aufbau (+300)'],['halten','Halten'],['fit','Fitter werden (−250)'],['defi','Definieren (−450)']].map(([k,l])=>`<button data-n="goal" data-v="${k}" aria-pressed="${S.nut.goal===k}">${l}</button>`).join('')}</div>
+ <div class="vars" style="margin:8px 0">${[['aufbau','Muskeln aufbauen (+300 kcal)'],['halten','Gewicht halten'],['fit','Fitter werden (−250 kcal)'],['defi','Abnehmen (−450 kcal)']].map(([k,l])=>`<button data-n="goal" data-v="${k}" aria-pressed="${S.nut.goal===k}">${l}</button>`).join('')}</div>
  <div class="settings" style="margin:8px 0"><div><label for="maint">Erhaltungsbedarf (kcal)</label><input id="maint" inputmode="numeric" data-n="maint" placeholder="${g.maint} (geschätzt)" value="${S.nut.maint||''}"></div><div><label for="gkg">Protein pro kg Körpergewicht</label><input id="gkg" inputmode="decimal" data-n="gkg" value="${fmt(S.nut.gkg)}"></div></div>
  <p class="tip" style="padding:0">${g.bmr?`Aus deinem Profil berechnet (Grundumsatz ${fmt(Math.round(g.bmr))} kcal × Aktivität ${fmt(S.prof.act)}). Eigene Angabe überschreibt das.`:'Profil unter „Mehr“ ausfüllen für eine genaue Berechnung – sonst grob 32 kcal pro kg.'} Fett 27 % der Kalorien, Rest Kohlenhydrate.</p></details>`;
  if(sheet)h+=renderSheet();
