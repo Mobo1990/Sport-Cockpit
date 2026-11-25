@@ -258,6 +258,9 @@ try:
             try: pg.wait_for_function("(document.getElementById('gplate')||{}).textContent.includes('pro Seite 25 + 5')", timeout=2000); ok = True; break
             except Exception: pass
         check(ok, "Scheiben pro Seite bei Langhantel (" + str(pg.text_content("#gplate")) + ")")
+        w0 = pg.evaluate("(S.nut.days[today()]||{}).water||0"); pg.click("#gym [data-g=water]"); pg.wait_for_timeout(150)
+        check(pg.evaluate("S.nut.days[today()].water") == w0 + 500 and pg.input_value("#gkg") == "80" and "Wasser" in pg.text_content(".gwater"), "Gym Mode: 0,5 l trinken eintragen, Eingabe bleibt")
+        pg.click("#gym [data-g=wundo]"); pg.wait_for_timeout(150); check(pg.evaluate("S.nut.days[today()].water") == w0, "Gym Mode: Trinken zurücknehmen")
         pg.evaluate("renderGym()"); check(pg.input_value("#gkg") == "80", "Eingetipptes Gewicht bleibt nach Neuaufbau (z. B. Pausenende)")
         pg.fill("#grp", "8")
         pg.evaluate("document.getElementById('gbody').scrollTop=150"); sc0 = pg.evaluate("document.getElementById('gbody').scrollTop")

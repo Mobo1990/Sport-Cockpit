@@ -958,3 +958,4 @@ b small.unit{font-size:.55em;font-weight:600;color:var(--mute);display:inline}
 .bdet{background:var(--s1);border-radius:var(--r);box-shadow:var(--sh);padding:12px 14px;margin:-4px 0 10px;font-size:14px}
 .bdrow{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;margin-bottom:8px}.bdrow div{background:var(--s2);border-radius:8px;padding:4px 0}.bdrow small{display:block;font-size:11px;color:var(--mute)}.bdrow b{font:700 16px var(--fh)}
 .bdet p{margin:6px 0 0}.bfair{font-size:13px;color:var(--mute)}
+.gwater{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0 4px;padding:10px 12px;background:var(--s1);border-radius:14px;box-shadow:var(--sh);font-size:14px;color:var(--mute)}.gwater b{color:var(--ink);font-family:var(--fh);font-size:17px}.gwater div{display:flex;gap:6px}.gwater button{min-height:40px;padding:6px 12px;font-size:14px;white-space:nowrap}

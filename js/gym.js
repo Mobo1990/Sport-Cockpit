@@ -1,6 +1,9 @@
 /* Sport Cockpit – Gym Mode: eine Übung im Vollbild, große Knöpfe, wischen */
 'use strict';
 let gym={open:false,i:0,last:null};
+/* Trinken während des Trainings: eine Zeile unten im Gym Mode, zählt fürs Wasserziel */
+function gymWaterHtml(){const day=S.nut.days[today()]||{},w=day.water||0,wg=waterGoal();
+ return `<div class="gwater"><span><b>${fmt(w/1000)}</b> / ${fmt(wg/1000)} l Wasser${w>=wg?' · Ziel geschafft':''}</span><div><button data-g="water" data-v="500">+ 0,5 l</button>${w&&day.wlast?`<button class="ghost" data-g="wundo" aria-label="Letzte Menge zurücknehmen">zurück</button>`:''}</div></div>`}
 const gymEl=(()=>{const d=document.createElement('div');d.id='gym';d.className='gym';d.setAttribute('role','dialog');d.setAttribute('aria-label','Gym Mode');d.setAttribute('aria-modal','true');document.body.appendChild(d);return d})();
 function gymRow(e,dr){const rows=dr.ex[e.id];let k=rows.findIndex(r=>!r.done);return{rows,k}}
 function gymDefaults(e,rows,k){const sg=sugg(e),r=rows[k]||{},prev=rows.slice(0,k).filter(x=>x.done).pop();
@@ -52,7 +55,7 @@ function renderGym0(){if(!gym.open){gymEl.innerHTML='';gymEl.classList.remove('o
  <div class="gsets">${rows.map((r,j)=>`<span data-g="edit" data-i="${j}" role="button" tabindex="0" class="${r.done?'ok':''}${j===k?' cur':''}${j===ed?' ed':''}">${j+1}: ${r.done?fmt(num(r.kg)||0)+'×'+r.reps:'–'}</span>`).join('')}</div>
  ${ed!=null?(rows[ed].done?`<div class="gedit"><b>Satz ${ed+1} ändern</b><div class="gerow"><label>${A?'kg Hilfe':'kg'}<input id="gekg" inputmode="decimal" value="${fmt(num(rows[ed].kg)||0)}"></label><label>Wdh.<input id="gerp" inputmode="numeric" value="${esc(rows[ed].reps)}"></label></div>
   <div class="gnav"><button class="primary" data-g="esave">Speichern</button><button data-g="edel">Satz löschen</button><button data-g="ecancel">Abbrechen</button></div></div>`
-  :`<div class="gedit"><b>Satz ${ed+1} ist noch offen</b><div class="gnav"><button data-g="edel">Satz entfernen</button><button data-g="ecancel">Abbrechen</button></div></div>`):`<p class="gtap">Tipp: Auf einen Satz tippen, um ihn zu ändern oder zu löschen.</p>`}</section>
+  :`<div class="gedit"><b>Satz ${ed+1} ist noch offen</b><div class="gnav"><button data-g="edel">Satz entfernen</button><button data-g="ecancel">Abbrechen</button></div></div>`):`<p class="gtap">Tipp: Auf einen Satz tippen, um ihn zu ändern oder zu löschen.</p>`}${gymWaterHtml()}</section>
  <footer class="gf g3"><button class="gnavb" data-g="prev"${gym.i===0?' disabled':''} aria-label="Vorige Übung">‹</button>${allDone?`<button class="primary" data-g="finish">Training abschließen</button>`:!done?`<button class="primary gok" data-g="set">Satz ${k+1} fertig ✓</button>`:nx!=null?`<button class="primary" data-g="go" data-i="${nx}">Nächste Übung ›</button>`:`<button class="primary" data-g="more">+ Noch ein Satz</button>`}<button class="gnavb" data-g="next"${gym.i>=list.length-1?' disabled':''} aria-label="Nächste Übung">›</button></footer>`}
 const rpeBtns=(e,i,r)=>`<div class="vars grpe">${[['l','leicht'],['m','passt'],['h','hart']].map(([k,l])=>`<button data-g="rpe" data-e="${e.id}" data-i="${i}" data-r="${k}" aria-pressed="${!!r&&r.rpe===k}">${l}</button>`).join('')}</div>`;
 function openGym(){gym.open=true;gym.last=null;gym.edit=null;gym.fin=null;const dr=draftFor(day),list=dayEx(day);const j=list.findIndex(x=>dr.ex[x.id].some(r=>!r.done));gym.i=j<0?0:j;renderGym()}
@@ -65,6 +68,7 @@ gymEl.addEventListener('focusin',ev=>{const t=ev.target;if(t.tagName!=='INPUT')r
  const top=el.getBoundingClientRect().top-gb.getBoundingClientRect().top;gb.scrollTo({top:gb.scrollTop+top-90,behavior:'smooth'})},320)});
 gymEl.addEventListener('focusout',()=>setTimeout(()=>{const el=document.activeElement;if(!el||!gymEl.contains(el)||el.tagName!=='INPUT')gymEl.classList.remove('kb')},200));
 gymEl.addEventListener('click',ev=>{const b=ev.target.closest('[data-g]');if(!b)return;const a=b.dataset.g;
+ if(a==='water'||a==='wundo'){gymStore();const d=today(),dd=ND(d),wb=cheerFrom(d);if(a==='water'){const v=+b.dataset.v;dd.water=(dd.water||0)+v;dd.wlast=v}else{dd.water=Math.max(0,(dd.water||0)-(dd.wlast||0));dd.wlast=0}touch(d);renderGym();cheerDiff(d,wb);return}
  if(a==='close'){gym.open=false;gym.fin=null;gymEl.classList.remove('kb');render();return}
  if(a==='flex'){const d=gym.fin?gym.fin.day:day;gym.open=false;gym.fin=null;render();woStart('flex_'+d);return}
  const dr=draftFor(day),list=dayEx(day),e=list[gym.i];
