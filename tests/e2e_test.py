@@ -506,11 +506,11 @@ try:
         check(pg.evaluate("(()=>{const base={d:'2026-11-22',k:9999,kz:9999,p:999,pz:999,tr:'Push',c:999,pt:999,wp:99999,w:{s:99,c:99999,p:9,h:9,st:999999,a:9,o:99,ca:9},tp:999999};return JSON.stringify(base).length<=255})()"), "Grunddaten passen immer in 255 Zeichen")
         print("Heim-Training")
         r = pg.evaluate("""(()=>{const loc=S.prof.loc,n0=S.sessions.length,p0=dayScore(today()).pt;S.prof.loc='home';view='train';day='pull';render();
-          const card=!!document.querySelector('.hwo [data-home=pull]')&&!document.querySelector('.gymgo');homeStart('pull');const st=woSteps(),mins=WO.home_pull.min,lbl=homeLabel('home_pull',st.find(x=>x[0]==='Stangen-Rudern'));
+          const card=!!document.querySelector('.hwo [data-home=pull]')&&!document.querySelector('.gymgo');homeStart('pull');const st=woSteps(),mins=WO.home_pull.min,lbl=homeLabel('home_pull',st.find(x=>x[0]==='Band-Latzug'));
           const okMoves=st.every(x=>x[0]==='Pause'||x[0]==='Gleich geht’s los'||moveFor(x[0]));woFinish();woClose();const s=S.sessions[S.sessions.length-1];
           const res=[card,mins>=20&&mins<=30,lbl,okMoves,s.day==='pull'&&s.ex[0].home===true,!trained().some(x=>x.id==='home_pull')].join('|');
           S.sessions=S.sessions.filter(x=>x!==s);S.prof.loc=loc;persist();render();return res})()""")
-        check(r == "true|true|Runde 1 von 3 · Übung 1 von 5|true|true|true", "Zu Hause: Pull mit Timer (20–30 min, Runden), Strichmännchen für jede Übung, zählt als Krafteinheit (" + r + ")")
+        check(r == "true|true|Runde 1 von 3 · Übung 2 von 6|true|true|true", "Zu Hause: Pull mit Timer (20–30 min, Runden), Strichmännchen für jede Übung, zählt als Krafteinheit (" + r + ")")
         print("Rückblick & Coach")
         pg.click(".nav >> text=Mehr"); pg.click("text=Rückblick"); pg.wait_for_timeout(200)
         check(pg.is_visible(".rvgrid"), "Rückblick zeigt Kennzahlen")
