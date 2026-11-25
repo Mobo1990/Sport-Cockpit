@@ -25,7 +25,8 @@ function woStart(k,ch){wo={k,ch,i:0,left:PREP,paused:false,done:false,last:Date.
 function woRun(){clearInterval(woTick);woTick=setInterval(()=>{if(!wo||wo.paused||wo.done)return;const now=Date.now();wo.left-=(now-wo.last)/1000;wo.last=now;
  if(wo.left<=0)woNext();else woUpd()},200)}
 function woBuzz(){try{navigator.vibrate&&navigator.vibrate([120,60,120])}catch(e){}}
-function woNext(){const st=woSteps();wo.i++;wo.last=Date.now();if(wo.i>=st.length){woFinish();return}wo.left=st[wo.i][1];woBuzz();woRender()}
+function woNext(){const st=woSteps();wo.i++;wo.last=Date.now();if(wo.i>=st.length){woFinish();return}wo.left=st[wo.i][1];woBuzz();woRender();
+ if(typeof homeSay==='function'){const c=st[wo.i],n=st[wo.i+1];homeSay(c[0]==='Pause'?(c[2]||'Pause')+(n&&n[0]!=='Pause'?'. Als Nächstes: '+n[0]:''):c[0])}}
 function woFinish(){wo.done=true;clearInterval(woTick);woBuzz();try{woLock&&woLock.release()}catch(e){}woLock=null;
  const d=today(),dd=ND(d),p0=dayScore(d).pt;if(/^home_/.test(wo.k)&&typeof homeFinish==='function')homeFinish(wo.k);/* Heim-Training zählt als Krafteinheit */if(wo.ch&&!(dd.ch||[]).includes(wo.ch)){const before=chDone(d).length;dd.ch=[...(dd.ch||[]),wo.ch];touch(d);
   if(chDone(d).length===3&&before<3)tell(`${S.prof.name||'Jemand'} hat alle Challenges geschafft`,`Heute alle 3 Coach-Challenges erledigt (+${chPoints(d)} Punkte). Und du?`)}
@@ -37,12 +38,12 @@ function woUpd(){const st=woSteps(),cur=st[wo.i],t=document.getElementById('woT'
  const rest=st.slice(wo.i+1).reduce((a,x)=>a+x[1],0)+wo.left,tl=document.getElementById('woTotal');if(tl)tl.textContent=mmss(rest)+' übrig'}
 function woRender(){if(!wo){woEl.classList.remove('on');woEl.innerHTML='';return}woEl.classList.add('on');const W=WO[wo.k],st=woSteps();
  if(wo.done){const c=CH.find(x=>x.id===wo.ch);woEl.innerHTML=`<div class="gh"><button class="gx" data-wo-a="close" aria-label="Schließen">✕</button><div><b>${esc(W.n)}</b><small>Fertig</small></div></div>
-  <div class="wobody"><p class="wodone cond">Geschafft!</p><p class="wosub">${W.min} Minuten ${esc(W.n)} erledigt${c?` · <b>+${c.pt} Punkte</b>`:''}</p><button class="primary" data-wo-a="close">Zurück zur Startseite</button></div>`;return}
+  <div class="wobody"><p class="wodone cond">Geschafft!</p><p class="wosub">${W.min} Minuten ${esc(W.n)} erledigt${c?` · <b>+${c.pt} Punkte</b>`:''}</p>${W.home&&typeof homeDoneHtml==='function'&&homeLast?homeDoneHtml()+'<button class="ghost" data-hw="skiprep">Ohne Eintragen schließen</button>':'<button class="primary" data-wo-a="close">Zurück zur Startseite</button>'}</div>`;return}
  const cur=st[wo.i],nx=st[wo.i+1],isP=cur[0]==='Pause'||wo.i===0,work=st.slice(1).filter(x=>x[0]!=='Pause'),wi=wo.i===0?0:work.indexOf(cur)+1;
  woEl.innerHTML=`<div class="gh"><button class="gx" data-wo-a="close" aria-label="Abbrechen">✕</button><div><b>${esc(W.n)}</b><small id="woTotal"></small></div></div>
  <div class="gprog">${st.slice(1).map((x,i)=>`<i class="${i+1<wo.i?'d':i+1===wo.i?'c':''}${x[0]==='Pause'?' p':''}"></i>`).join('')}</div>
- <div class="wobody${isP?' rest':''}"><small class="wok">${wo.i===0?'Bereit machen':cur[0]==='Pause'?'Pause':(typeof homeLabel==='function'&&homeLabel(wo.k,cur))||'Übung '+(wi>0?wi:'')+' von '+work.length}</small>
-  <h2 class="won">${esc(cur[0]==='Pause'?(cur[2]||'Durchatmen'):cur[0])}</h2>${cur[2]&&cur[0]!=='Pause'&&wo.i>0?`<p class="wosub">${esc(cur[2])}</p>`:''}
+ <div class="wobody${isP?' rest':''}${W.home?' wohome':''}"><small class="wok">${wo.i===0?'Bereit machen':cur[0]==='Pause'?'Pause':(typeof homeLabel==='function'&&homeLabel(wo.k,cur))||'Übung '+(wi>0?wi:'')+' von '+work.length}</small>
+  <h2 class="won">${esc(cur[0]==='Pause'?(cur[2]||'Durchatmen'):cur[0])}</h2>${cur[2]&&cur[0]!=='Pause'&&wo.i>0?`<p class="wosub">${esc(cur[2])}</p>`:''}${cur[3]&&cur[3].easy&&cur[0]!=='Pause'?`<p class="woeasy"><b>Leichter:</b> ${esc(cur[3].easy)} · <b>Schmerz?</b> Aufhören.</p>`:''}${cur[3]&&cur[3].rd&&typeof homeReps==='function'&&!HOME_HOLD.test(cur[0])&&homeReps(cur[0]).last?`<p class="wolast">Letztes Mal ${homeReps(cur[0]).last} Wdh. – schaffst du ${homeReps(cur[0]).last+1}?</p>`:''}
   ${(()=>{const fn=cur[0]==='Pause'?(nx?nx[0]:''):(wo.i===0?st[1][0]:cur[0]);if(!fn||fn==='Pause')return '';const mf=moveFor(fn),fe=mf&&mf.m.feel;return moveSvg(fn,'wofig'+(cur[0]==='Pause'||wo.i===0?' soon':''))+(fe?`<p class="wofeel">Spürst du hier: <b>${esc(fe)}</b></p>`:'')})()}
   <div class="woring"><svg viewBox="0 0 110 110" aria-hidden="true"><circle cx="55" cy="55" r="48" class="bg"/><circle id="woR" cx="55" cy="55" r="48" class="fg" stroke-dasharray="301.6" stroke-dashoffset="0"/></svg><b id="woT" class="cond">${Math.ceil(wo.left)}</b></div>
   ${wo.i===0&&woHasKnee(wo.k)?`<button class="woknee" data-wo-a="knee" aria-pressed="${!!wo.knee}">${wo.knee?'Knieschonend an ✓':'Knieschonend'}</button>`:''}${nx?`<p class="wonx">Als Nächstes: <b>${esc(nx[0]==='Pause'?(nx[2]||'Pause'):nx[0])}</b>${nx[0]==='Pause'?'':' · '+nx[1]+' s'}</p>`:'<p class="wonx">Letzte Runde!</p>'}</div>

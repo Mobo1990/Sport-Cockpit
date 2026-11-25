@@ -511,6 +511,13 @@ try:
           const res=[card,mins>=20&&mins<=30,lbl,okMoves,s.day==='pull'&&s.ex[0].home===true,!trained().some(x=>x.id==='home_pull')].join('|');
           S.sessions=S.sessions.filter(x=>x!==s);S.prof.loc=loc;persist();render();return res})()""")
         check(r == "true|true|Runde 1 von 3 · Übung 2 von 6|true|true|true", "Zu Hause: Pull mit Timer (20–30 min, Runden), Strichmännchen für jede Übung, zählt als Krafteinheit (" + r + ")")
+        r = pg.evaluate("""(()=>{const P={...S.prof},n0=S.sessions.length;S.prof.loc='home';const m=k=>{S.prof.hlen=k;return homeBuild('push').min};const len=[m('k'),m('n'),m('l')];S.prof.hlen='n';
+          S.prof.heq={band:0,pole:0};const c=homeCirc('push').map(x=>x[0]);S.prof.heq={};
+          homeStart('legs');woFinish();const html=woEl.innerHTML.includes('data-hrep');document.querySelectorAll('[data-hrep]').forEach(i=>i.value='9');homeSaveReps();
+          const last=homeReps('Glute Bridges').last;homeStart('legs');const st=woSteps(),i=st.findIndex(x=>x[0]==='Glute Bridges');wo.i=i;woRender();const t=woEl.textContent;woClose();
+          S.sessions=S.sessions.slice(0,n0);S.prof=P;persist();render();
+          return [len[0]<18,len[1]>=20&&len[1]<=26,len[2]>=28,!c.some(x=>/Band|Stange/.test(x))&&c.includes('Y-Heben in Bauchlage'),html,last===9,/Letztes Mal 9 Wdh/.test(t)&&/Leichter:/.test(t)].join('|')})()""")
+        check(r == "true|true|true|true|true|true|true", "Zu Hause: kurz/normal/lang, Ersatz ohne Band und Stange, Wiederholungen eintragen → 'Letztes Mal' + 'Leichter' im Training (" + r + ")")
         print("Rückblick & Coach")
         pg.click(".nav >> text=Mehr"); pg.click("text=Rückblick"); pg.wait_for_timeout(200)
         check(pg.is_visible(".rvgrid"), "Rückblick zeigt Kennzahlen")
