@@ -26,7 +26,7 @@ function renderHome(){weeklyCheck();const d=today(),sc=dayScore(d),g=sc.g,t=sc.t
  ${chHtml()}
  ${afHtml()}
  </section>
- ${woQuickHtml()}
+ ${typeof awayHotelHtml==='function'?awayHotelHtml():''}${woQuickHtml()}
  <section class="weekbox">${weeklyHtml()}${rwLineHtml()}</section>`}
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-h]');if(!b)return;const a=b.dataset.h,d=today(),wb=/^(water|wmlok|steps)$/.test(a)?cheerFrom(d):null;
  if(a==='train'){day=b.dataset.d;view='train'}

@@ -985,3 +985,44 @@ html.kbopen .nav{display:none}
 .awmore{margin:6px 0 0;font-size:13px;color:var(--mute)}
 .awadd{display:block;width:100%;min-height:52px;margin:8px 0 12px;border-radius:var(--r);border:1.5px dashed var(--line);background:var(--s1);color:var(--ink);font:700 18px var(--fh)}
 .away.form .actions{margin:12px 0 0}.away.form .actions .primary{flex:1}
+/* Training/Kraft-Umschalter oben im Training-Tab */
+.tsw{display:flex;gap:4px;padding:4px;margin:4px 0 14px;background:var(--s2);border-radius:999px}
+.tsw button{flex:1;min-height:38px;border:0;border-radius:999px;background:none;color:var(--mute);font:700 16px var(--fh)}
+.tsw button[aria-pressed=true]{background:var(--s1);color:var(--ink);box-shadow:var(--sh)}
+/* Kalender: Monatsraster mit Trainingstagen und Unterwegs-Balken */
+.calnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}.calnav b{font:800 22px var(--fh)}
+.calnav button{width:38px;height:38px;min-height:0;padding:0;border-radius:50%;border:1px solid var(--line);background:none;font-size:20px;color:var(--ink)}
+.cgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cwd{text-align:center;font-size:12px;font-weight:600;color:var(--mute);padding:2px 0 4px}
+.cc{position:relative;aspect-ratio:1/1.08;min-height:0;padding:4px 0 0;border:0;border-radius:10px;background:var(--s2);display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--ink)}
+.cc.pad{background:none}.cc.fut{background:none;border:1px solid var(--line)}
+.cc b{font:700 15px var(--fh)}.cc.tr{background:var(--acc2)}
+.cc.tdy b{display:inline-grid;place-items:center;min-width:24px;height:24px;border-radius:50%;background:var(--ink);color:var(--bg)}
+.cc.sel{outline:2px solid var(--acc);outline-offset:-2px}
+.cdots{display:flex;gap:3px;min-height:7px}
+.cd{display:inline-block;width:7px;height:7px;border-radius:50%;font-style:normal}.cd.t-k{background:var(--acc)}.cd.t-c{background:var(--dark)}
+.cbar{position:absolute;left:4px;right:4px;bottom:5px;display:flex;flex-direction:column;gap:2px}
+.cbar s,.clegend s{display:block;height:4px;border-radius:2px;text-decoration:none}.cbar s.me,.clegend s.me{background:var(--me,#6f7fe8)}.cbar s.pa,.clegend s.pa{background:var(--pa,#ff7f5f)}
+.cn{position:absolute;top:4px;right:5px;width:6px;height:6px;border-radius:50%;border:1.5px solid var(--mute);font-style:normal}
+.clegend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:12px 0 0;font-size:12px;color:var(--mute)}.clegend span{display:inline-flex;align-items:center;gap:5px}.clegend s{width:16px}.clegend .cn{position:static}
+.cstat{margin:10px 0 0;font-size:14px;color:var(--mute)}.cstat b{font-size:20px;color:var(--ink)}
+.calnow{font-style:normal;font-size:12px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--acc2);color:var(--acc)}
+.calls{list-style:none;margin:0;padding:0}.calls li{display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid var(--line)}.calls li:first-child{border-top:0}
+.calls li .cd{width:12px;height:12px}.calls li div{display:flex;flex-direction:column}.calls li b{font-size:15px}.calls li span{font-size:13px;color:var(--mute)}
+.calh{font:800 22px var(--fh);margin:18px 0 0}
+.v-cal .seg,.v-cal .dayrow,.v-cal .stats{display:none}.v-cal .top{padding-bottom:10px}
+/* Kalender nach Tester-Wünschen: größer, beide Personen, Klartext */
+.calsum{display:flex;gap:8px;margin:0 0 10px}.calsum div{flex:1;background:var(--s1);border-radius:16px;box-shadow:var(--sh);padding:12px}.calsum b{display:block;font-size:26px;line-height:1.1}.calsum span{font-size:14px;color:var(--mute)}
+.calsum .pa b{color:var(--d-rosed,#9A5F4E)}.calsum .we b{color:var(--d-saged,#3E5A4C)}
+.calfair{margin:0 0 10px;padding:10px 12px;border-radius:12px;background:var(--d-sagel,#E3ECE6);font-size:15px}
+.awq{background:var(--s1);border-radius:18px;box-shadow:var(--sh);padding:14px;margin:0 0 12px}.awq>b{font:800 20px var(--fh);display:block;margin-bottom:8px}
+.awqb{display:flex;flex-wrap:wrap;gap:8px}.awqb button{min-height:46px;font-size:16px;padding:8px 14px}
+.awok{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;background:var(--d-sagel,#E3ECE6);border-radius:18px;padding:14px;margin:0 0 12px}.awok b{font:800 18px var(--fh)}.awok span{flex:1 1 60%;font-size:15px}.awok button{min-height:44px}
+.cc b{font-size:17px}.cwd{font-size:13px}
+.cd.me{background:var(--d-sage,#6F8F7E)}.cd.pa{background:var(--d-rose,#C4917F)}.cd.ring{background:none!important;border:2px solid currentColor;width:8px;height:8px;box-sizing:border-box}.cd.me.ring{color:var(--d-sage,#6F8F7E)}.cd.pa.ring{color:var(--d-rose,#C4917F)}
+.cc.both{background:var(--d-sagel,#E3ECE6);box-shadow:inset 0 0 0 2px var(--d-sage,#6F8F7E)}.cboth{display:inline-block;width:14px;height:14px;border-radius:4px;background:var(--d-sagel,#E3ECE6);box-shadow:inset 0 0 0 2px var(--d-sage,#6F8F7E)}
+.cbar s.me,.clegend s.me{background:var(--d-sage,#6F8F7E)}.cbar s.pa,.clegend s.pa{background:var(--d-rose,#C4917F)}
+.clegend{font-size:14px}.calls li b{font-size:16px}
+.calnone{margin:4px 0;color:var(--mute);font-size:15px}.calgo{width:100%;margin-top:10px;min-height:46px;font-size:16px}
+.calpriv{background:var(--s2);border-radius:16px;padding:12px 14px;margin:12px 0 24px}.calpriv b{font:800 17px var(--fh)}.calpriv p{margin:6px 0 0;font-size:15px;color:var(--mute)}
+.awhotel{display:flex;align-items:center;gap:12px;background:var(--s1);border-radius:18px;box-shadow:var(--sh);padding:14px;margin:0 0 12px}.awhotel div{flex:1}.awhotel b{display:block;font:800 17px var(--fh)}.awhotel span{font-size:14px;color:var(--mute)}
