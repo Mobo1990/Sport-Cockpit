@@ -704,6 +704,8 @@ try:
         _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         _bad = [f for f in ['index.html', 'style.css', 'sw.js'] + glob.glob(os.path.join(_root, 'js', '*.js')) if _re.search(r'^(<{7}|={7}|>{7})( |$)', open(os.path.join(_root, f), encoding='utf-8').read(), _re.M)]
         check(not _bad, "Keine Merge-Konfliktmarker in ausgelieferten Dateien" + ("" if not _bad else ": " + ", ".join(_bad)))
+        r = pg.evaluate("""(()=>{const o=location.reload;let n=0;try{document.querySelector('#recv')&&document.querySelector('#recv').classList.add('on');const a=swAutoReload();document.querySelector('#recv').classList.remove('on');return [a,swPend].join(',')}catch(e){return 'err:'+e}})()""")
+        check(r == "false,true", "Update: neue Version lädt nicht mitten im Rezept/Workout neu, sondern beim nächsten Öffnen (" + r + ")")
         check(not errs, "Keine JavaScript-Fehler" + ("" if not errs else ": " + "; ".join(errs)))
         b.close()
 finally:
