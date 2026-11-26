@@ -591,6 +591,13 @@ try:
         try: pg.wait_for_selector(".rcard h3", timeout=8000); ok = True
         except Exception: ok = False
         check(ok and pg.is_visible(".rdone") and not pg.is_visible(".tile.big") and "Hähnchen-Reis-Bowl" in pg.text_content(".rcard"), "Nach dem Training: 'erledigt' statt 'Als Nächstes' + eiweißreiches Chefkoch-Rezept (Torte aussortiert)")
+        r = pg.evaluate("""(async()=>{const o=recCall,oR=REC;const S1={results:[{recipe:{id:'k1',title:'Skyr-Kuchen',preparationTime:20,rating:{rating:4.9,numVotes:50}}},{recipe:{id:'l1',title:'Lachs aus dem Backofen',preparationTime:15,rating:{rating:4.7,numVotes:500}}},{recipe:{id:'n1',title:'Nudelauflauf',preparationTime:20,rating:{rating:4.5,numVotes:300}}}]};
+          const D={l1:{id:'l1',title:'Lachs aus dem Backofen',servings:2,preparationTime:15,totalTime:35,nutrition:{kCalories:420,proteinContent:34},ingredientGroups:[{ingredients:[{name:'Lachs',amount:300,unit:'g'}]}],instructions:'Backen.'},
+                   n1:{id:'n1',title:'Nudelauflauf',servings:2,preparationTime:20,totalTime:50,nutrition:{kCalories:700,proteinContent:14},ingredientGroups:[],instructions:'x'}};
+          recCall=async(sv,d)=>sv==='sport_cockpit_rezepte'?S1:D[d.id];REC=null;await recLoad(true);const t=(REC.list||[]).map(x=>x.t).join('|');
+          recCall=async(sv,d)=>sv==='sport_cockpit_rezepte'?{results:[S1.results[2]]}:D[d.id];await recLoad(true);const t2=(REC.list||[]).map(x=>x.t).join('|');
+          recCall=o;REC=oR;return t+'#'+t2})()""")
+        check(r.startswith("Lachs aus dem Backofen") and "Kuchen" not in r and r.endswith("#Nudelauflauf"), "Rezeptsuche: Backofen-Zeit zählt nicht als Arbeitszeit, Kuchen raus, ohne strenge Treffer trotzdem ein Vorschlag (" + r + ")")
         r = pg.evaluate("""(()=>{const ins='Hähnchen ca. 2 Minuten anbraten.\\n\\nServieren.\\n\\nPro Portion:\\nkJ/kcal: 1755/421\\nEW: 32,4 g\\nF: 16,7 g\\nKH: 33,4 g\\nBE: 3';
           const a=recCompact({id:1,title:'X',servings:4,nutrition:{kCalories:345,proteinContent:37.5,status:'partial'},instructions:ins,ingredientGroups:[]}),
                 b=recCompact({id:2,title:'Y',servings:4,nutrition:{kCalories:345,proteinContent:37.5,status:'partial'},instructions:'Kochen.',ingredientGroups:[]});
