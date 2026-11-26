@@ -5,7 +5,9 @@
    Zubereitung in der App (mit Quelle) + Link zum Original mit Fotos. Ergebnis pro Tag zwischengespeichert. */
 'use strict';
 const REC_WORDS=['Hähnchen','Pute','Lachs','Thunfisch','Rind','Hack','Garnelen','Quark','Skyr','Hüttenkäse','Ei','Linsen','Kichererbsen','Tofu','Feta','Bohnen'];
-const REC_DEF={f:['Skyr','Quark','Ei'],m:['Hähnchen','Linsen','Thunfisch'],a:['Hähnchen','Lachs','Hack'],s:['Quark','Skyr','Hüttenkäse']},REC_VEG={f:['Skyr','Quark','Ei'],m:['Linsen','Kichererbsen','Feta'],a:['Linsen','Tofu','Ei'],s:['Quark','Skyr','Hüttenkäse']};
+/* Suchbegriffe je Mahlzeit – mit Gericht-Wort, sonst liefert Chefkoch vor allem Kuchen und Brötchen (z. B. bei „Skyr“) */
+const REC_DEF={f:['Skyr Bowl','Rührei','Protein Porridge'],m:['Hähnchen Pfanne','Linsen Curry','Thunfisch Salat'],a:['Hähnchen Pfanne','Lachs Pfanne','Hackfleisch Pfanne'],s:['Quark Dessert','Skyr Creme','Hüttenkäse']},REC_VEG={f:['Skyr Bowl','Rührei','Protein Porridge'],m:['Linsen Curry','Kichererbsen Pfanne','Feta Ofen'],a:['Linsen Curry','Tofu Pfanne','Shakshuka'],s:['Quark Dessert','Skyr Creme','Hüttenkäse']};
+const REC_BAKE=/kuchen|torte|brötchen|brot\b|muffin|keks|plätzchen|waffel|cheesecake|zopf|stollen/i;
 let REC=null,recBusy=false,recOpen=null,recIdx=0,recPor=1,recServ=0,recHide='',recLock=null;
 const recPref=()=>{try{return JSON.parse(localStorage.getItem('sc.recpref'))||{}}catch(e){return{}}};/* {veg:1, no:[ids], seen:{id:datum}} */
 const recSavePref=p=>{try{localStorage.setItem('sc.recpref',JSON.stringify(p))}catch(e){}};
@@ -30,18 +32,22 @@ function recCompact(r){const tn=recTextNut(r.instructions),n0=r.nutrition||{},pa
  const steps=String(r.instructions||'').split(/\n\s*\n|\r\n\r\n/).map(x=>x.replace(/\s+/g,' ').trim()).filter(x=>x&&!/^pro\s+(portion|person|stück)\s*:/i.test(x));
  const img=r.previewImageUrlTemplate?String(r.previewImageUrlTemplate).replace('<format>','crop-480x320'):'';
  return{id:String(r.id),t:String(r.title||'Rezept'),url:r.siteUrl||('https://www.chefkoch.de/rezepte/'+r.id),img,r:recNum((r.rating||{}).rating),v:recNum((r.rating||{}).numVotes),
-  min:recNum(r.totalTime||r.preparationTime)||0,serv,kcal:Math.round(recNum(n.kCalories||r.kCalories)),p:Math.round(recNum(n.proteinContent)),c:Math.round(recNum(n.carbohydrateContent)),f:Math.round(recNum(n.fatContent)),
+  prep:recNum(r.preparationTime)||0,min:recNum(r.totalTime||r.preparationTime)||0,serv,kcal:Math.round(recNum(n.kCalories||r.kCalories)),p:Math.round(recNum(n.proteinContent)),c:Math.round(recNum(n.carbohydrateContent)),f:Math.round(recNum(n.fatContent)),
   g:gsum?Math.round(gsum/serv):0,ing,steps}}
 /* Suchen, Details holen, passend filtern und sortieren */
 async function recLoad(force){if(recBusy||!HA.url||!HA.token)return;const d=today(),meal=recMeal();if(!force&&REC&&REC.d===d&&REC.meal===meal&&(REC.list||[]).length)return;
  recBusy=true;if(view==='home')render();
- try{const pf=recPref(),veg=!!pf.veg,fav=recFav().filter(w=>!veg||!REC_MEAT.test(w)),qs=[...new Set([...fav.slice(0,2),...(veg?REC_VEG:REC_DEF)[meal]])].slice(0,3),seen=new Set(),cand=[],no=new Set(pf.no||[]),recent=pf.seen||{},wkAgo=iso(Date.now()-7*864e5);
+ try{const pf=recPref(),veg=!!pf.veg,fav=recFav().filter(w=>!veg||!REC_MEAT.test(w)),qs=[...new Set([...(meal==='m'||meal==='a'?fav.slice(0,1).map(w=>w+' schnell'):[]),...(veg?REC_VEG:REC_DEF)[meal]])].slice(0,3),seen=new Set(),cand=[],no=new Set(pf.no||[]),recent=pf.seen||{},wkAgo=iso(Date.now()-7*864e5);
   for(const q of qs){let res;try{res=await recCall('sport_cockpit_rezepte',{q,limit:12})}catch(e){continue}
-   for(const x of (res.results||[])){const r=x.recipe||x;if(!r||!r.id||seen.has(r.id)||no.has(String(r.id))||(recent[r.id]&&recent[r.id]>wkAgo&&recent[r.id]<today()))continue;seen.add(r.id);cand.push({id:r.id,q,score:recNum((r.rating||{}).rating)*Math.log10(10+recNum((r.rating||{}).numVotes))})}}
+   for(const x of (res.results||[])){const r=x.recipe||x;if(!r||!r.id||seen.has(r.id)||(meal!=='s'&&REC_BAKE.test(r.title||''))||recNum(r.preparationTime)>40||no.has(String(r.id))||(recent[r.id]&&recent[r.id]>wkAgo&&recent[r.id]<today()))continue;seen.add(r.id);cand.push({id:r.id,q,score:recNum((r.rating||{}).rating)*Math.log10(10+recNum((r.rating||{}).numVotes))})}}
   cand.sort((a,b)=>b.score-a.score);
   const sc=dayScore(d),left=Math.max(0,sc.g.kcal-sc.t.kcal),list=[];
-  for(const c of cand.slice(0,8)){let r;try{r=recCompact(await recCall('sport_cockpit_rezept',{id:c.id}))}catch(e){continue}
-   if(!r.p||!r.kcal)continue;if(r.p<18)continue;if(r.min>30||r.ing.length>12)continue;/* schnell und einfach */if(veg&&r.ing.some(i=>REC_MEAT.test(i.n))||veg&&REC_MEAT.test(r.t))continue;if(left>300&&r.kcal>left+150)continue;r.q=c.q;r.fav=fav.includes(c.q);list.push(r)}
+  /* Streng: aktive Zeit ≤ 30 min (Backofen-Zeit zählt nicht), gesamt ≤ 60, ≤ 14 Zutaten, genug Eiweiß. Locker als Rückfall, damit nie „nichts“ kommt. */
+  const pMin=meal==='f'||meal==='s'?12:18,loose=[];
+  for(const c of cand.slice(0,10)){let r;try{r=recCompact(await recCall('sport_cockpit_rezept',{id:c.id}))}catch(e){continue}
+   if(!r.p||!r.kcal)continue;if(veg&&r.ing.some(i=>REC_MEAT.test(i.n))||veg&&REC_MEAT.test(r.t))continue;r.q=c.q;r.fav=fav.some(w=>c.q.startsWith(w));
+   const act=r.prep||r.min;if(r.p>=pMin&&act<=30&&r.min<=60&&r.ing.length<=14&&!(left>300&&r.kcal>left+150))list.push(r);else if(r.p>=8&&act<=45)loose.push(r)}
+  if(!list.length)list.push(...loose.sort((a,b)=>b.p/b.kcal-a.p/a.kcal).slice(0,3));
   list.sort((a,b)=>(b.p/b.kcal*1000+b.r*3+(b.fav?8:0))-(a.p/a.kcal*1000+a.r*3+(a.fav?8:0)));
   REC={d,meal,list:list.slice(0,5),err:list.length?'':'nichts'};recIdx=0}
  catch(e){REC={d,meal,list:[],err:String(e.message||e)}}
@@ -63,10 +69,10 @@ function recHomeHtml(){const last=S.sessions.filter(s=>iso(s.date)===today()&&s.
  if(!REC||REC.d!==today()||REC.meal!==meal){setTimeout(()=>recLoad(),0);return done+`<section class="rcard rload"><p>Duo sucht ein passendes Rezept bei Chefkoch …</p></section>`}
  if(recBusy)return done+`<section class="rcard rload"><p>Duo sucht ein passendes Rezept bei Chefkoch …</p></section>`;
  const L=REC.list||[],r=L[recIdx%Math.max(1,L.length)];
- if(!r)return done+`<section class="rcard rload"><p>${REC.err&&REC.err!=='nichts'?'Rezepte gerade nicht erreichbar.':'Gerade kein passendes schnelles Rezept gefunden.'}</p><button data-rec="reload">Nochmal suchen</button></section>`;
+ if(!r)return REC.err&&REC.err!=='nichts'?done+`<section class="rcard rload"><p>Rezepte gerade nicht erreichbar.</p><button data-rec="reload">Nochmal suchen</button></section>`:done;
  recSeen(r);const ok=!left||r.kcal<=left,np=Math.max(0,need-r.p);
  return done+`<section class="rcard">${r.img?`<img src="${esc(r.img)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:''}<div class="rbd"><div class="rtop"><small>Dein ${recMealN[meal]} · Chefkoch</small><button class="rvegc" data-rec="veg" aria-pressed="${!!recPref().veg}">${recPref().veg?'✓ Vegetarisch':'Vegetarisch'}</button></div><h3>${esc(r.t)}</h3>
-  <div class="rkpi"><span><b>${r.p} g</b>Eiweiß</span><span><b>${fmt(r.kcal)}</b>kcal</span><span><b>${r.min||'–'}</b>Minuten</span></div>
+  <div class="rkpi"><span><b>${r.p} g</b>Eiweiß</span><span><b>${fmt(r.kcal)}</b>kcal</span><span><b>${r.prep||r.min||'–'}</b>Min. Arbeit</span></div>
   <p class="rfit${ok?' ok':''}">${ok?'Passt zu deinem Ziel':`Etwas über deinem Rest (${fmt(left)} kcal) – ein halber Teller passt`}${need?` · nach diesem Teller ${np?`fehlen noch ${np} g Eiweiß`:'ist dein Eiweiß-Ziel erreicht'}`:''}</p>
   <p class="rmeta">pro Teller${recMild(r)?' · nicht scharf, auch für Kinder':''}</p>
   <div class="rbtn"><button class="primary" data-rec="open">So geht's</button><button data-rec="quick">1 Teller eintragen</button></div>
@@ -77,7 +83,7 @@ const recAmt=(a,f)=>{const v=a*f;return v>=10?Math.round(v):Math.round(v*4)/4};
 function recRender(){const r=recOpen;if(!r){recEl.classList.remove('on');recEl.innerHTML='';try{recLock&&recLock.release()}catch(e){}recLock=null;return}recEl.classList.add('on');
  if(!recLock){try{navigator.wakeLock&&navigator.wakeLock.request('screen').then(l=>recLock=l).catch(()=>{})}catch(e){}}
  const sv=recServ||1,f=sv/r.serv,pn=typeof sharePartner==='function'?sharePartner():null,P=recPor;
- recEl.innerHTML=`<header class="gh"><button class="gx" data-rec="close" aria-label="Schließen">✕</button><div><b>${esc(r.t)}</b><span>Chefkoch · ${r.min?'ca. '+r.min+' min · ':''}Bildschirm bleibt an</span></div></header>
+ recEl.innerHTML=`<header class="gh"><button class="gx" data-rec="close" aria-label="Schließen">✕</button><div><b>${esc(r.t)}</b><span>Chefkoch · ${r.prep?r.prep+' min Arbeit'+(r.min>r.prep?', gesamt '+r.min+' min':'')+' · ':r.min?'ca. '+r.min+' min · ':''}Bildschirm bleibt an</span></div></header>
  <section class="recb">${r.img?`<img src="${esc(r.img)}" alt="" referrerpolicy="no-referrer">`:''}
  <div class="rkpi r4"><span><b>${r.p} g</b>Eiweiß</span><span><b>${fmt(r.kcal)}</b>kcal</span><span><b>${r.c} g</b>Kohlenh.</span><span><b>${r.f} g</b>Fett</span></div>
  <p class="rnote">pro Teller, Nährwerte laut Chefkoch${r.r?` · ★ ${fmt(Math.round(r.r*10)/10)} (${fmt(r.v)} Bewertungen)`:''}${recMild(r)?' · nicht scharf, auch für Kinder':''}</p>
