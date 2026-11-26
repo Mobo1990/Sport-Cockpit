@@ -11,7 +11,7 @@ function renderHome(){weeklyCheck();const d=today(),sc=dayScore(d),g=sc.g,t=sc.t
  return `${healthLink()}<section class="hero2"><div><p class="hk">${new Date().toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'})}</p><h2>${gr}, ${esc(S.prof.name)}</h2></div></section>
  ${boardHtml(sc)}
  ${sc.why.length?`<div class="chips">${sc.why.map(w=>`<span>${esc(w)}</span>`).join('')}</div>`:'<p class="tip" style="padding:0 0 12px">Noch keine Punkte heute: Trainieren, im Kalorienziel bleiben und Protein schaffen bringt am meisten.</p>'}
- ${typeof awayHotelHtml==='function'?awayHotelHtml():''}${rwInboxHtml()}${shareInboxHtml()}${sayInboxHtml()}
+ ${typeof awayTodayHtml==='function'?awayTodayHtml():''}${typeof awayHotelHtml==='function'?awayHotelHtml():''}${rwInboxHtml()}${shareInboxHtml()}${sayInboxHtml()}
  ${typeof trainedToday==='function'&&trainedToday()?recHomeHtml():`<section class="tiles">
   <button class="tile big" data-gym="1" data-d="${run?run[0]:nx}"><small>${run?'Training läuft':'Als Nächstes'}</small><b>${typeof homeDayName==='function'?homeDayName(run?run[0]:nx):DAYS[run?run[0]:nx].n}</b><span>${run?runSets+' Sätze erledigt – weiter':typeof isHome==='function'&&isHome()&&HOME[nx]?HOME[nx].sub+' · ca. '+homeBuild(nx).min+' min':DAYS[nx].sub}</span><em>${run?'Fortsetzen':'Training starten'} ›</em></button>
   </section>${typeof isHome==='function'&&isHome()&&HOME[nx]&&!run?homeLenHtml(nx):''}`}

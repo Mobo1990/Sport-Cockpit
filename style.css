@@ -1159,3 +1159,13 @@ html.kbopen .nav{display:none}
 .away.form .awnight{display:block;line-height:1.45;margin:10px 0}.away.form .awnight input{width:22px;height:22px;vertical-align:-5px;margin-right:6px}
 .awkind button{font-size:15px;padding:6px 8px;min-width:0}.awkind button span{overflow:hidden;text-overflow:ellipsis}
 .away.form .awkind button{flex:1 1 auto}.away.form .awnight input,.sheetin .rshare input{min-height:0!important;padding:0}
+/* Paar-Kalender: viele Arten, „Heute bei euch“ */
+.awkind.awall{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.awkind.awall button{flex-direction:column;gap:2px;min-height:58px;font-size:13px;padding:6px 4px}.awkind.awall button .aic{width:20px;height:20px}
+.awkind button[aria-pressed=true] .aic{color:#fff}.aic.both{color:var(--me);filter:drop-shadow(2px 0 0 var(--pa))}
+.awqh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}.awqh .primary{display:inline-flex;align-items:center;gap:6px;min-height:44px}.awqh .primary .aic{color:#fff}
+.calgob{display:flex;flex-wrap:wrap;gap:8px}.calgob .calgo{flex:1 1 auto}
+.cmore{font-style:normal;font-size:11px;font-weight:700;color:var(--mute);line-height:15px}
+.awtoday{display:block;width:100%;text-align:left;background:var(--s1);border:0;border-radius:18px;box-shadow:var(--sh);padding:12px 14px;margin:0 0 12px;color:var(--ink);position:relative}
+.awtoday small{display:block;font:700 12px var(--fh);letter-spacing:.06em;text-transform:uppercase;color:var(--acc);margin:2px 0}
+.awtoday ul{list-style:none;margin:0 0 4px;padding:0}.awtoday li{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:15px}.awtoday li .aic{width:20px;height:20px}
+.awtoday em{font-style:normal;color:var(--mute);font-size:13px}.awtoday .awtgo{position:absolute;top:12px;right:14px}

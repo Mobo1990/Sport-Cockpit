@@ -219,7 +219,7 @@ try:
         pg.click(".nav >> text=Kalender"); pg.wait_for_timeout(200)
         check(pg.is_visible(".cgrid") and pg.locator(".cgrid .cc.tdy").count() == 1 and pg.locator(".cgrid .cc .cdots .cd.me").count() == pg.evaluate("new Set(S.sessions.map(s=>iso(s.date)).filter(d=>d.slice(0,7)===today().slice(0,7))).size"), "Kalender-Tab: Monat mit heute, Trainingstage markiert")
         check(pg.is_visible(".awq [data-aw=quick]") and "Gerade ist nichts eingetragen" in pg.text_content(".away.list") and "liest keinen Kalender" in pg.text_content(".awpriv"), "Kalender: Schnellwahl 'Ich bin unterwegs', Hinweis zur Privatsphäre")
-        pg.click("[data-aw=new]"); pg.wait_for_timeout(150)
+        pg.click(".awq [data-aw=new]:not([data-k])"); pg.wait_for_timeout(150)
         check(all(pg.is_visible(x) for x in ["#awWas","#awOrt","#awVon","#awBis","#awVt","#awBt"]) and pg.locator(".awq").count() == 0, "Genauer eintragen: Was, Wo, Von/Bis und Uhrzeiten sofort sichtbar, oben statt der Schnellwahl")
         pg.fill("#awWas", "tecis Workshop"); pg.fill("#awOrt", "Köln")
         tm = (datetime.date.today() + datetime.timedelta(days=1)).isoformat(); pg.fill("#awVon", tm); pg.dispatch_event("#awVon", "change"); pg.fill("#awVt", "08:00")
@@ -274,6 +274,16 @@ try:
           AWAY=[{wer:'Pauline',art:'treffen',allDay:false,s:td,start:t('17:00'),stop:t('23:00')}];view='cal';render();const ic=!!document.querySelector(`.cc[data-cal="${td}"] .cic .aic.pa`);
           AWAY=o;render();return [g===S.goal,h1==='',h2!=='',ic].join(',')})()""")
         check(r == "true,true,true,true", "Abend weg (Treffen) senkt das Ziel nicht · Hotel-Training nur bei Übernachtung · Bier-Symbol in Paulines Farbe (" + r + ")")
+        r = pg.evaluate("""(()=>{const o=AWAY,td=today(),t=s=>new Date(td+'T'+s).getTime();
+          AWAY=[{uid:'z1',wer:'Michell',mit:'Pauline',was:'Frauenarzt',ort:'',art:'arzt',allDay:false,nacht:false,s:td,start:t('15:00'),stop:t('16:00')},{uid:'z2',wer:'Pauline',mit:'',was:'Geburtstag Oma',ort:'',art:'geburtstag',allDay:true,nacht:false,s:iso(Date.now()+864e5),start:new Date(iso(Date.now()+864e5)+'T00:00').getTime(),stop:new Date(iso(Date.now()+864e5)+'T23:59').getTime()}];
+          const h=awayTodayHtml(),c=awayCounts(AWAY[0]);AWAY=o;return [/Heute/.test(h)&&/15:00/.test(h)&&/Frauenarzt/.test(h)&&/Michell (&amp;|&) Pauline/.test(h),/Morgen/.test(h)&&/Geburtstag Oma/.test(h),c].join(',')})()""")
+        check(r == "true,true,false", "Startseite oben: 'Heute 15:00 Frauenarzt – Michell & Pauline', 'Morgen Geburtstag'; Termine senken das Wochenziel nicht (" + r + ")")
+        pg.click(".awq [data-aw=new][data-k=termin]"); pg.wait_for_timeout(150)
+        okf = pg.locator(".awkind.awall button").count() == 14 and pg.get_attribute("#awWas", "placeholder") == "z. B. Steuerberater"
+        pg.click("[data-aw=kind][data-v=arzt]"); pg.fill("#awWas", "Frauenarzt"); pg.fill("#awVt", "15:00"); pg.fill("#awBt", "16:00"); pg.check("#awMit"); pg.click("[data-aw=save]"); pg.wait_for_timeout(1500)
+        ce = [c for c in [json.loads(l) for l in open("/tmp/calls.log")] if c.get("service") == "create_event"]
+        check(okf and ce[-1]["service_data"]["summary"] == "Michell: Frauenarzt" and "Art: arzt" in ce[-1]["service_data"]["description"] and "Mit: Pauline" in ce[-1]["service_data"]["description"], "Termin eintragen: 14 Arten mit Symbol, Arzt-Termin zusammen mit Pauline")
+        pg.click("[data-aw=undo]"); pg.wait_for_timeout(1200)
         r = pg.evaluate("""(()=>{const c=s=>getComputedStyle(document.querySelector(s)).backgroundColor,a=[c('.clegend .cd.me'),c('.clegend .cd.pa')];document.documentElement.classList.add('me-w');const b=[c('.clegend .cd.me'),c('.clegend .cd.pa')];document.documentElement.classList.remove('me-w');return a[0]===b[1]&&a[1]===b[0]&&a[0]!==a[1]})()""")
         check(r, "Kalender: feste Personenfarben – bei ihr ist er Salbei, sie Rosé (wie auf seinem Handy)")
         check(any(c.get("service") == "set_value" and c["service_data"]["entity_id"] == "input_text.sport_cockpit_michell_tage" for c in [json.loads(l) for l in open("/tmp/calls.log")]), "Eigene Trainingstage werden für den Partner-Kalender geteilt")
