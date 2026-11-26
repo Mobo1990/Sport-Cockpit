@@ -4,6 +4,7 @@ store={}
 stores={}
 todo=[]
 cal=[]
+CALN=[0]
 async def h(ws):
     await ws.send(json.dumps({"type":"auth_required"}))
     m=json.loads(await ws.recv())
@@ -68,7 +69,7 @@ async def h(ws):
             open("/tmp/calls.log","a").write(json.dumps(m)+"\n")
             sd=m.get("service_data") or {}
             if m["service"]=="create_event":
-                ev={"uid":"c%d"%len(cal),"summary":sd["summary"],"location":sd.get("location",""),"description":sd.get("description","")}
+                CALN[0]+=1;ev={"uid":"c%d"%CALN[0],"summary":sd["summary"],"location":sd.get("location",""),"description":sd.get("description","")}
                 if "start_date" in sd: ev.update(start=sd["start_date"],end=sd["end_date"])
                 else: ev.update(start=sd["start_date_time"].replace(" ","T"),end=sd["end_date_time"].replace(" ","T"))
                 cal.append(ev)
