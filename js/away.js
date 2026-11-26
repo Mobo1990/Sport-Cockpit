@@ -98,7 +98,7 @@ function awayFormHtml(){const f=awayForm,pn0=sharePartner(),pn=esc(pn0||'Dein Pa
   ${gone?`<label class="awnight"><input type="checkbox" id="awN" ${f.nacht?'checked':''}> Mit Übernachtung <span>(dann schlägt Duo ein Hotel-Training vor)</span></label>`:''}
   <label class="awnight"><input type="checkbox" id="awRem" ${f.rem===false?'':'checked'}> Erinnerung am Vorabend an euch beide</label>
   ${pn0?`<label class="awnight"><input type="checkbox" id="awPriv" ${f.priv?'checked':''}> Privat: ${pn} sieht nur „Termin“ <span>(Details bleiben bei dir)</span></label>`:''}
-  <div class="actions"><button class="primary" data-aw="save">${f.repl&&f.edit?'Speichern':'Eintragen'}</button>${f.repl&&f.edit?`<button class="awx${awayDel===f.repl?' danger':''}" data-aw="del" data-uid="${esc(f.repl)}">${awayDel===f.repl?(f.rep?'Ganze Serie löschen?':'Wirklich löschen?'):'Löschen'}</button>`:''}</div></section>`}
+  ${f.err?`<p class="awerr" role="alert">${esc(f.err)}</p>`:''}<div class="actions"><button class="primary" data-aw="save">${f.repl&&f.edit?'Speichern':'Eintragen'}</button>${f.repl&&f.edit?`<button class="awx${awayDel===f.repl?' danger':''}" data-aw="del" data-uid="${esc(f.repl)}">${awayDel===f.repl?(f.rep?'Ganze Serie löschen?':'Wirklich löschen?'):'Löschen'}</button>`:''}</div></section>`}
 function renderAway(){const td=today(),end=Date.now()+14*864e5;
  if(!HA.url||!HA.token)return `<section class="meal"><header><h3>Unser Kalender</h3></header><p class="tip" style="padding:0">Dafür muss die App mit Home Assistant verbunden sein (Mehr → Home Assistant).</p></section>`;
  const days=[];for(let i=0;i<14;i++){const d=iso(Date.now()+i*864e5);if(d===calSel)continue;const l=calAway(d).filter(a=>iso(a.start)===d||(d===td&&a.start<Date.now())).sort((a,b)=>a.start-b.start);if(l.length)days.push([d,i,l])}
@@ -110,11 +110,11 @@ function awayFocus(id){setTimeout(()=>{const e=$('awForm');if(e)e.scrollIntoView
 function awayRead(){const g=(id,k)=>{const e=$(id);return e?e.value:(awayForm[k]||'')};if(awayForm){Object.assign(awayForm,{was:g('awWas','was'),ort:g('awOrt','ort'),von:g('awVon','von'),vt:g('awVt','vt'),bis:g('awBis','bis'),bt:g('awBt','bt')});const n=$('awN');if(n)awayForm.nacht=n.checked;const mt=$('awMit');if(mt)awayForm.mit=mt.checked?sharePartner():'';const nz=$('awNz');if(nz)awayForm.notiz=nz.value;
  const gz=$('awGanz');if(gz){awayForm.ganz=gz.checked;if(gz.checked){awayForm.vt='';awayForm.bt=''}}const rm=$('awRem');if(rm)awayForm.rem=rm.checked;const pv=$('awPriv');if(pv)awayForm.priv=pv.checked}}
 async function awaySave(){if(!awayForm.quick)awayRead();const f=awayForm,was=f.was.trim(),ort=f.ort.trim();
- if(!f.von){note('Startdatum angeben');return}const bis=f.bis||f.von;if(bis<f.von){note('Ende liegt vor dem Start');return}
+ const fail=m=>{f.err=m;note(m);render();setTimeout(()=>{const e=document.querySelector('.awerr');if(e)e.scrollIntoView({block:'center'})},60)};f.err='';if(!f.von){fail('Bitte einen Tag wählen');return}let bis=f.bis||f.von;if(bis<f.von){fail('Der Bis-Tag liegt vor dem Start-Tag');return}
  const kind=f.kind||awayKind,art=kind==='unterwegs'&&f.nacht?'reise':kind,word=AWAY_SUM[art]||'unterwegs',timed=!f.ganz&&!!(f.vt||f.bt),priv=!!f.priv,nz=(f.notiz||'').trim();
  const sd={summary:`${S.prof.name}: ${priv?'Termin':was||word}`};if(ort&&!priv)sd.location=ort;
  sd.description=[f.nacht?'Übernachtung':'','Art: '+(priv?'termin':art),f.mit?'Mit: '+f.mit:'',nz&&!priv?'Notiz: '+nz:'',f.rep?'Wdh: '+(f.rep==='y'?'jährlich':'wöchentlich'):'',f.rem===false?'Erinnerung: aus':'',priv?'Privat: 1':''].filter(Boolean).join('\n');
- if(timed){const st=new Date(f.von+'T'+(f.vt||'00:00')),en=new Date(bis+'T'+(f.bt||'23:59'));if(en<=st){note('Ende liegt vor dem Start');return}sd.start_date_time=f.von+' '+(f.vt||'00:00')+':00';sd.end_date_time=bis+' '+(f.bt||'23:59')+':00'}
+ if(timed){const st=new Date(f.von+'T'+(f.vt||'00:00'));let en=new Date(bis+'T'+(f.bt||'23:59'));/* 17:00–01:00 am selben Tag = bis nach Mitternacht */if(en<=st&&bis===f.von&&f.bt){bis=iso(new Date(f.von+'T12:00').getTime()+864e5);en=new Date(bis+'T'+f.bt)}if(en<=st){fail('Die Endzeit liegt vor der Startzeit');return}sd.start_date_time=f.von+' '+(f.vt||'00:00')+':00';sd.end_date_time=bis+' '+(f.bt||'23:59')+':00'}
  else{sd.start_date=f.von;sd.end_date=iso(new Date(bis+'T12:00').getTime()+864e5)}
  note('Trage ein …');const repl=f.repl;
  /* Wiederholung nur über den Kalender-Befehl (der Dienst kennt keine RRULE) */

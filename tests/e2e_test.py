@@ -293,6 +293,16 @@ try:
         check(len(cr) == 1 and cr[-1]["event"]["rrule"] == "FREQ=YEARLY" and "Notiz: Geschenk besorgen" in cr[-1]["event"]["description"] and pg.evaluate("AWAY.filter(a=>a.rep==='y').length") >= 2 and "jährlich" in pg.text_content("#view") and "Geschenk besorgen" in pg.text_content("#view"), "Geburtstag 'jedes Jahr' mit Notiz: als Serie in HA, Wiederholungen sichtbar")
         pg.click("[data-aw=undo]"); pg.wait_for_timeout(1200)
         pg.click(".awq [data-aw=new][data-k=termin]"); pg.wait_for_timeout(150)
+        d0 = pg.input_value("#awVon"); pg.fill("#awWas", "Glühwein"); pg.uncheck("#awGanz"); pg.wait_for_timeout(100); pg.fill("#awVt", "17:00"); pg.fill("#awBt", "01:00"); pg.click("[data-aw=save]"); pg.wait_for_timeout(1500)
+        ce = [c for c in [json.loads(l) for l in open("/tmp/calls.log")] if c.get("service") == "create_event"]
+        d1 = pg.evaluate("d=>iso(new Date(d+'T12:00').getTime()+864e5)", d0)
+        check(ce[-1]["service_data"]["start_date_time"] == d0 + " 17:00:00" and ce[-1]["service_data"]["end_date_time"] == d1 + " 01:00:00", "17:00 bis 01:00 am selben Tag wird als 'bis nach Mitternacht' gespeichert (statt stillem Abbruch)")
+        pg.click("[data-aw=undo]"); pg.wait_for_timeout(1200)
+        pg.click(".awq [data-aw=new][data-k=termin]"); pg.wait_for_timeout(150)
+        pg.evaluate("([a,b])=>{document.getElementById('awVon').value=a;document.getElementById('awBis').value=b}", [d1, d0]); pg.click("[data-aw=save]"); pg.wait_for_timeout(300)
+        check(pg.is_visible(".awerr") and "Bis-Tag" in pg.text_content(".awerr"), "Fehler beim Eintragen steht sichtbar im Formular")
+        pg.click("[data-aw=cancel]"); pg.wait_for_timeout(100)
+        pg.click(".awq [data-aw=new][data-k=termin]"); pg.wait_for_timeout(150)
         pg.click("[data-aw=kind][data-v=arzt]"); pg.fill("#awWas", "Hautarzt"); pg.fill("#awOrt", "Praxis X"); pg.check("#awPriv"); pg.click("[data-aw=save]"); pg.wait_for_timeout(1500)
         ce = [c for c in [json.loads(l) for l in open("/tmp/calls.log")] if c.get("service") == "create_event"]
         check(ce[-1]["service_data"]["summary"] == "Michell: Termin" and "location" not in ce[-1]["service_data"] and "Privat: 1" in ce[-1]["service_data"]["description"] and "Hautarzt" in pg.text_content("#view") and "nur für dich" in pg.text_content("#view").lower(), "Privat: HA/Pauline sehen nur 'Termin', ich sehe Hautarzt + Ort")
