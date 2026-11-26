@@ -242,8 +242,8 @@ try:
         check(pg.locator(f".cc[data-cal='{tmd.isoformat()}'] .cic .aic.me").count() == 1, "Kalender zeigt Unterwegs-Symbol (in meiner Farbe) am Termin")
         pg.click(f".cc[data-cal='{tmd.isoformat()}']"); pg.wait_for_timeout(150)
         check("Köln" in pg.text_content(".calday"), "Tag antippen zeigt den Unterwegs-Eintrag")
-        pg.click("[data-aw=del]"); pg.click("[data-aw=del]"); pg.wait_for_timeout(1200)
-        check(pg.locator(".away .awr").count() == 0 and any(json.loads(l).get("type") == "calendar/event/delete" for l in open("/tmp/calls.log")), "Löschen (zweimal tippen) entfernt den Eintrag aus HA")
+        pg.click(".calday [data-aw=edit]"); pg.wait_for_timeout(200); pg.click("#awForm [data-aw=del]"); pg.wait_for_timeout(150); pg.click("#awForm [data-aw=del]"); pg.wait_for_timeout(1200)
+        check(pg.locator(".away .awr").count() == 0 and any(json.loads(l).get("type") == "calendar/event/delete" for l in open("/tmp/calls.log")), "Eintrag antippen → Bearbeiten → Löschen (zweimal) entfernt ihn aus HA")
         pg.click("[data-aw=quick][data-n='1'][data-night='1']"); pg.wait_for_timeout(1500)
         ce = [json.loads(l) for l in open("/tmp/calls.log")]; ce = [c for c in ce if c.get("service") == "create_event"]
         check(len(ce) == 2 and ce[-1]["service_data"]["summary"] == "Michell: auf Reise" and ce[-1]["service_data"]["start_date"] == tmd.isoformat() and ce[-1]["service_data"]["description"] == "Übernachtung\nArt: reise", "Ein Tipp 'Morgen mit Übernachtung' trägt ein (ohne Pflichtfelder)")

@@ -1182,3 +1182,6 @@ html.kbopen .nav{display:none}
 .awmit{font-weight:600;color:var(--ink)}
 .awtoday li>span:first-of-type{flex:none}.awtoday .awtt{flex:1;min-width:0}.away.form input[type=checkbox],.awq input[type=checkbox]{accent-color:var(--d-saged,#3E5A4C)}
 .awtoday li>span.awtt{flex:1 1 auto;min-width:0}
+.awr b{white-space:normal;overflow:visible}.awed{cursor:pointer}.awgo{font-size:24px;color:var(--mute);line-height:1}
+.awav2{display:flex;flex-direction:column;gap:2px;flex:none}.awav2 .ava{margin:0}
+.away.form .actions{display:flex;gap:8px;flex-wrap:wrap}.away.form .actions .awx{flex:none}

@@ -8,11 +8,11 @@ let AWAY=[],awayForm=null,awayDel='',awayUndoT=null,awayKind='unterwegs';
 /* Arten mit Symbol (SVG, Farbe = Person). Zählt fürs Wochenziel: ganze Tage, Übernachtung, Urlaub, krank – nicht ein Abend weg. */
 /* Gemeinsamer Paar-Kalender: Termine und Wegsein, jede Art mit eigenem Symbol */
 const AWAY_KINDS=[['termin','Termin'],['arzt','Arzt'],['geburtstag','Geburtstag'],['treffen','Ausgehen'],['unterwegs','Unterwegs'],['reise','Reise'],
- ['essen','Essen gehen'],['feier','Feier'],['kultur','Kino/Konzert'],['sport','Sport'],['familie','Familie'],['kind','Kind'],['zuhause','Handwerker'],['urlaub','Urlaub'],['krank','Krank']];
+ ['essen','Essen gehen'],['feier','Feier'],['kultur','Kino/Konzert'],['sport','Sport'],['familie','Familie'],['kind','Kind'],['zuhause','Zuhause'],['urlaub','Urlaub'],['krank','Krank']];
 const AWAY_MAIN=6;/* die ersten 6 sind sofort sichtbar, der Rest unter „Mehr Arten“ */
 const AWAY_GONE=['unterwegs','treffen','reise','urlaub','krank'];/* Schnellwahl „Ich bin weg“ */
 const AWAY_SUM={kind:'Kind-Termin',termin:'hat einen Termin',arzt:'beim Arzt',geburtstag:'Geburtstag',essen:'essen gehen',treffen:'unterwegs am Abend',feier:'auf einer Feier',kultur:'Kino/Konzert',sport:'Sport',familie:'bei der Familie',zuhause:'Termin zu Hause',unterwegs:'unterwegs',reise:'auf Reise',urlaub:'im Urlaub',krank:'krank'};
-const AWAY_PH={kind:'z. B. Kita-Fest, Kinderarzt',termin:'z. B. Steuerberater',arzt:'z. B. Frauenarzt',geburtstag:'z. B. Geburtstag Oma',essen:'z. B. Italiener mit Kim',treffen:'z. B. Bier mit Stefan, Firmen-Event',feier:'z. B. Weihnachtsfeier',kultur:'z. B. Konzert',sport:'z. B. Fußball',familie:'z. B. Eltern besuchen',zuhause:'z. B. Handwerker kommt',unterwegs:'z. B. Dienstreise',reise:'z. B. Wuppertal',urlaub:'z. B. Mallorca',krank:''};
+const AWAY_PH={kind:'z. B. Kita-Fest, Kinderarzt',termin:'z. B. Steuerberater',arzt:'z. B. Frauenarzt',geburtstag:'z. B. Geburtstag Oma',essen:'z. B. Italiener mit Kim',treffen:'z. B. Bier mit Stefan, Firmen-Event',feier:'z. B. Weihnachtsfeier',kultur:'z. B. Konzert',sport:'z. B. Fußball',familie:'z. B. Eltern besuchen',zuhause:'z. B. Handwerker kommt, Paket',unterwegs:'z. B. Dienstreise',reise:'z. B. Wuppertal',urlaub:'z. B. Mallorca',krank:''};
 const AWAY_ICO={termin:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
  arzt:'<path d="M10 4h4v6h6v4h-6v6h-4v-6H4v-4h6z"/>',
  geburtstag:'<path d="M4 21h16v-8H4z"/><path d="M4 16.5c2 1.5 4 1.5 6 0s4-1.5 6 0 3 1.5 4 0"/><path d="M12 13V9"/><path d="M12 6.5c-1.2-1 0-3 0-3s1.2 2 0 3z"/>',
@@ -24,7 +24,7 @@ const AWAY_ICO={termin:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d
  familie:'<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M14 20c0-2.5 1.5-4.5 3.5-4.5S21 17.5 21 20"/>',
  zuhause:'<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/>',
  unterwegs:'<path d="M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/>',
- treffen:'<path d="M6 8h9v11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z"/><path d="M15 11h2.5a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5H15"/><path d="M6 8a2.5 2.5 0 0 1 3-3 3 3 0 0 1 5 .5A2 2 0 0 1 15 8"/>',
+ treffen:'<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
  reise:'<path d="M3 19V6M3 15h18v4"/><path d="M21 15v-2.5A2.5 2.5 0 0 0 18.5 10H11v5"/><circle cx="7" cy="11.5" r="1.8"/>',
  urlaub:'<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>',
  krank:'<path d="M14 14.5V5a2 2 0 0 0-4 0v9.5a4 4 0 1 0 4 0z"/><path d="M12 9v7"/>'};
@@ -65,9 +65,10 @@ const awayPriv=a=>a.priv&&calMe(a)?((S.calPriv||{})[awayKey(a)]||null):null;
 const awayTitle=a=>{const p=awayPriv(a);if(p&&p.was)return p.was;return awayStd(a.was)?(AWAY_KINDS.find(k=>k[0]===a.art)||['','Termin'])[1]:a.was};
 const awayArt=a=>{const p=awayPriv(a);return p&&p.art||a.art};
 const awayStd=w=>!w||Object.values(AWAY_SUM).some(x=>x.toLowerCase()===String(w).toLowerCase());
-function awayRow(a,del,notag){const me=calMe(a),[tc,tl0]=awayTag(a),tl=notag&&tc!=='jetzt'?'':tl0,who=esc(a.wer||'?')+(a.mit?' & '+esc(a.mit):''),p=awayPriv(a),ort=p?p.ort:a.ort,nz=p?p.notiz:a.notiz;
- return `<li class="awr${tc?' '+tc:''}">${avaHtml(a.wer||'?',me,'sm')}<div><b>${awayIcoW(awayArt(a),a.mit?'both':me?'me':'pa')}${esc(awayTitle(a))}</b><span>${who}${ort?` · ${esc(ort)}`:''}</span><small>${esc(awayWhen(a))}${a.rep?` · ${a.rep==='y'?'jährlich':'wöchentlich'}`:''}</small>${nz?`<span class="awnz">Notiz: ${esc(nz)}</span>`:''}${a.priv&&me?`<span class="awnz">Nur für dich – ${esc(sharePartner()||'Partner')} sieht „Termin“</span>`:''}</div>
- <div class="awm">${tl?`<em>${tl}</em>`:''}${a.nacht?'<i>Über Nacht</i>':''}${me&&HA.url&&a.uid?`<button class="awe" data-aw="edit" data-uid="${esc(a.uid)}" data-rid="${esc(a.rid)}">Bearbeiten</button>`:''}${del&&me&&a.uid?`<button class="awx${awayDel===a.uid+a.rid?' danger':''}" data-aw="del" data-uid="${esc(a.uid)}" data-rid="${esc(a.rid)}" aria-label="Löschen">${awayDel===a.uid+a.rid?(a.rep?'Ganze Serie löschen?':'Wirklich löschen?'):'Löschen'}</button>`:''}</div></li>`}
+function awayRow(a,del,notag){const me=calMe(a),[tc,tl0]=awayTag(a),tl=notag&&tc!=='jetzt'?'':tl0,p=awayPriv(a),ort=p?p.ort:a.ort,nz=p?p.notiz:a.notiz,ed=me&&HA.url&&a.uid;
+ const av=a.mit?`<span class="awav2">${avaHtml(a.wer||'?',me,'sm')}${avaHtml(a.mit,!me,'sm')}</span>`:avaHtml(a.wer||'?',me,'sm');
+ return `<li class="awr${tc?' '+tc:''}${ed?' awed':''}"${ed?` data-aw="edit" data-uid="${esc(a.uid)}" role="button" tabindex="0" aria-label="${esc(awayTitle(a))} bearbeiten"`:''}>${av}<div><b>${awayIcoW(awayArt(a),a.mit?'both':me?'me':'pa')}${esc(awayTitle(a))}</b><span>${esc(a.wer||'?')}${a.mit?' & '+esc(a.mit):''}${ort?` · ${esc(ort)}`:''}</span><small>${esc(awayWhen(a))}${a.rep?` · ${a.rep==='y'?'jährlich':'wöchentlich'}`:''}</small>${nz?`<span class="awnz">Notiz: ${esc(nz)}</span>`:''}${a.priv&&me?`<span class="awnz">Nur für dich – ${esc(sharePartner()||'Partner')} sieht „Termin“</span>`:''}</div>
+ <div class="awm">${tl?`<em>${tl}</em>`:''}${a.nacht?'<i>Über Nacht</i>':''}${ed?'<span class="awgo" aria-hidden="true">›</span>':''}</div></li>`}
 const awayNext=days=>AWAY.filter(a=>a.stop>=Date.now()&&a.start<=Date.now()+days*864e5);
 /* Karte auf der Startseite – nur sichtbar, wenn in den nächsten 14 Tagen jemand weg ist */
 function awayHomeHtml(){if(!HA.url||!HA.token)return '';const l=awayNext(14);if(!l.length)return '';
@@ -97,10 +98,10 @@ function awayFormHtml(){const f=awayForm,pn0=sharePartner(),pn=esc(pn0||'Dein Pa
   ${gone?`<label class="awnight"><input type="checkbox" id="awN" ${f.nacht?'checked':''}> Mit Übernachtung <span>(dann schlägt Duo ein Hotel-Training vor)</span></label>`:''}
   <label class="awnight"><input type="checkbox" id="awRem" ${f.rem===false?'':'checked'}> Erinnerung am Vorabend an euch beide</label>
   ${pn0?`<label class="awnight"><input type="checkbox" id="awPriv" ${f.priv?'checked':''}> Privat: ${pn} sieht nur „Termin“ <span>(Details bleiben bei dir)</span></label>`:''}
-  <div class="actions"><button class="primary" data-aw="save">${f.repl&&f.edit?'Speichern':'Eintragen'}</button></div></section>`}
+  <div class="actions"><button class="primary" data-aw="save">${f.repl&&f.edit?'Speichern':'Eintragen'}</button>${f.repl&&f.edit?`<button class="awx${awayDel===f.repl?' danger':''}" data-aw="del" data-uid="${esc(f.repl)}">${awayDel===f.repl?(f.rep?'Ganze Serie löschen?':'Wirklich löschen?'):'Löschen'}</button>`:''}</div></section>`}
 function renderAway(){const td=today(),end=Date.now()+14*864e5;
  if(!HA.url||!HA.token)return `<section class="meal"><header><h3>Unser Kalender</h3></header><p class="tip" style="padding:0">Dafür muss die App mit Home Assistant verbunden sein (Mehr → Home Assistant).</p></section>`;
- const days=[];for(let i=0;i<14;i++){const d=iso(Date.now()+i*864e5);if(d===calSel)continue;const l=calAway(d).filter(a=>iso(a.start)===d||(d===td&&a.start<Date.now()));if(l.length)days.push([d,i,l])}
+ const days=[];for(let i=0;i<14;i++){const d=iso(Date.now()+i*864e5);if(d===calSel)continue;const l=calAway(d).filter(a=>iso(a.start)===d||(d===td&&a.start<Date.now())).sort((a,b)=>a.start-b.start);if(l.length)days.push([d,i,l])}
  let free='';for(let i=0;i<14;i++){const d=iso(Date.now()+i*864e5);if(!calAway(d).length&&(i>0||new Date().getHours()<17)){free=d;break}}
  const lab=(d,i)=>i===0?'Heute':i===1?'Morgen':`${AWT[new Date(d+'T12:00').getDay()]} ${+d.slice(8)}.${+d.slice(5,7)}. · in ${i} Tagen`;
  return `<h3 class="calh">Nächste 14 Tage</h3>${free?`<p class="calfree">Nächster Abend, an dem ihr beide nichts habt: <b>${lab(free,Math.round((new Date(free+'T12:00')-new Date(td+'T12:00'))/864e5))}</b></p>`:''}
@@ -145,7 +146,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-aw]');if
  else if(a==='save')awaySave();
  else if(a==='quick')awayQuick(b.dataset.d||iso(Date.now()+(+b.dataset.n)*864e5),!!b.dataset.night);
  else if(a==='undo'){const u=awayUndo;awayUndo=null;if(u)awayRemove(u.uid,true).then(()=>tell(`${S.prof.name}: doch nicht unterwegs`,'Der eben gemeldete Eintrag ist zurückgenommen.'))}
- else if(a==='del'){const k=b.dataset.uid+(b.dataset.rid||'');if(awayDel===k)awayRemove(b.dataset.uid);else{awayDel=k;render()}}
+ else if(a==='del'){const k=b.dataset.uid;if(awayDel===k){awayForm=null;awayRemove(k)}else{if(awayForm)awayRead();awayDel=k;render()}}
  else if(a==='morek'){if(awayForm){awayRead();awayForm.more=true}render()}
  else if(a==='rep'){if(awayForm){awayRead();awayForm.rep=b.dataset.v}render()}
  else if(a==='leg'){calLeg=!calLeg;render()}});
