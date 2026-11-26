@@ -25,5 +25,8 @@ Live: https://mobo1990.github.io/Sport-Cockpit/ (GitHub Pages, Branch `main`, Or
 - Nach Änderungen immer testen: `python3 tests/e2e_test.py` (braucht `pip install playwright websockets` + `python -m playwright install chromium`).
   Startet Webserver + nachgebauten HA (`tests/mock_ha.py`) und prüft die Hauptabläufe. Läuft auch als GitHub Action.
 - Neue Features bekommen eine Prüfung im E2E-Test.
+- **Große Änderungen (Michells feste Regel):** 1) Best Practice recherchieren (was machen die gängigsten Apps, welcher Nutzen für uns), 2) Testpersonen befragen,
+  3) aus Recherche + Feedback + eigenen Ideen bauen, 4) Testrunden, bis **alle Testpersonen ≥ 8,5** geben, 5) Lighthouse laufen lassen,
+  6) erst dann Michell präsentieren (Screens, Noten, Lighthouse) und auf „Main“ warten.
 - Keine Zugangsdaten ins Repo: HA-Token und Anthropic-API-Schlüssel liegen nur im `localStorage` des Geräts.
 - Kleine, beschriebene Commits auf `main` (Pages veröffentlicht automatisch).
