@@ -10,6 +10,12 @@ function haCall(cmds){return new Promise((res,rej)=>{let ws;try{ws=new WebSocket
   else if(m.type==='auth_ok'){if(!cmds.length){clearTimeout(to);ws.close();res([]);return}cmds.forEach(c=>ws.send(JSON.stringify({id:++id,...c})))}
   else if(m.type==='result'){out[m.id]=m;if(Object.keys(out).length===cmds.length){clearTimeout(to);ws.close();res(cmds.map((_,i)=>out[i+1]))}}};
  ws.onerror=()=>{clearTimeout(to);rej(new Error('Home Assistant nicht erreichbar'))}})}
+/* Abo-Befehle (z. B. calendar/event/subscribe): erste Ereignis-Nachricht abwarten, dann schließen */
+function haSub(cmd,ms=9000){return new Promise((res,rej)=>{let ws;try{ws=new WebSocket(HA.url.replace(/\/+$/,'').replace(/^http/,'ws')+'/api/websocket')}catch(e){rej(new Error('Adresse ungültig'));return}
+ const end=(f,v)=>{clearTimeout(to);try{ws.close()}catch(e){}f(v)},to=setTimeout(()=>end(rej,new Error('Keine Antwort')),ms);
+ ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.type==='auth_required')ws.send(JSON.stringify({type:'auth',access_token:HA.token}));else if(m.type==='auth_invalid')end(rej,new Error('Token ungültig'));
+  else if(m.type==='auth_ok')ws.send(JSON.stringify({id:1,...cmd}));else if(m.type==='result'&&!m.success)end(rej,new Error((m.error&&m.error.message)||'Fehler'));else if(m.type==='event'&&m.id===1)end(res,m.event)};
+ ws.onerror=()=>end(rej,new Error('Home Assistant nicht erreichbar'))})}
 let partners=[],partnersCh=false;try{partners=JSON.parse(localStorage.getItem('sc.partners'))||[]}catch(e){}
 function health(m){if(!m||!m.success||!S.prof.name)return;const me='input_text.sport_cockpit_'+slugN(S.prof.name);const np=(m.result||[]).filter(e=>/^input_text\.sport_cockpit_[a-z0-9]+$/.test(e.entity_id)&&e.entity_id!==me).map(e=>{let j={};try{j=JSON.parse(e.state)}catch(x){}return{name:(e.attributes&&e.attributes.friendly_name||'').replace(/^Sport Cockpit /,''),...j,_id:e.entity_id}}).map(p=>{const t=(m.result||[]).find(e=>e.entity_id===p._id+'_tage');let td=null;try{td=t?JSON.parse(t.state):null}catch(x){}const {_id,...r}=p;return td&&td.d?{...r,td}:r});
  if(JSON.stringify(np)!==JSON.stringify(partners)){partners=np;partnersCh=true;try{localStorage.setItem('sc.partners',JSON.stringify(np))}catch(e){}}const pre='input_number.sport_cockpit_'+slugN(S.prof.name)+'_',d=today(),h={};
@@ -19,9 +25,9 @@ function health(m){if(!m||!m.success||!S.prof.name)return;const me='input_text.s
   sonst überschreibt ein Gerät mit leerem Tag die Einträge der anderen (Datenverlust 22.11.) */
  if(JSON.stringify(day.h)!==old)partnersCh=true;S.hT=Math.max(...(m.result||[]).filter(e=>e.entity_id.startsWith(pre)).map(e=>Date.parse(e.last_updated)||0),0)}
 function syncLater(){clearTimeout(syncT);if(HA.url&&HA.token)syncT=setTimeout(syncNow,1500)}
-function metaOf(){return{t:S.metaT,prof:S.prof,plan:S.plan,goal:S.goal,rest:S.rest,cgoal:S.cgoal,nut:{goal:S.nut.goal,gh:S.nut.gh||[],maint:S.nut.maint,gkg:S.nut.gkg,foods:S.nut.foods,meals:S.nut.meals,recent:S.nut.recent,bowls:S.nut.bowls||[]},drafts,draftT}}
+function metaOf(){return{t:S.metaT,calPriv:S.calPriv||{},prof:S.prof,plan:S.plan,goal:S.goal,rest:S.rest,cgoal:S.cgoal,nut:{goal:S.nut.goal,gh:S.nut.gh||[],maint:S.nut.maint,gkg:S.nut.gkg,foods:S.nut.foods,meals:S.nut.meals,recent:S.nut.recent,bowls:S.nut.bowls||[]},drafts,draftT}}
 function merge(R){let changed=false;const m=R.sc_meta;
- if(m&&(m.t||0)>(S.metaT||0)){if(m.prof){S.prof=m.prof;if(profOK())obOpen=false}Object.assign(S,{plan:m.plan||S.plan,goal:m.goal||S.goal,rest:m.rest||S.rest,cgoal:m.cgoal||S.cgoal,metaT:m.t});if(m.nut)Object.assign(S.nut,m.nut);changed=true}
+ if(m&&(m.t||0)>(S.metaT||0)){if(m.prof){S.prof=m.prof;if(profOK())obOpen=false}Object.assign(S,{calPriv:m.calPriv||S.calPriv,plan:m.plan||S.plan,goal:m.goal||S.goal,rest:m.rest||S.rest,cgoal:m.cgoal||S.cgoal,metaT:m.t});if(m.nut)Object.assign(S.nut,m.nut);changed=true}
  if(m&&(m.draftT||0)>draftT){drafts=m.drafts||{};draftT=m.draftT;changed=true}
  const rs=R.sc_sessions;if(rs){const del=new Set([...(S.del||[]),...(rs.del||[])]),map=new Map();for(const s of [...(rs.list||[]),...S.sessions]){const o=map.get(s.id);if(!o||(s.t||0)>(o.t||0))map.set(s.id,s)}
   const list=[...map.values()].filter(s=>!del.has(s.id));if(list.length!==S.sessions.length||del.size!==(S.del||[]).length)changed=true;S.sessions=list;S.del=[...del]}

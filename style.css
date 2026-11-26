@@ -1169,3 +1169,16 @@ html.kbopen .nav{display:none}
 .awtoday small{display:block;font:700 12px var(--fh);letter-spacing:.06em;text-transform:uppercase;color:var(--acc);margin:2px 0}
 .awtoday ul{list-style:none;margin:0 0 4px;padding:0}.awtoday li{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:15px}.awtoday li .aic{width:20px;height:20px}
 .awtoday em{font-style:normal;color:var(--mute);font-size:13px}.awtoday .awtgo{position:absolute;top:12px;right:14px}
+/* Paar-Kalender Runde 2 */
+.aic.ink{color:var(--ink)}.aicb{position:relative;display:inline-flex;flex-direction:column;align-items:center;line-height:0}.aicb i{position:absolute;bottom:-4px;width:5px;height:5px;border-radius:50%}.aicb i.me{left:calc(50% - 6px);background:var(--me)}.aicb i.pa{left:calc(50% + 1px);background:var(--pa)}
+.cic .aic{width:18px;height:18px}.cic{bottom:3px}.cmore{font-size:11px}
+.awtoday li{gap:10px}.awtoday li>span:first-of-type{flex:1;min-width:0}.awwho{display:inline-flex;gap:3px}.awwho i{font-style:normal;font-size:11px;font-weight:800;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;color:#fff}.awwho i.me{background:var(--me)}.awwho i.pa{background:var(--pa)}
+.awday{margin:12px 0 2px;font:700 13px var(--fh);letter-spacing:.04em;text-transform:uppercase;color:var(--acc)}.awday:first-child{margin-top:0}
+.calfree{margin:0 0 8px;font-size:14px;color:var(--mute)}.calfree b{color:var(--ink)}
+.awclash{background:#fbe7e1;color:#8f321d;border-radius:10px;padding:6px 10px;font-size:14px}
+.awnz{display:block;font-size:13px;color:var(--mute);margin-top:2px}
+.awmorek{display:block;margin:6px 0 4px;font-size:15px;color:var(--ink);text-decoration:underline}
+.awrep{display:flex;gap:6px}.awrep button{flex:1;min-height:40px;font-size:14px}
+.awmit{font-weight:600;color:var(--ink)}
+.awtoday li>span:first-of-type{flex:none}.awtoday .awtt{flex:1;min-width:0}.away.form input[type=checkbox],.awq input[type=checkbox]{accent-color:var(--d-saged,#3E5A4C)}
+.awtoday li>span.awtt{flex:1 1 auto;min-width:0}

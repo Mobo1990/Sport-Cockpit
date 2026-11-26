@@ -4,6 +4,21 @@ store={}
 stores={}
 todo=[]
 cal=[]
+def cal_expand():
+    """Wiederholungen wie HA aufklappen (nur FREQ=WEEKLY/YEARLY, reicht für die Tests)."""
+    import datetime as _d
+    out=[]
+    for e in cal:
+        rr=e.get("rrule") or ""
+        if not rr: out.append(e);continue
+        f=_d.datetime.fromisoformat if "T" in e["start"] else _d.date.fromisoformat
+        s0,e0=f(e["start"]),f(e["end"])
+        for i in range(60 if "WEEKLY" in rr else 3):
+            dt=_d.timedelta(weeks=i) if "WEEKLY" in rr else None
+            try: si,ei=(s0+dt,e0+dt) if dt is not None else (s0.replace(year=s0.year+i),e0.replace(year=e0.year+i))
+            except ValueError: continue
+            out.append({**e,"start":si.isoformat(),"end":ei.isoformat(),"recurrence_id":si.isoformat()})
+    return out
 CALN=[0]
 async def h(ws):
     await ws.send(json.dumps({"type":"auth_required"}))
@@ -75,7 +90,17 @@ async def h(ws):
                 cal.append(ev)
                 await ws.send(json.dumps({"id":m["id"],"type":"result","success":True,"result":{"context":{}}}))
             else:
-                await ws.send(json.dumps({"id":m["id"],"type":"result","success":True,"result":{"context":{},"response":{"calendar.unterwegs":{"events":cal}}}}))
+                # wie echtes HA: get_events liefert KEINE uid
+                await ws.send(json.dumps({"id":m["id"],"type":"result","success":True,"result":{"context":{},"response":{"calendar.unterwegs":{"events":[{k:v for k,v in e.items() if k not in ("uid","rrule")} for e in cal_expand()]}}}}))
+        elif m["type"]=="calendar/event/subscribe":
+            open("/tmp/calls.log","a").write(json.dumps(m)+"\n")
+            await ws.send(json.dumps({"id":m["id"],"type":"result","success":True,"result":None}))
+            await ws.send(json.dumps({"id":m["id"],"type":"event","event":{"events":cal_expand()}}))
+        elif m["type"]=="calendar/event/create":
+            open("/tmp/calls.log","a").write(json.dumps(m)+"\n")
+            e=m.get("event") or {};CALN[0]+=1
+            cal.append({"uid":"c%d"%CALN[0],"summary":e.get("summary",""),"location":e.get("location",""),"description":e.get("description",""),"start":e["dtstart"],"end":e["dtend"],"rrule":e.get("rrule","")})
+            await ws.send(json.dumps({"id":m["id"],"type":"result","success":True,"result":None}))
         elif m["type"]=="calendar/event/delete":
             open("/tmp/calls.log","a").write(json.dumps(m)+"\n")
             cal[:]=[e for e in cal if e["uid"]!=m.get("uid")]

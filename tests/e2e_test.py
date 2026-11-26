@@ -218,9 +218,10 @@ try:
         print("Unterwegs")
         pg.click(".nav >> text=Kalender"); pg.wait_for_timeout(200)
         check(pg.is_visible(".cgrid") and pg.locator(".cgrid .cc.tdy").count() == 1 and pg.locator(".cgrid .cc .cdots .cd.me").count() == pg.evaluate("new Set(S.sessions.map(s=>iso(s.date)).filter(d=>d.slice(0,7)===today().slice(0,7))).size"), "Kalender-Tab: Monat mit heute, Trainingstage markiert")
-        check(pg.is_visible(".awq [data-aw=quick]") and "Gerade ist nichts eingetragen" in pg.text_content(".away.list") and "liest keinen Kalender" in pg.text_content(".awpriv"), "Kalender: Schnellwahl 'Ich bin unterwegs', Hinweis zur Privatsphäre")
+        check(pg.is_visible(".awq [data-aw=quick]") and "Sonst ist nichts eingetragen" in pg.text_content(".away.list") and "liest keinen Kalender" in pg.text_content(".awpriv"), "Kalender: Schnellwahl 'Ich bin unterwegs', Hinweis zur Privatsphäre")
         pg.click(".awq [data-aw=new]:not([data-k])"); pg.wait_for_timeout(150)
-        check(all(pg.is_visible(x) for x in ["#awWas","#awOrt","#awVon","#awBis","#awVt","#awBt"]) and pg.locator(".awq").count() == 0, "Genauer eintragen: Was, Wo, Von/Bis und Uhrzeiten sofort sichtbar, oben statt der Schnellwahl")
+        gz = pg.is_checked("#awGanz") and pg.locator("#awVt").count() == 0; pg.uncheck("#awGanz"); pg.wait_for_timeout(150)
+        check(gz and all(pg.is_visible(x) for x in ["#awWas","#awOrt","#awVon","#awBis","#awVt","#awBt"]) and pg.locator(".awq").count() == 0, "Genauer eintragen: Was, Wo, Tag; Uhrzeiten nach 'Ganztägig' aus – sofort sichtbar, oben statt der Schnellwahl")
         pg.fill("#awWas", "tecis Workshop"); pg.fill("#awOrt", "Köln")
         tm = (datetime.date.today() + datetime.timedelta(days=1)).isoformat(); pg.fill("#awVon", tm); pg.dispatch_event("#awVon", "change"); pg.fill("#awVt", "08:00")
         pg.check("#awN")
@@ -242,13 +243,13 @@ try:
         pg.click(f".cc[data-cal='{tmd.isoformat()}']"); pg.wait_for_timeout(150)
         check("Köln" in pg.text_content(".calday"), "Tag antippen zeigt den Unterwegs-Eintrag")
         pg.click("[data-aw=del]"); pg.click("[data-aw=del]"); pg.wait_for_timeout(1200)
-        check(pg.locator(".away.list .awr").count() == 0 and any(json.loads(l).get("type") == "calendar/event/delete" for l in open("/tmp/calls.log")), "Löschen (zweimal tippen) entfernt den Eintrag aus HA")
+        check(pg.locator(".away .awr").count() == 0 and any(json.loads(l).get("type") == "calendar/event/delete" for l in open("/tmp/calls.log")), "Löschen (zweimal tippen) entfernt den Eintrag aus HA")
         pg.click("[data-aw=quick][data-n='1'][data-night='1']"); pg.wait_for_timeout(1500)
         ce = [json.loads(l) for l in open("/tmp/calls.log")]; ce = [c for c in ce if c.get("service") == "create_event"]
         check(len(ce) == 2 and ce[-1]["service_data"]["summary"] == "Michell: auf Reise" and ce[-1]["service_data"]["start_date"] == tmd.isoformat() and ce[-1]["service_data"]["description"] == "Übernachtung\nArt: reise", "Ein Tipp 'Morgen mit Übernachtung' trägt ein (ohne Pflichtfelder)")
         check(pg.is_visible(".awok") and "Pauline" in pg.text_content(".awok"), "Bestätigung: Eingetragen, Pauline bekommt eine Nachricht")
         pg.click("[data-aw=undo]"); pg.wait_for_timeout(1200)
-        check(pg.locator(".away.list .awr").count() == 0 and sum(1 for l in open("/tmp/calls.log") if json.loads(l).get("type") == "calendar/event/delete") == 2, "Rückgängig nimmt den Eintrag wieder raus")
+        check(pg.locator(".away .awr").count() == 0 and sum(1 for l in open("/tmp/calls.log") if json.loads(l).get("type") == "calendar/event/delete") == 2, "Rückgängig nimmt den Eintrag wieder raus")
         pg.click("[data-aw=kind][data-v='urlaub']"); pg.click("[data-aw=quick][data-n='1']:not([data-night])"); pg.wait_for_timeout(1500)
         ce = [json.loads(l) for l in open("/tmp/calls.log")]; ce = [c for c in ce if c.get("service") == "create_event"]
         check(ce[-1]["service_data"]["summary"] == "Michell: im Urlaub", "Art wählbar: 'Urlaub' statt 'unterwegs'")
@@ -256,12 +257,12 @@ try:
         pre = pg.is_visible("#awOrt") and pg.input_value("#awVon") == tmd.isoformat()
         pg.fill("#awOrt", "Mallorca"); pg.click("[data-aw=save]"); pg.wait_for_timeout(1800)
         cl = [json.loads(l) for l in open("/tmp/calls.log")]; ce = [c for c in cl if c.get("service") == "create_event"]
-        check(pre and ce[-1]["service_data"].get("location") == "Mallorca" and ce[-1]["service_data"]["summary"] == "Michell: im Urlaub" and sum(1 for c in cl if c.get("type") == "calendar/event/delete") == 3 and pg.locator(".away.list .awr").count() == 1, "Nach dem Schnell-Eintrag: 'Wo, was, Uhrzeit ergänzen' ersetzt den Eintrag mit Ort")
-        pg.click(".away.list [data-aw=edit]"); pg.wait_for_timeout(200)
+        check(pre and ce[-1]["service_data"].get("location") == "Mallorca" and ce[-1]["service_data"]["summary"] == "Michell: im Urlaub" and sum(1 for c in cl if c.get("type") == "calendar/event/delete") == 3 and pg.locator(".away .awr").count() == 1, "Nach dem Schnell-Eintrag: 'Wo, was, Uhrzeit ergänzen' ersetzt den Eintrag mit Ort")
+        pg.click(".away [data-aw=edit]"); pg.wait_for_timeout(200)
         pre = pg.input_value("#awOrt") == "Mallorca" and "bearbeiten" in pg.text_content("#awForm")
-        pg.fill("#awVt", "17:00"); pg.fill("#awBt", "23:30"); pg.check("#awMit"); pg.click("[data-aw=save]"); pg.wait_for_timeout(1800)
+        pg.uncheck("#awGanz"); pg.wait_for_timeout(150); pg.fill("#awVt", "17:00"); pg.fill("#awBt", "23:30"); pg.check("#awMit"); pg.click("[data-aw=save]"); pg.wait_for_timeout(1800)
         cl = [json.loads(l) for l in open("/tmp/calls.log")]; ce = [c for c in cl if c.get("service") == "create_event"]
-        check(pre and ce[-1]["service_data"].get("start_date_time") == tmd.isoformat() + " 17:00:00" and "Mit: Pauline" in ce[-1]["service_data"]["description"] and sum(1 for c in cl if c.get("type") == "calendar/event/delete") == 4 and pg.locator(".away.list .awr").count() == 1 and "17:00" in pg.text_content(".away.list") and "Pauline" in pg.text_content(".away.list"), "Eintrag nachträglich bearbeiten: Uhrzeit 17–23:30 und 'Pauline ist auch dabei' ersetzen den alten Eintrag")
+        check(pre and ce[-1]["service_data"].get("start_date_time") == tmd.isoformat() + " 17:00:00" and "Mit: Pauline" in ce[-1]["service_data"]["description"] and sum(1 for c in cl if c.get("type") == "calendar/event/delete") == 4 and pg.locator(".away .awr").count() == 1 and "17:00" in pg.text_content("#view") and "Pauline" in pg.text_content("#view"), "Eintrag nachträglich bearbeiten: Uhrzeit 17–23:30 und 'Pauline ist auch dabei' ersetzen den alten Eintrag")
         pg.click("[data-aw=undo]"); pg.wait_for_timeout(1200); pg.click("[data-aw=kind][data-v='unterwegs']")
         r = pg.evaluate("""(()=>{const o=partners;partners=[{name:'Pauline',td:{d:today(),k:(2).toString(36),c:(4).toString(36)}}];const f=tdPartner(),y=iso(Date.now()-864e5),v=iso(Date.now()-2*864e5),r=[f(y),f(v),f(today())].join('/');partners=o;return r})()""")
         check(r == "k/c/", "Partner-Trainingstage aus HA: Kraft gestern, Cardio vorgestern")
@@ -276,13 +277,25 @@ try:
         check(r == "true,true,true,true", "Abend weg (Treffen) senkt das Ziel nicht · Hotel-Training nur bei Übernachtung · Bier-Symbol in Paulines Farbe (" + r + ")")
         r = pg.evaluate("""(()=>{const o=AWAY,td=today(),t=s=>new Date(td+'T'+s).getTime();
           AWAY=[{uid:'z1',wer:'Michell',mit:'Pauline',was:'Frauenarzt',ort:'',art:'arzt',allDay:false,nacht:false,s:td,start:t('15:00'),stop:t('16:00')},{uid:'z2',wer:'Pauline',mit:'',was:'Geburtstag Oma',ort:'',art:'geburtstag',allDay:true,nacht:false,s:iso(Date.now()+864e5),start:new Date(iso(Date.now()+864e5)+'T00:00').getTime(),stop:new Date(iso(Date.now()+864e5)+'T23:59').getTime()}];
-          const h=awayTodayHtml(),c=awayCounts(AWAY[0]);AWAY=o;return [/Heute/.test(h)&&/15:00/.test(h)&&/Frauenarzt/.test(h)&&/Michell (&amp;|&) Pauline/.test(h),/Morgen/.test(h)&&/Geburtstag Oma/.test(h),c].join(',')})()""")
+          const h=awayTodayHtml(),c=awayCounts(AWAY[0]);AWAY=o;return [/Heute/.test(h)&&/15:00/.test(h)&&/Frauenarzt/.test(h)&&/<i class="me">M<\/i><i class="pa">P<\/i>/.test(h),/Morgen/.test(h)&&/Geburtstag Oma/.test(h),c].join(',')})()""")
         check(r == "true,true,false", "Startseite oben: 'Heute 15:00 Frauenarzt – Michell & Pauline', 'Morgen Geburtstag'; Termine senken das Wochenziel nicht (" + r + ")")
         pg.click(".awq [data-aw=new][data-k=termin]"); pg.wait_for_timeout(150)
-        okf = pg.locator(".awkind.awall button").count() == 14 and pg.get_attribute("#awWas", "placeholder") == "z. B. Steuerberater"
-        pg.click("[data-aw=kind][data-v=arzt]"); pg.fill("#awWas", "Frauenarzt"); pg.fill("#awVt", "15:00"); pg.fill("#awBt", "16:00"); pg.check("#awMit"); pg.click("[data-aw=save]"); pg.wait_for_timeout(1500)
+        okf = pg.locator(".awkind.awall button").count() == 6 and pg.get_attribute("#awWas", "placeholder") == "z. B. Steuerberater"; pg.click("[data-aw=morek]"); pg.wait_for_timeout(100); okf = okf and pg.locator(".awkind.awall button").count() == 15
+        pg.click("[data-aw=kind][data-v=arzt]"); pg.fill("#awWas", "Frauenarzt"); pg.uncheck("#awGanz"); pg.wait_for_timeout(100); pg.fill("#awVt", "15:00"); pg.fill("#awBt", "16:00"); pg.check("#awMit"); pg.click("[data-aw=save]"); pg.wait_for_timeout(1500)
         ce = [c for c in [json.loads(l) for l in open("/tmp/calls.log")] if c.get("service") == "create_event"]
-        check(okf and ce[-1]["service_data"]["summary"] == "Michell: Frauenarzt" and "Art: arzt" in ce[-1]["service_data"]["description"] and "Mit: Pauline" in ce[-1]["service_data"]["description"], "Termin eintragen: 14 Arten mit Symbol, Arzt-Termin zusammen mit Pauline")
+        check(okf and ce[-1]["service_data"]["summary"] == "Michell: Frauenarzt" and "Art: arzt" in ce[-1]["service_data"]["description"] and "Mit: Pauline" in ce[-1]["service_data"]["description"], "Termin eintragen: 6 Arten sofort, 15 unter 'Mehr Arten', Arzt-Termin zusammen mit Pauline")
+        pg.click("[data-aw=undo]"); pg.wait_for_timeout(1200)
+        cl = [json.loads(l) for l in open("/tmp/calls.log")]
+        check(any(c.get("type") == "calendar/event/subscribe" for c in cl) and pg.evaluate("AWAY.every(a=>!!a.uid)"), "Kalender wird per Abo geladen – jeder Eintrag hat seine ID (Bearbeiten/Löschen funktionieren im echten HA)")
+        pg.click(".awq [data-aw=new][data-k=termin]"); pg.wait_for_timeout(150)
+        pg.click("[data-aw=kind][data-v=geburtstag]"); pg.fill("#awWas", "Geburtstag Oma"); pg.fill("#awNz", "Geschenk besorgen"); pg.click("[data-aw=rep][data-v=y]"); pg.wait_for_timeout(100); pg.click("[data-aw=save]"); pg.wait_for_timeout(1500)
+        cl = [json.loads(l) for l in open("/tmp/calls.log")]; cr = [c for c in cl if c.get("type") == "calendar/event/create"]
+        check(len(cr) == 1 and cr[-1]["event"]["rrule"] == "FREQ=YEARLY" and "Notiz: Geschenk besorgen" in cr[-1]["event"]["description"] and pg.evaluate("AWAY.filter(a=>a.rep==='y').length") >= 2 and "jährlich" in pg.text_content("#view") and "Geschenk besorgen" in pg.text_content("#view"), "Geburtstag 'jedes Jahr' mit Notiz: als Serie in HA, Wiederholungen sichtbar")
+        pg.click("[data-aw=undo]"); pg.wait_for_timeout(1200)
+        pg.click(".awq [data-aw=new][data-k=termin]"); pg.wait_for_timeout(150)
+        pg.click("[data-aw=kind][data-v=arzt]"); pg.fill("#awWas", "Hautarzt"); pg.fill("#awOrt", "Praxis X"); pg.check("#awPriv"); pg.click("[data-aw=save]"); pg.wait_for_timeout(1500)
+        ce = [c for c in [json.loads(l) for l in open("/tmp/calls.log")] if c.get("service") == "create_event"]
+        check(ce[-1]["service_data"]["summary"] == "Michell: Termin" and "location" not in ce[-1]["service_data"] and "Privat: 1" in ce[-1]["service_data"]["description"] and "Hautarzt" in pg.text_content("#view") and "nur für dich" in pg.text_content("#view").lower(), "Privat: HA/Pauline sehen nur 'Termin', ich sehe Hautarzt + Ort")
         pg.click("[data-aw=undo]"); pg.wait_for_timeout(1200)
         r = pg.evaluate("""(()=>{const c=s=>getComputedStyle(document.querySelector(s)).backgroundColor,a=[c('.clegend .cd.me'),c('.clegend .cd.pa')];document.documentElement.classList.add('me-w');const b=[c('.clegend .cd.me'),c('.clegend .cd.pa')];document.documentElement.classList.remove('me-w');return a[0]===b[1]&&a[1]===b[0]&&a[0]!==a[1]})()""")
         check(r, "Kalender: feste Personenfarben – bei ihr ist er Salbei, sie Rosé (wie auf seinem Handy)")
