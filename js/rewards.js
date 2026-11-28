@@ -31,7 +31,9 @@ function rwIcon(name){const n=String(name||'').toLowerCase(),k=(RW_KEYS.find(([r
 /* Gesamtpunkte (alle Tage mit Einträgen) */
 function myTotal(){const ds=new Set([...Object.keys(S.nut.days),...S.sessions.map(s=>iso(s.date))]),t=today();let sum=0;for(const d of ds)if(d<=t)sum+=dayScore(d).pt;return sum}
 function rwPartner(){const p=(typeof partners!=='undefined'?partners:[]).find(x=>x.name);return p?{name:p.name,tp:+p.tp||0}:null}
-function rwBalance(){const p=rwPartner(),spent=REW.filter(r=>r.st==='done').reduce((a,r)=>a+(+r.cost||0),0);return{me:myTotal(),pa:p?p.tp:0,spent,bal:myTotal()+(p?p.tp:0)-spent}}
+/* Belohnungen sind mehrfach einlösbar: n = Anzahl Einlösungen (alte 'done'-Einträge zählen als 1) */
+const rwN=r=>+r.n||(r.st==='done'?1:0);
+function rwBalance(){const p=rwPartner(),spent=REW.filter(r=>r.st!=='gone').reduce((a,r)=>a+(+r.cost||0)*rwN(r),0);return{me:myTotal(),pa:p?p.tp:0,spent,bal:myTotal()+(p?p.tp:0)-spent}}
 const meSlug=()=>slugN(S.prof.name||'');
 /* aus der HA-Liste lesen (von shareFetch aufgerufen) */
 function rewardsFrom(items){const l=[];for(const it of items){let j;try{j=JSON.parse(it.description||'')}catch(e){continue}if(j.kind==='reward'&&j.id)l.push({...j,uid:it.uid})}
@@ -54,14 +56,14 @@ function rwAccHtml(b,p){const me=S.prof.name||'Ich',tot=Math.max(1,b.me+b.pa),sm
  return `<section class="rwacc"><div class="rwduo">${avaHtml(me,true)}${p?avaHtml(p.name,false):''}</div><span>Unser Punktekonto · alle Punkte seit Start</span><b class="cond">${fmt(b.bal)}</b>
  ${p?`<div class="rwsplit"><i style="width:${sm.toFixed(1)}%"></i><s></s></div><div class="rwwho"><span><i class="dot me"></i>${esc(me)} ${fmt(b.me)}</span><span><i class="dot pa"></i>${esc(p.name)} ${fmt(b.pa)}</span></div>`:'<small>Partner noch nicht verbunden</small>'}
  ${b.spent?`<small>Schon eingelöst: ${fmt(b.spent)} Punkte</small>`:''}</section>`}
-function renderRewards(){const b=rwBalance(),p=rwPartner(),me=meSlug(),act=REW.filter(r=>r.st==='active'||r.st==='redeem').sort((a,c)=>a.cost-c.cost),prop=REW.filter(r=>r.st==='proposed'),done=REW.filter(r=>r.st==='done').sort((a,c)=>(c.at||'').localeCompare(a.at||''));
+function renderRewards(){const b=rwBalance(),p=rwPartner(),me=meSlug(),act=REW.filter(r=>r.st==='active'||r.st==='redeem'||r.st==='done').sort((a,c)=>a.cost-c.cost),prop=REW.filter(r=>r.st==='proposed'),done=REW.flatMap(r=>(r.hist&&r.hist.length?r.hist:rwN(r)&&r.at?[r.at]:[]).map(d=>({...r,at:d}))).sort((a,c)=>(c.at||'').localeCompare(a.at||'')).slice(0,12);
  if(!HA.token)return `<section class="meal"><header><h3>Belohnungen</h3></header><p class="tip" style="padding:0">Belohnungen funktionieren zu zweit über Home Assistant. Verbinde die App unter „Mehr → Home Assistant“.</p></section>`;
  return `<h2 class="rwh">Belohnungen</h2>
  ${rwAccHtml(b,p)}
  ${rwInboxHtml()}
  <section class="meal rwlist"><header><h3>Gemeinsame Belohnungen</h3></header>
  ${act.length?RW_TIERS.map((T,ti)=>{const lo=ti?RW_TIERS[ti-1].max:0,list=act.filter(r=>r.cost>lo&&r.cost<=T.max);if(!list.length)return '';return `<div class="rwtier"><h4>${T.t}</h4><span>${T.r}</span></div><div class="rwgrid">${list.map((r,i)=>{const can=b.bal>=r.cost,waiting=r.st==='redeem';return `<div class="rwtile t-${RW_TONES[i%3]}${can&&!waiting?' ready':''}"><span class="rwic">${rwIcon(r.name)}</span><b>${esc(r.name)}</b><em class="cond">${fmt(r.cost)}<small> Punkte</small></em>
-  <i><s style="width:${Math.min(b.bal/r.cost,1)*100}%"></s></i><small>${waiting?(r.rq===me?`Wartet auf ${esc(p?p.name:'Partner')}`:'Wartet auf dich'):can?'Bereit!':`Noch ${fmt(r.cost-b.bal)}`}</small>${!waiting&&can?`<button class="primary" data-rw="redeem" data-id="${r.id}">Einlösen</button>`:''}</div>`}).join('')}</div>`}).join(''):'<p class="tip" style="padding:0">Noch keine Belohnungen. Schlagt welche vor – sie gelten, sobald der andere zustimmt.</p>'}
+  <i><s style="width:${Math.min(b.bal/r.cost,1)*100}%"></s></i><small>${waiting?(r.rq===me?`Wartet auf ${esc(p?p.name:'Partner')}`:'Wartet auf dich'):can?(rwN(r)?'Wieder bereit!':'Bereit!'):`Noch ${fmt(r.cost-b.bal)}`}${rwN(r)?`<span class="rwcnt">schon ${rwN(r)}× eingelöst</span>`:''}</small>${!waiting&&can?`<button class="primary" data-rw="redeem" data-id="${r.id}">Einlösen</button>`:''}</div>`}).join('')}</div>`}).join(''):'<p class="tip" style="padding:0">Noch keine Belohnungen. Schlagt welche vor – sie gelten, sobald der andere zustimmt.</p>'}
  ${prop.length?`<h4>Vorgeschlagen</h4>${prop.map(r=>`<div class="rwrow muted"><span class="rwic sm">${rwIcon(r.name)}</span><div><b>${esc(r.name)}</b><small>von ${esc(rwName(r.by))} · ${(r.ok||[]).includes(me)?`wartet auf ${esc(p?p.name:'Partner')}`:'wartet auf dich'}</small></div><em>${fmt(r.cost)}</em>${r.by===me?`<button class="ghost" data-rw="reject" data-id="${r.id}">Zurückziehen</button>`:''}</div>`).join('')}`:''}
  ${rwForm?`<div class="rwform"><input id="rwN" placeholder="z. B. Kino mit Popcorn" value="${esc(rwForm.n||'')}" aria-label="Belohnung"><input id="rwC" inputmode="numeric" placeholder="Punkte" value="${esc(rwForm.c||'')}" aria-label="Punkte"><button class="primary" data-rw="send">Vorschlagen</button></div>
    <div class="vars rwideas">${RW_IDEAS.map(([n,c])=>`<button data-rw="idea" data-n="${esc(n)}" data-c="${c}">${esc(n)} · ${fmt(c)}</button>`).join('')}</div><p class="tip" style="padding:4px 0 0">Keine Reisen. Grob: ${fmt(Math.max(1000,Math.round((b.me+b.pa)/Math.max(1,(Date.now()-Math.min(...Object.keys(S.nut.days).map(k=>Date.parse(k)),Date.now()))/864e5+1)*14/100)*100))} Punkte ≈ 2 Wochen für euch beide.</p>`
@@ -76,6 +78,6 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-rw]');if
  if(a==='approve'){rwSave({...r,ok:[...new Set([...(r.ok||[]),me])],st:'active'});tell(`${S.prof.name} hat zugestimmt`,`„${r.name}“ steht jetzt in eurer Belohnungsliste.`)}
  else if(a==='reject'){rwSave({...r,st:'gone'})}
  else if(a==='redeem'){if(rwBalance().bal<r.cost){note('Noch nicht genug Punkte');return}rwSave({...r,st:'redeem',rq:me});tell(`${S.prof.name} möchte einlösen`,`„${r.name}“ (${fmt(r.cost)} Punkte) – bitte in der App zustimmen.`)}
- else if(a==='confirm'){rwSave({...r,st:'done',at:today()});toast('Eingelöst!',`${r.name} – viel Spaß euch beiden`);tell(`${S.prof.name} hat zugestimmt: ${r.name}`,`Eingelöst – viel Spaß euch beiden!`)}
+ else if(a==='confirm'){const n=rwN(r)+1,h=r.hist&&r.hist.length?r.hist:(rwN(r)&&r.at?[r.at]:[]);rwSave({...r,st:'active',rq:'',n,hist:[...h,today()].slice(-30),at:today()});toast('Eingelöst!',`${r.name} – viel Spaß euch beiden. Bleibt in der Liste für das nächste Mal.`);tell(`${S.prof.name} hat zugestimmt: ${r.name}`,`Eingelöst – viel Spaß euch beiden!`)}
  else if(a==='later'){rwSave({...r,st:'active',rq:''})}});
 document.addEventListener('input',ev=>{if(!rwForm)return;if(ev.target.id==='rwN')rwForm.n=ev.target.value;if(ev.target.id==='rwC')rwForm.c=ev.target.value});

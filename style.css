@@ -1190,3 +1190,4 @@ html.kbopen .nav{display:none}
 .away.form .cform>div{min-width:0}.away.form .cform input{min-width:0;width:100%;max-width:100%;box-sizing:border-box}
 .away.form input[type=date],.away.form input[type=time]{-webkit-appearance:none;appearance:none;display:block;text-align:left;min-height:44px}
 .awerr{background:#fbe7e1;color:#8f321d;border-radius:10px;padding:8px 12px;font-weight:600;margin:8px 0}
+.rwcnt{display:block;font-size:11px;color:var(--mute);margin-top:2px}
